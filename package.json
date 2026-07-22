@@ -1,0 +1,21 @@
+{
+  "name": "dakiya",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Local-first API toolkit — CLI + web dashboard (desktop later)",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev:web": "pnpm --filter @dakiya/web dev",
+    "hello": "pnpm --filter @dakiya/cli hello",
+    "dakiya": "pnpm --filter @dakiya/cli dakiya",
+    "dakiya:init": "pnpm --filter @dakiya/cli run init",
+    "dakiya:serve": "pnpm --filter @dakiya/cli run serve",
+    "link:cli": "pnpm --filter @dakiya/domain build && pnpm --filter @dakiya/format build && pnpm --filter @dakiya/services build && pnpm --filter @dakiya/cli run link:global",
+    "unlink:cli": "pnpm --filter @dakiya/cli run unlink:global",
+    "typecheck": "pnpm -r run typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
