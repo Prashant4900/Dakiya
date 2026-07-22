@@ -9,7 +9,7 @@ function usage(exitCode = 0): never {
   console.log(`dakiya — local-first API toolkit (skeleton)
 
 Usage:
-  dakiya init     Create .dakiya/ in the current directory
+  dakiya init     Create .dakiya/ with dakiya.yaml core manifest
   dakiya serve    Start web dashboard at http://localhost:4242
 
 `)

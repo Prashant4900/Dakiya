@@ -118,7 +118,7 @@ Dakiya/
 ```
 project/
   .dakiya/
-    dakiya.yaml
+    dakiya.yaml               # workspace core / manifest
     collections/
       auth/
         login.drq
@@ -126,6 +126,26 @@ project/
       local.yaml
     examples/                 # optional large payloads
       auth/login-200.json
+```
+
+### `dakiya.yaml` (workspace core)
+
+Manifest at the root of `.dakiya/`. Holds workspace metadata used by CLI, web, and desktop:
+
+| Field | Purpose |
+|-------|---------|
+| `name` | Display name of the workspace |
+| `description` | Short purpose / notes |
+| `version` | Manifest schema version (currently `1`) |
+| `defaultEnv` | Active environment key (file under `environments/`) |
+
+Example:
+
+```yaml
+name: my-api
+description: "A local-first API workspace for my-api."
+version: 1
+defaultEnv: local
 ```
 
 ### `.drq` (Dakiya Request)
