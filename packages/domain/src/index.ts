@@ -14,19 +14,16 @@ export function hello(): HelloMessage {
   }
 }
 
-export type {
-  WorkspaceManifest,
-} from "./workspace.js"
+export type { WorkspaceManifest } from "./workspace.js"
 export { WORKSPACE_MANIFEST_VERSION } from "./workspace.js"
 
-export type {
-  Environment,
-  EnvironmentVariables,
-} from "./environment.js"
+export type { Environment, EnvironmentVariables } from "./environment.js"
 
 export type {
   HttpMethod,
   HttpRequestLine,
   RequestDocument,
   RequestMeta,
+  ResolvedHttpRequest,
+  SendResult,
 } from "./request.js"

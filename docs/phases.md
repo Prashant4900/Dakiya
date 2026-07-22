@@ -52,15 +52,19 @@
 
 ## Phase 3 — CLI app (`apps/cli`)
 
-**Goal:** Real local API and commands developers run.
+**Goal:** Real commands developers run — including a terminal API runner before the web dashboard.
 
-- [ ] Node `FsClient` + repos reading `.dakiya/`
+- [x] `dakiya init` (production-clean scaffold)
+- [ ] Node fs wiring reading `.dakiya/`
+- [x] **Starter:** `dakiya list` + `dakiya run <path>` (parse → env → send → print)
 - [ ] Hono: `/api/health`, workspace, requests CRUD, environments, `/api/send`
-- [ ] `dakiya init`
 - [ ] `dakiya serve` (port 4242, open browser, serve `apps/web` assets)
 - [ ] Wire script sandbox into `/api/send`
 
-**Exit criteria:** From an empty folder: `init` → `serve` → hit health + load sample request via API.
+**Exit criteria (starter):** With `@example/server` up: `dakiya list` and `dakiya run health/health` return real HTTP responses.  
+**Exit criteria (full Phase 3):** `init` → `serve` → hit health + load request via API.
+
+**Order note:** CLI list/run ships before the web UI so collections can be tested from the terminal.
 
 ---
 

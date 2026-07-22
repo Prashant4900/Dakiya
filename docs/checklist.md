@@ -46,6 +46,8 @@
 ## D. CLI app (Phase 3)
 
 - [ ] `dakiya init` idempotent / clear errors if already present
+- [ ] `dakiya list` shows collection tree
+- [ ] `dakiya run <path>` sends request with env vars and prints response
 - [ ] `dakiya serve --port 4242`
 - [ ] `GET /api/health` → `{ status: "ok" }`
 - [ ] CRUD request via API updates `.drq` on disk

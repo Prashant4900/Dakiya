@@ -6,6 +6,6 @@ export function runHello(): string {
     "",
     greet(),
     "",
-    "Next: see docs/phases.md (Phase 1 — domain + .drq format)",
+    "Next: see docs/phases.md (CLI list/run → Hono → web)",
   ].join("\n")
 }

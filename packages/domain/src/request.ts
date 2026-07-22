@@ -24,8 +24,8 @@ export type HttpRequestLine = {
 }
 
 /**
- * Minimal request model for scaffold / early services.
- * Parser will populate docs, body, pre/post, examples later.
+ * Minimal request model for CLI run / early services.
+ * @pre / @post / @example / @assert are ignored by the MVP parser.
  */
 export type RequestDocument = {
   /** Path relative to `.dakiya/`, e.g. `collections/hello/health.drq`. */
@@ -33,4 +33,22 @@ export type RequestDocument = {
   meta: RequestMeta
   request: HttpRequestLine
   body?: string
+  docs?: string
+}
+
+/** Resolved request ready to send (vars already substituted). */
+export type ResolvedHttpRequest = {
+  method: HttpMethod
+  url: string
+  headers: Record<string, string>
+  body?: string
+}
+
+export type SendResult = {
+  status: number
+  statusText: string
+  headers: Record<string, string>
+  body: string
+  /** Wall time in milliseconds. */
+  durationMs: number
 }

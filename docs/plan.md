@@ -16,10 +16,11 @@ Dakiya is a local-first API toolkit: your collections live in `.dakiya/` as huma
 Validate in market with **core functionality only**:
 
 1. `dakiya init` — scaffold `.dakiya/` in a project  
-2. `dakiya serve` — local dashboard on `localhost`  
-3. Edit / send HTTP requests stored as `.drq`  
-4. Environments (YAML) + `{{var}}` substitution  
-5. Docs, examples, pre/post scripts (JS/TS) on send  
+2. `dakiya list` / `dakiya run` — discover and send requests from the terminal (no dashboard required)  
+3. `dakiya serve` — local dashboard on `localhost`  
+4. Edit / send HTTP requests stored as `.drq`  
+5. Environments (YAML) + `{{var}}` substitution  
+6. Docs, examples, pre/post scripts (JS/TS) on send  
 
 **Out of MVP:** desktop app, cloud, history DB, Postman/Bruno import, Python scripts.
 

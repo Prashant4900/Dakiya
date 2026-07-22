@@ -11,6 +11,7 @@
     "hello": "pnpm --filter @dakiya/cli hello",
     "dakiya": "pnpm --filter @dakiya/cli dakiya",
     "dakiya:init": "pnpm --filter @dakiya/cli run init",
+    "dakiya:list": "pnpm --filter @dakiya/cli run list",
     "dakiya:serve": "pnpm --filter @dakiya/cli run serve",
     "link:cli": "pnpm --filter @dakiya/domain build && pnpm --filter @dakiya/format build && pnpm --filter @dakiya/services build && pnpm --filter @dakiya/cli run link:global",
     "unlink:cli": "pnpm --filter @dakiya/cli run unlink:global",

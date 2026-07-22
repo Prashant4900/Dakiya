@@ -28,8 +28,10 @@ pnpm link:cli
 Then in any directory:
 
 ```bash
-dakiya init     # creates .dakiya/
-dakiya serve    # http://localhost:4242 (hello-world web UI)
+dakiya init              # creates .dakiya/
+dakiya list              # list .drq requests
+dakiya run health/health # send a request (needs API up)
+dakiya serve             # http://localhost:4242 (hello-world web UI)
 dakiya --help
 ```
 
@@ -45,9 +47,25 @@ pnpm unlink:cli
 
 ```bash
 pnpm dakiya:init
+pnpm --filter @dakiya/cli run list
+pnpm --filter @dakiya/cli exec node dist/cli.js run health/health
 pnpm dakiya:serve
 ```
 
+## Dummy API (dev only)
+
+```bash
+pnpm dev:example   # http://localhost:3000 — see example/server/README.md
+```
+
+In this repo, `.dakiya/collections/` already has requests aimed at that server. With the example API running:
+
+```bash
+pnpm --filter @dakiya/cli run list
+pnpm --filter @dakiya/cli exec node dist/cli.js run health/health
+```
+
+Not scaffolded by `dakiya init`. Point `.dakiya/environments/local.yaml` `baseUrl` at it when testing.
 
 ## Layout
 
@@ -66,14 +84,6 @@ example/
   server            — dummy Express API (`pnpm dev:example`) for local testing
 ```
 
-## Dummy API (dev only)
-
-```bash
-pnpm dev:example   # http://localhost:3000 — see example/server/README.md
-```
-
-Not scaffolded by `dakiya init`. Point `.dakiya/environments/local.yaml` `baseUrl` at it when testing.
-
 ## Next
 
-See [docs/phases.md](./docs/phases.md) — Phase 1 is domain + `.drq` format.
+See [docs/phases.md](./docs/phases.md) — CLI list/run starter, then Hono + web.

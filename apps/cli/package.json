@@ -18,11 +18,15 @@
     "hello": "pnpm build && node dist/cli.js hello",
     "dakiya": "pnpm build && node dist/cli.js",
     "init": "pnpm build && node dist/cli.js init",
+    "list": "pnpm build && node dist/cli.js list",
+    "run": "pnpm build && node dist/cli.js run",
     "serve": "pnpm build && node dist/cli.js serve",
     "link:global": "pnpm build && pnpm link --global",
     "unlink:global": "pnpm unlink --global"
   },
   "dependencies": {
+    "@dakiya/domain": "workspace:*",
+    "@dakiya/format": "workspace:*",
     "@dakiya/services": "workspace:*",
     "vite": "^7.0.4"
   },

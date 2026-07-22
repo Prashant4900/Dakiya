@@ -3,23 +3,14 @@ import * as path from "node:path"
 import * as readline from "node:readline"
 import { fileURLToPath } from "node:url"
 import { createServer } from "vite"
+import {
+  dakiyaDir,
+  hasDakiyaManifest,
+  hasDakiyaWorkspace,
+} from "../workspace.js"
 import { runInit } from "./init.js"
 
 const DEFAULT_PORT = 4242
-
-function dakiyaDir(cwd = process.cwd()): string {
-  return path.join(cwd, ".dakiya")
-}
-
-function hasDakiyaWorkspace(cwd = process.cwd()): boolean {
-  const dir = dakiyaDir(cwd)
-  return fs.existsSync(dir) && fs.statSync(dir).isDirectory()
-}
-
-function hasDakiyaManifest(cwd = process.cwd()): boolean {
-  const manifest = path.join(dakiyaDir(cwd), "dakiya.yaml")
-  return fs.existsSync(manifest) && fs.statSync(manifest).isFile()
-}
 
 function askYesNo(question: string): Promise<boolean> {
   const rl = readline.createInterface({
