@@ -119,7 +119,7 @@ Dakiya/
 project/
   .dakiya/
     dakiya.yaml               # workspace core / manifest
-    collections/
+    collections/              # empty after init — add your .drq files
       auth/
         login.drq
     environments/
@@ -127,6 +127,8 @@ project/
     examples/                 # optional large payloads
       auth/login-200.json
 ```
+
+For local smoke tests against a live HTTP API, run the dummy app in `example/server` (`pnpm dev:example`) — it is not part of `dakiya init`.
 
 ### `dakiya.yaml` (workspace core)
 

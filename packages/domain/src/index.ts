@@ -1,4 +1,4 @@
-/** Shared domain types — full Zod models land in Phase 1. */
+/** Shared domain types — Zod models land later in Phase 1. */
 
 export const DOMAIN_VERSION = "0.0.0"
 
@@ -13,3 +13,20 @@ export function hello(): HelloMessage {
     message: "Hello from @dakiya/domain",
   }
 }
+
+export type {
+  WorkspaceManifest,
+} from "./workspace.js"
+export { WORKSPACE_MANIFEST_VERSION } from "./workspace.js"
+
+export type {
+  Environment,
+  EnvironmentVariables,
+} from "./environment.js"
+
+export type {
+  HttpMethod,
+  HttpRequestLine,
+  RequestDocument,
+  RequestMeta,
+} from "./request.js"

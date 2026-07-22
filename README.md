@@ -61,7 +61,18 @@ apps/               — delivery surfaces (interfaces)
   cli               — dakiya CLI + local server
   web               — browser dashboard
   desktop           — Tauri (reserved, not started)
+
+example/
+  server            — dummy Express API (`pnpm dev:example`) for local testing
 ```
+
+## Dummy API (dev only)
+
+```bash
+pnpm dev:example   # http://localhost:3000 — see example/server/README.md
+```
+
+Not scaffolded by `dakiya init`. Point `.dakiya/environments/local.yaml` `baseUrl` at it when testing.
 
 ## Next
 
