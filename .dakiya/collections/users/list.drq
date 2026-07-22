@@ -1,0 +1,10 @@
+@meta
+name: List users
+type: http
+
+@request
+GET {{baseUrl}}/api/users
+
+@docs
+# List users
+Returns the in-memory user list from `@example/server`.

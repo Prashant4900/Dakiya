@@ -1,0 +1,10 @@
+@meta
+name: Health
+type: http
+
+@request
+GET {{baseUrl}}/api/health
+
+@docs
+# Health
+Liveness check for `@example/server`.

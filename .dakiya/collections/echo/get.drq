@@ -1,0 +1,11 @@
+@meta
+name: Echo GET
+type: http
+
+@request
+GET {{baseUrl}}/api/echo?message=hello
+X-Request-Id: {{requestId}}
+
+@docs
+# Echo (GET)
+Echoes query params and selected headers.

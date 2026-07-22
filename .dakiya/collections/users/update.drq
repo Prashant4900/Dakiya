@@ -1,0 +1,17 @@
+@meta
+name: Update user
+type: http
+
+@request
+PUT {{baseUrl}}/api/users/{{userId}}
+Content-Type: application/json
+
+@body
+{
+  "name": "{{userName}}",
+  "email": "{{userEmail}}"
+}
+
+@docs
+# Update user
+Partial update of an existing user by `userId`.

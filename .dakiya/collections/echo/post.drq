@@ -1,0 +1,18 @@
+@meta
+name: Echo POST
+type: http
+
+@request
+POST {{baseUrl}}/api/echo
+Content-Type: application/json
+X-Request-Id: {{requestId}}
+
+@body
+{
+  "ping": true,
+  "source": "dakiya"
+}
+
+@docs
+# Echo (POST)
+Echoes JSON body and selected headers. Expects `201`.

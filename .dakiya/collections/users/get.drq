@@ -1,0 +1,10 @@
+@meta
+name: Get user
+type: http
+
+@request
+GET {{baseUrl}}/api/users/{{userId}}
+
+@docs
+# Get user
+Fetch one user by id (`userId` from the active environment).

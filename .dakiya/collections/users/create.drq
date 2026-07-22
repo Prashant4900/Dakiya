@@ -1,0 +1,17 @@
+@meta
+name: Create user
+type: http
+
+@request
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+@body
+{
+  "name": "{{userName}}",
+  "email": "{{userEmail}}"
+}
+
+@docs
+# Create user
+Creates a user. Requires `name` and `email`. Expects `201`.
