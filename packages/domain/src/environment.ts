@@ -3,11 +3,11 @@
  * Variables resolve as `{{name}}` in URL, headers, and body.
  */
 
-export type EnvironmentVariables = Record<string, string>
+export type EnvironmentVariables = Record<string, string>;
 
 export type Environment = {
-  /** File stem, e.g. `local` for `environments/local.yaml`. */
-  name: string
-  /** Key-value vars available to requests and scripts. */
-  variables: EnvironmentVariables
-}
+	/** File stem, e.g. `local` for `environments/local.yaml`. */
+	name: string;
+	/** Key-value vars available to requests and scripts. */
+	variables: EnvironmentVariables;
+};
