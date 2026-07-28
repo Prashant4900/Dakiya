@@ -152,13 +152,16 @@ It is a small nod to Indian roots, and a reminder that the best tools are the on
 
 ## Current Status
 
-Dakiya is actively in development across three surfaces:
+Dakiya is actively in development. **Phases 0–3 are complete** (shared core + CLI + local API). **Phase 4 (web dashboard)** is next.
 
-- **CLI** — `init`, `serve`, and project scaffolding
-- **Web dashboard** — local browser UI (Swagger-like workflow)
-- **Desktop app** — Tauri client for macOS, Windows, and Linux
+| Surface | Status |
+|---------|--------|
+| **Shared core** (`domain`, `format`, `services`) | Done — Zod types, `.drq` parse/serialize, send pipeline, tests |
+| **CLI** | Done — `init`, `list`, `run`, `serve`, Hono `/api/*`, script sandbox |
+| **Web dashboard** | Placeholder UI — needs wiring to local API |
+| **Desktop app** | Reserved stub (Tauri, later) |
 
-All surfaces share the same `.dakiya` file format and core logic. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for technical details.
+All surfaces share the same `.dakiya` file format and core logic. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/phases.md](./docs/phases.md).
 
 ---
 
@@ -168,6 +171,7 @@ All surfaces share the same `.dakiya` file format and core logic. See [docs/ARCH
 - [docs/plan.md](./docs/plan.md) — MVP plan and product decisions
 - [docs/phases.md](./docs/phases.md) — Implementation phases
 - [docs/checklist.md](./docs/checklist.md) — Hand-off and QA checklists
+- [docs/drq-format.md](./docs/drq-format.md) — `.drq` format cheat sheet
 
 ---
 

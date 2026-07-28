@@ -5,80 +5,85 @@
 
 ---
 
-## Phase 0 — Documentation & skeleton (current)
+## Phase 0 — Documentation & skeleton ✅
 
 **Goal:** Anyone opening the repo understands the product and can run a hello-world monorepo.
 
 | Deliverable | Status |
 |-------------|--------|
-| `docs/ARCHITECTURE.md` | Done in this pass |
-| `docs/plan.md` | Done in this pass |
-| `docs/phases.md` | Done in this pass |
-| `docs/checklist.md` | Done in this pass |
-| pnpm workspace + package stubs | Done in this pass |
-| Hello-world CLI / web / packages | Done in this pass |
+| `docs/ARCHITECTURE.md` | Done |
+| `docs/plan.md` | Done |
+| `docs/phases.md` | Done |
+| `docs/checklist.md` | Done |
+| pnpm workspace + package stubs | Done |
+| Hello-world CLI / web / packages | Done |
 
-**Exit criteria:** `pnpm install` works; `pnpm hello` (apps/cli) prints hello; `pnpm dev:web` (apps/web) shows a placeholder page.
+**Exit criteria:** `pnpm install` works; `pnpm hello` prints hello; `pnpm dev:web` shows a placeholder page.
 
 ---
 
-## Phase 1 — Domain + `.drq` format
+## Phase 1 — Domain + `.drq` format ✅
 
 **Goal:** Canonical on-disk contract and a trustworthy parser.
 
-- [ ] `@dakiya/domain` — Zod models for Workspace, Request, Environment, Example, Script
-- [ ] `@dakiya/format` — parse / serialize `.drq` (all v1 blocks)
-- [ ] Round-trip Vitest fixtures (lossless save)
-- [ ] Format cheat sheet under `docs/` (1 page)
-- [ ] Sample `.dakiya/` tree used in tests
+- [x] `@dakiya/domain` — Zod models for Workspace, Request, Environment, Example, Script
+- [x] `@dakiya/format` — parse / serialize `.drq` (all v1 blocks)
+- [x] Round-trip Vitest fixtures (lossless save)
+- [x] Format cheat sheet under `docs/` ([drq-format.md](./drq-format.md))
+- [x] Fixture `.drq` files in `packages/format/src/__fixtures__/`
 
-**Exit criteria:** Fixture `.drq` → parse → serialize → equal (or intentional normalize rules documented).
+**Exit criteria:** Fixture `.drq` → parse → serialize → equal. **Met** — run `pnpm --filter @dakiya/format test`.
+
+**Notes:** `@file(...)` refs are stored in the model; loading file contents at parse time is deferred. `@assert` blocks are parsed but not executed.
 
 ---
 
-## Phase 2 — Services (platform-agnostic)
+## Phase 2 — Services (platform-agnostic) ✅
 
 **Goal:** Business logic with injected interfaces (no Node/React imports).
 
-- [ ] `WorkspaceService.scaffold()`
-- [ ] `RequestService` load / save / list tree
-- [ ] `EnvironmentService` load YAML + `{{var}}` resolve
-- [ ] `ScriptService` JS/TS sandbox APIs (`req`, `res`, `env`)
-- [ ] `RequestService.send()` orchestration: vars → pre → HTTP → post
+- [x] `scaffoldWorkspace()` — manifest, env, empty `collections/`
+- [x] `RequestService` — load / save / delete / list paths
+- [x] `EnvironmentService` — load / save YAML
+- [x] `resolveVars` / `resolveRequest` — `{{var}}` substitution
+- [x] `sendRequest()` — vars → pre → HTTP → post
+- [x] `FsClient` interface + `createMemoryFs` for tests
+- [x] `ScriptRunner` contract (sandbox stays in CLI Layer 4)
+- [x] `buildCollectionTree()` for sidebar-style folder trees
 
-**Exit criteria:** Unit tests for var resolve + script hooks with mock `HttpClient` / `FsClient`.
+**Exit criteria:** Unit tests for var resolve + script hooks with mock `HttpClient` / `FsClient`. **Met** — run `pnpm --filter @dakiya/services test`.
 
 ---
 
-## Phase 3 — CLI app (`apps/cli`)
+## Phase 3 — CLI app (`apps/cli`) ✅ (mostly)
 
 **Goal:** Real commands developers run — including a terminal API runner before the web dashboard.
 
-- [x] `dakiya init` (production-clean scaffold)
-- [ ] Node fs wiring reading `.dakiya/`
-- [x] **Starter:** `dakiya list` + `dakiya run <path>` (parse → env → send → print)
-- [ ] Hono: `/api/health`, workspace, requests CRUD, environments, `/api/send`
-- [ ] `dakiya serve` (port 4242, open browser, serve `apps/web` assets)
-- [ ] Wire script sandbox into `/api/send`
+- [x] `dakiya init` (production-clean scaffold via `scaffoldWorkspace`)
+- [x] Node fs wiring via `createNodeFsClient()` → services
+- [x] `dakiya list` + `dakiya run <path>` (parse → env → scripts → send → print)
+- [x] Hono: `/api/health`, workspace, requests CRUD, environments, `/api/send`
+- [x] `dakiya serve` (port 4242, Vite + API middleware)
+- [x] VM script sandbox wired into `run` and `/api/send`
 
-**Exit criteria (starter):** With `@example/server` up: `dakiya list` and `dakiya run health/health` return real HTTP responses.  
-**Exit criteria (full Phase 3):** `init` → `serve` → hit health + load request via API.
-
-**Order note:** CLI list/run ships before the web UI so collections can be tested from the terminal.
+**Exit criteria (starter):** With `@example/server` up: `dakiya list` and `dakiya run health/health` return real HTTP responses. **Met.**  
+**Exit criteria (full Phase 3):** `init` → `serve` → hit health + load request via API. **Met.**
 
 ---
 
-## Phase 4 — Web app (`apps/web`)
+## Phase 4 — Web app (`apps/web`) — current
 
 **Goal:** Browser UI that uses the local API only (no direct disk).
 
 - [ ] Layout: sidebar tree, request editor, response panel
 - [ ] Tabs: Request, Body, Headers, Docs, Scripts (pre/post), Examples
-- [ ] Zustand + TanStack Query
+- [ ] TanStack Query (or equivalent) API client
 - [ ] Send via `POST /api/send`
 - [ ] Env switcher + save back to `.drq` / YAML through API
 
 **Exit criteria:** Full click-path without CLI knowledge beyond `dakiya serve`.
+
+**Current:** Placeholder “Hello world” page at `apps/web/src/App.tsx`. API backend is ready.
 
 ---
 
@@ -86,7 +91,7 @@
 
 **Goal:** Marketable first release.
 
-- [ ] Error UX (missing `.dakiya`, port in use, parse errors)
+- [ ] Error UX (missing `.dakiya`, port in use, parse errors in UI)
 - [ ] README quickstart aligned with ABOUT.md
 - [ ] Manual checklist pass ([checklist.md](./checklist.md))
 - [ ] Optional: `dakiya export curl` (nice-to-have)
@@ -117,3 +122,5 @@ Only if needed after market feedback.
 | OAuth / cloud / telemetry | Never for core path; OAuth auth helpers later |
 | Collection script inheritance execution | Format may allow; run later |
 | GraphQL / gRPC / WS | HTTP only in MVP |
+| `@assert` execution | Parsed only; run later |
+| `@file(...)` content resolution at parse time | Path preserved in model |

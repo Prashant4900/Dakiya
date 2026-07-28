@@ -6,7 +6,18 @@ Local-first API toolkit. **CLI + web dashboard first**; desktop optional later.
 
 ## Status
 
-**Stage 1 — skeleton.** Docs and a hello-world monorepo. Full MVP is not built yet.
+**Stage 2 — core complete.** Phases 0–2 done; Phase 3 (CLI + local API) largely built. **Next:** Phase 4 web dashboard.
+
+| Phase | Status |
+|-------|--------|
+| 0 — Skeleton | Done |
+| 1 — Domain + `.drq` format | Done |
+| 2 — Services | Done |
+| 3 — CLI + API | ~90% (uncommitted polish may remain) |
+| 4 — Web dashboard | Not started (placeholder UI) |
+| 5 — Ship MVP | Not started |
+
+Run tests: `pnpm test` · Format reference: [docs/drq-format.md](./docs/drq-format.md)
 
 | Doc | Purpose |
 |-----|---------|
@@ -14,6 +25,7 @@ Local-first API toolkit. **CLI + web dashboard first**; desktop optional later.
 | [docs/plan.md](./docs/plan.md) | MVP plan & decisions |
 | [docs/phases.md](./docs/phases.md) | Implementation phases |
 | [docs/checklist.md](./docs/checklist.md) | Hand-off / QA checklists |
+| [docs/drq-format.md](./docs/drq-format.md) | `.drq` format cheat sheet |
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical architecture |
 
 ## Install CLI (run `dakiya` anywhere)
@@ -71,13 +83,13 @@ Not scaffolded by `dakiya init`. Point `.dakiya/environments/local.yaml` `baseUr
 
 ```
 packages/           — shared core (not user-facing)
-  domain            — types
-  format            — .drq parser
-  services          — business logic
+  domain            — Zod schemas + types
+  format            — .drq parse / serialize
+  services          — business logic (FsClient, workspace, send)
 
 apps/               — delivery surfaces (interfaces)
-  cli               — dakiya CLI + local server
-  web               — browser dashboard
+  cli               — dakiya CLI + Hono API + script sandbox
+  web               — browser dashboard (placeholder)
   desktop           — Tauri (reserved, not started)
 
 example/
@@ -86,4 +98,4 @@ example/
 
 ## Next
 
-See [docs/phases.md](./docs/phases.md) — CLI list/run starter, then Hono + web.
+See [docs/phases.md](./docs/phases.md) — **Phase 4:** wire `apps/web` to the local `/api/*` endpoints.

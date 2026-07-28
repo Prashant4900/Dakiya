@@ -104,19 +104,25 @@ apps/desktop        — Tauri stub                      (surface, later)
 
 ---
 
-## Current stage: Stage 0 → Stage 1 (skeleton)
+## Current stage: Stage 2 (core) → Stage 3 (MVP)
 
 | Stage | Meaning |
 |-------|---------|
 | **0** | Docs only (`ABOUT.md`) |
-| **1** | Docs in `docs/` + hello-world monorepo skeleton (this delivery) |
-| **2+** | Real `.drq` parser, CLI, API, dashboard (see [phases.md](./phases.md)) |
+| **1** | Docs + hello-world monorepo skeleton |
+| **2** | Domain, `.drq` format, services — **done** |
+| **3** | CLI + local API — **done**; web dashboard — **in progress** |
+| **4** | Ship MVP (polish, docs, manual QA) |
 
-**This delivery intentionally does not build the full MVP.** It establishes:
+**Delivered so far:**
 
-- Shared understanding in `docs/`
-- Runnable workspace skeleton (hello world per package)
-- Clear boundaries so later work does not fight the layout
+- Zod schemas + `.drq` parse/serialize with Vitest round-trip fixtures
+- Platform-agnostic services (`FsClient`, workspace/request/env, send pipeline)
+- CLI commands: `init`, `list`, `run`, `serve`
+- Local Hono API: workspace, CRUD, environments, `POST /api/send`
+- Pre/post JS/TS scripts with env persistence
+
+**Next:** Wire `apps/web` to `/api/*` (Phase 4). See [phases.md](./phases.md) and [checklist.md](./checklist.md).
 
 ---
 

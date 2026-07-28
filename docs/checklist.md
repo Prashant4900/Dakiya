@@ -22,38 +22,39 @@
 
 ## B. Format & domain (Phase 1)
 
-- [ ] Parse `@meta`, `@request`, `@body`, `@docs`, `@pre`, `@post`, `@example`, `@assert`
-- [ ] Serialize round-trip fixtures pass
-- [ ] `@file(...)` example refs resolve or are preserved
-- [ ] `lang=js` / `lang=ts` on script blocks stored in model
-- [ ] Workspace + environment types in `@dakiya/domain`
-- [ ] Format cheat sheet committed under `docs/`
+- [x] Parse `@meta`, `@request`, `@body`, `@docs`, `@pre`, `@post`, `@example`, `@assert`
+- [x] Serialize round-trip fixtures pass (`pnpm --filter @dakiya/format test`)
+- [x] `@file(...)` example refs preserved in model (resolution deferred)
+- [x] `lang=js` / `lang=ts` on script blocks stored in model
+- [x] Workspace + environment types in `@dakiya/domain` (Zod schemas)
+- [x] Format cheat sheet committed under `docs/` ([drq-format.md](./drq-format.md))
 
 ---
 
 ## C. Services (Phase 2)
 
-- [ ] Scaffold creates valid `.dakiya/` tree
-- [ ] List collections as folder tree
-- [ ] Variable substitution `{{name}}`
-- [ ] Pre-script can set header / env
-- [ ] Post-script can mutate body and persist env
-- [ ] TS scripts execute (after transpile/strip)
-- [ ] No React / Node imports inside `@dakiya/services`
+- [x] Scaffold creates valid `.dakiya/` tree (`scaffoldWorkspace` + `dakiya init`)
+- [x] List collections as folder tree (`buildCollectionTree`, `listRequestPaths`)
+- [x] Variable substitution `{{name}}`
+- [x] Pre-script can set header / env
+- [x] Post-script can mutate body and persist env
+- [x] TS scripts execute (esbuild transpile in CLI sandbox)
+- [x] No React / Node imports inside `@dakiya/services`
+- [x] Unit tests for var resolve + send orchestration (`pnpm --filter @dakiya/services test`)
 
 ---
 
 ## D. CLI app (Phase 3)
 
-- [ ] `dakiya init` idempotent / clear errors if already present
-- [ ] `dakiya list` shows collection tree
-- [ ] `dakiya run <path>` sends request with env vars and prints response
-- [ ] `dakiya serve --port 4242`
-- [ ] `GET /api/health` → `{ status: "ok" }`
-- [ ] CRUD request via API updates `.drq` on disk
-- [ ] `POST /api/send` runs pre → HTTP → post
-- [ ] Missing `.dakiya` returns clear error
-- [ ] Port-in-use message is actionable
+- [x] `dakiya init` idempotent / clear errors if already present
+- [x] `dakiya list` shows collection tree
+- [x] `dakiya run <path>` sends request with env vars and prints response
+- [x] `dakiya serve --port 4242`
+- [x] `GET /api/health` → `{ status: "ok" }`
+- [x] CRUD request via API updates `.drq` on disk
+- [x] `POST /api/send` runs pre → HTTP → post
+- [x] Missing `.dakiya` returns clear error
+- [x] Port-in-use message is actionable
 
 ---
 
@@ -93,7 +94,11 @@
 ## Manual smoke (copy/paste when testing MVP)
 
 ```bash
-# from a temp project
+# Terminal send (no dashboard)
+pnpm dev:example   # in repo root — dummy API on :3000
+dakiya run health/health
+
+# Full path (once Phase 4 lands)
 mkdir /tmp/dakiya-smoke && cd /tmp/dakiya-smoke
 dakiya init
 dakiya serve
@@ -114,3 +119,5 @@ A developer who has never used Dakiya can:
 4. Send a request with env vars  
 5. Add a post-script in JS or TS and see env/response change  
 6. Commit `.dakiya/` and have a teammate reproduce with `dakiya serve` only  
+
+**Current:** Steps 1–2 and 4–5 work from CLI/API. Step 3 serves a placeholder UI until Phase 4.
