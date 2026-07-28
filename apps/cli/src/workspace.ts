@@ -1,24 +1,49 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-import type { Environment, WorkspaceManifest } from "@dakiya/domain";
-import { parseEnvironment, parseWorkspaceManifest } from "@dakiya/services";
+import {
+	buildCollectionTree,
+	collectionsRoot,
+	dakiyaRoot,
+	deleteRequestFile as deleteRequestFileService,
+	environmentsRoot,
+	hasManifest,
+	hasWorkspace,
+	listRequestPaths as listRequestPathsService,
+	loadActiveEnvironment as loadActiveEnvironmentService,
+	loadEnvironment as loadEnvironmentService,
+	loadManifest as loadManifestService,
+	normalizeRequestPath,
+	readEnvironmentSource as readEnvironmentSourceService,
+	readRequestSource as readRequestSourceService,
+	resolveRequestPaths,
+	writeEnvironmentSource as writeEnvironmentSourceService,
+	writeRequestSource as writeRequestSourceService,
+} from "@dakiya/services";
+import { createNodeFsClient } from "./fs/node-fs-client.js";
+
+const fs = createNodeFsClient();
+
+export { buildCollectionTree, normalizeRequestPath };
+export type CollectionNode =
+	| { name: string; type: "folder"; children: CollectionNode[] }
+	| { name: string; type: "request"; path: string };
 
 export function dakiyaDir(cwd = process.cwd()): string {
-	return path.join(cwd, ".dakiya");
+	return dakiyaRoot(cwd);
 }
 
 export function collectionsDir(cwd = process.cwd()): string {
-	return path.join(dakiyaDir(cwd), "collections");
+	return collectionsRoot(cwd);
+}
+
+export function environmentsDir(cwd = process.cwd()): string {
+	return environmentsRoot(cwd);
 }
 
 export function hasDakiyaWorkspace(cwd = process.cwd()): boolean {
-	const dir = dakiyaDir(cwd);
-	return fs.existsSync(dir) && fs.statSync(dir).isDirectory();
+	return hasWorkspace(fs, cwd);
 }
 
 export function hasDakiyaManifest(cwd = process.cwd()): boolean {
-	const manifest = path.join(dakiyaDir(cwd), "dakiya.yaml");
-	return fs.existsSync(manifest) && fs.statSync(manifest).isFile();
+	return hasManifest(fs, cwd);
 }
 
 /** Require a usable `.dakiya/` + `dakiya.yaml`; exit with message if missing. */
@@ -31,70 +56,51 @@ export function requireWorkspace(cwd = process.cwd()): string {
 	return dakiyaDir(cwd);
 }
 
-export function loadManifest(cwd = process.cwd()): WorkspaceManifest {
-	const file = path.join(dakiyaDir(cwd), "dakiya.yaml");
-	return parseWorkspaceManifest(fs.readFileSync(file, "utf8"));
+export function loadManifest(cwd = process.cwd()) {
+	return loadManifestService(fs, cwd);
 }
 
-export function loadActiveEnvironment(cwd = process.cwd()): Environment {
-	const manifest = loadManifest(cwd);
-	const envName = manifest.defaultEnv ?? "local";
-	const file = path.join(dakiyaDir(cwd), "environments", `${envName}.yaml`);
-	if (!fs.existsSync(file)) {
-		throw new Error(`Environment not found: environments/${envName}.yaml`);
-	}
-	return parseEnvironment(envName, fs.readFileSync(file, "utf8"));
+export function loadActiveEnvironment(cwd = process.cwd()) {
+	return loadActiveEnvironmentService(fs, cwd);
 }
 
-/** Recursively list `.drq` paths relative to `collections/`. */
-export function listRequestPaths(cwd = process.cwd()): string[] {
-	const root = collectionsDir(cwd);
-	if (!fs.existsSync(root)) {
-		return [];
-	}
-
-	const results: string[] = [];
-
-	const walk = (dir: string) => {
-		for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-			const abs = path.join(dir, entry.name);
-			if (entry.isDirectory()) {
-				walk(abs);
-				continue;
-			}
-			if (entry.isFile() && entry.name.endsWith(".drq")) {
-				results.push(path.relative(root, abs).split(path.sep).join("/"));
-			}
-		}
-	};
-
-	walk(root);
-	return results.sort();
+export function loadEnvironment(envName: string, cwd = process.cwd()) {
+	return loadEnvironmentService(fs, envName, cwd);
 }
 
-/**
- * Resolve a CLI path arg to an absolute `.drq` file.
- * Accepts `health/health`, `health/health.drq`, or `collections/health/health.drq`.
- */
-export function resolveRequestFile(
-	arg: string,
+export function readEnvironmentSource(envName: string, cwd = process.cwd()) {
+	return readEnvironmentSourceService(fs, envName, cwd);
+}
+
+export function writeEnvironmentSource(
+	envName: string,
+	source: string,
 	cwd = process.cwd(),
-): { absPath: string; relativeToDakiya: string } {
-	let cleaned = arg.trim().replace(/\\/g, "/");
-	if (cleaned.startsWith("collections/")) {
-		cleaned = cleaned.slice("collections/".length);
-	}
-	if (!cleaned.endsWith(".drq")) {
-		cleaned = `${cleaned}.drq`;
-	}
+) {
+	return writeEnvironmentSourceService(fs, envName, source, cwd);
+}
 
-	const absPath = path.join(collectionsDir(cwd), cleaned);
-	if (!fs.existsSync(absPath) || !fs.statSync(absPath).isFile()) {
-		throw new Error(`Request not found: ${cleaned}`);
-	}
+export function listRequestPaths(cwd = process.cwd()) {
+	return listRequestPathsService(fs, cwd);
+}
 
-	return {
-		absPath,
-		relativeToDakiya: path.posix.join("collections", cleaned),
-	};
+export function resolveRequestFile(arg: string, cwd = process.cwd()) {
+	return resolveRequestPaths(arg, cwd);
+}
+
+export function readRequestSource(arg: string, cwd = process.cwd()) {
+	return readRequestSourceService(fs, arg, cwd);
+}
+
+export function writeRequestSource(
+	arg: string,
+	source: string,
+	cwd = process.cwd(),
+	options?: { createOnly?: boolean },
+) {
+	return writeRequestSourceService(fs, arg, source, cwd, options);
+}
+
+export function deleteRequestFile(arg: string, cwd = process.cwd()) {
+	return deleteRequestFileService(fs, arg, cwd);
 }

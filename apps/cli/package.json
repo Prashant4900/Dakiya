@@ -28,6 +28,8 @@
 		"@dakiya/domain": "workspace:*",
 		"@dakiya/format": "workspace:*",
 		"@dakiya/services": "workspace:*",
+		"esbuild": "^0.28.1",
+		"hono": "^4.12.31",
 		"vite": "^7.0.4"
 	},
 	"devDependencies": {

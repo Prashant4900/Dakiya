@@ -1,10 +1,11 @@
-import * as fs from "node:fs";
 import { parseDrq } from "@dakiya/format";
 import { sendRequest } from "@dakiya/services";
+import { persistEnvironmentVariables } from "../sandbox/persist-env.js";
+import { createVmScriptRunner } from "../sandbox/run-script.js";
 import {
 	loadActiveEnvironment,
+	readRequestSource,
 	requireWorkspace,
-	resolveRequestFile,
 } from "../workspace.js";
 
 function formatBody(body: string, contentType: string | undefined): string {
@@ -19,7 +20,7 @@ function formatBody(body: string, contentType: string | undefined): string {
 	return body;
 }
 
-/** Load a `.drq`, resolve env vars, send HTTP, print the response. */
+/** Load a `.drq`, resolve env vars, run scripts, send HTTP, print the response. */
 export async function runRun(requestArg: string | undefined): Promise<void> {
 	if (!requestArg) {
 		console.error(`[dakiya] Usage: dakiya run <path>`);
@@ -30,17 +31,28 @@ export async function runRun(requestArg: string | undefined): Promise<void> {
 
 	requireWorkspace();
 	const env = loadActiveEnvironment();
-	const { absPath, relativeToDakiya } = resolveRequestFile(requestArg);
-	const source = fs.readFileSync(absPath, "utf8");
+	const { source, relativeToDakiya } = readRequestSource(requestArg);
 	const document = parseDrq(source, relativeToDakiya);
 
 	console.log(`[dakiya] ${document.meta.name}  (${relativeToDakiya})`);
 	console.log(`[dakiya] Env: ${env.name}`);
 
-	const { resolved, response } = await sendRequest({
+	const { resolved, response, persistedVariables, logs } = await sendRequest({
 		document,
 		variables: env.variables,
+		scripts: createVmScriptRunner(),
 	});
+
+	for (const line of logs) {
+		console.log(`[script] ${line}`);
+	}
+
+	if (Object.keys(persistedVariables).length > 0) {
+		persistEnvironmentVariables(env.name, persistedVariables);
+		console.log(
+			`[dakiya] Persisted env: ${Object.keys(persistedVariables).join(", ")}`,
+		);
+	}
 
 	console.log("");
 	console.log(`→ ${resolved.method} ${resolved.url}`);

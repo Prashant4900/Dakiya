@@ -1,4 +1,4 @@
-/** Shared domain types — Zod models land later in Phase 1. */
+/** Shared domain types and Zod schemas. */
 
 export const DOMAIN_VERSION = "0.0.0";
 
@@ -16,12 +16,33 @@ export function hello(): HelloMessage {
 
 export type { Environment, EnvironmentVariables } from "./environment.js";
 export type {
+	ExampleResponse,
 	HttpMethod,
 	HttpRequestLine,
+	RequestAssert,
 	RequestDocument,
+	RequestExample,
 	RequestMeta,
 	ResolvedHttpRequest,
+	ScriptBlock,
+	ScriptLang,
 	SendResult,
 } from "./request.js";
+export {
+	EnvironmentSchema,
+	EnvironmentVariablesSchema,
+	ExampleResponseSchema,
+	HttpMethodSchema,
+	HttpRequestLineSchema,
+	RequestAssertSchema,
+	RequestDocumentSchema,
+	RequestExampleSchema,
+	RequestMetaSchema,
+	ResolvedHttpRequestSchema,
+	ScriptBlockSchema,
+	ScriptLangSchema,
+	SendResultSchema,
+	WorkspaceManifestSchema,
+} from "./schemas.js";
 export type { WorkspaceManifest } from "./workspace.js";
 export { WORKSPACE_MANIFEST_VERSION } from "./workspace.js";

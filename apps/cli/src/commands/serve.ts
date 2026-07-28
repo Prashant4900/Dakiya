@@ -3,6 +3,8 @@ import * as path from "node:path";
 import * as readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
+import { createApiApp } from "../api/app.js";
+import { createHonoMiddleware } from "../api/middleware.js";
 import {
 	dakiyaDir,
 	hasDakiyaManifest,
@@ -84,7 +86,16 @@ function resolveWebRoot(): string {
 	return candidate;
 }
 
-/** Start the web dashboard (hello world) on localhost:4242. */
+function isAddrInUse(err: unknown): boolean {
+	return (
+		typeof err === "object" &&
+		err !== null &&
+		"code" in err &&
+		(err as { code?: string }).code === "EADDRINUSE"
+	);
+}
+
+/** Start the web dashboard + `/api` on localhost (default 4242). */
 export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	const ready = await ensureDakiyaWorkspace();
 	if (!ready) {
@@ -93,21 +104,56 @@ export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	}
 
 	const webRoot = resolveWebRoot();
+	const api = createApiApp({ cwd: process.cwd() });
 
-	const server = await createServer({
-		root: webRoot,
-		configFile: path.join(webRoot, "vite.config.ts"),
-		server: {
-			port,
-			strictPort: true,
-			host: "localhost",
-		},
-	});
+	let server: Awaited<ReturnType<typeof createServer>>;
+	try {
+		server = await createServer({
+			root: webRoot,
+			configFile: path.join(webRoot, "vite.config.ts"),
+			server: {
+				port,
+				strictPort: true,
+				host: "localhost",
+			},
+		});
+	} catch (err) {
+		if (isAddrInUse(err)) {
+			console.error(`[dakiya] Port ${port} is already in use.`);
+			console.error(
+				`[dakiya] Try \`dakiya serve --port ${port + 1}\` or free the port and retry.`,
+			);
+			process.exitCode = 1;
+			return;
+		}
+		throw err;
+	}
 
-	await server.listen();
+	// Prepend so /api is handled before Vite's SPA / static fallback.
+	const apiMiddleware = createHonoMiddleware(api, "/api");
+	server.middlewares.use(apiMiddleware);
+	const stack = server.middlewares.stack;
+	const entry = stack.pop();
+	if (entry) stack.unshift(entry);
+
+	try {
+		await server.listen();
+	} catch (err) {
+		if (isAddrInUse(err)) {
+			console.error(`[dakiya] Port ${port} is already in use.`);
+			console.error(
+				`[dakiya] Try \`dakiya serve --port ${port + 1}\` or free the port and retry.`,
+			);
+			await server.close();
+			process.exitCode = 1;
+			return;
+		}
+		throw err;
+	}
 
 	const url = `http://localhost:${port}`;
 	console.log(`[dakiya] Workspace: ${dakiyaDir()}`);
 	console.log(`[dakiya] Serving dashboard at ${url}`);
+	console.log(`[dakiya] API health: ${url}/api/health`);
 	console.log(`[dakiya] Press Ctrl+C to stop`);
 }

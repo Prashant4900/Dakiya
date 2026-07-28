@@ -1,0 +1,41 @@
+@meta
+name: Login
+type: http
+
+@request
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+@body
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+@docs
+# Login
+Authenticates a user and stores `token` via post-script.
+
+@pre lang=js
+env.set("requestId", crypto.randomUUID())
+req.setHeader("X-Request-Id", env.get("requestId"))
+
+@post lang=ts
+if (res.status === 200) {
+  const body = res.json() as { accessToken: string }
+  env.set("token", body.accessToken, { persist: true })
+}
+
+@example Success
+status: 200
+response: @file(examples/auth/login-200.json)
+
+@example Error
+status: 401
+response:
+{
+  "error": "unauthorized"
+}
+
+@assert
+res.status === 200

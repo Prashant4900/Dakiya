@@ -1,18 +1,10 @@
 /**
  * On-disk workspace core — maps to `.dakiya/dakiya.yaml`.
- * Zod schemas land later in Phase 1; these types are the contract now.
  */
 
-/** Manifest schema version currently written by `dakiya init`. */
-export const WORKSPACE_MANIFEST_VERSION = 1 as const;
+import type { z } from "zod";
+import type { WorkspaceManifestSchema } from "./schemas.js";
 
-export type WorkspaceManifest = {
-	/** Display name of the workspace. */
-	name: string;
-	/** Short purpose / notes. */
-	description?: string;
-	/** Manifest schema version. */
-	version: number;
-	/** Active environment key (file stem under `environments/`). */
-	defaultEnv?: string;
-};
+export { WORKSPACE_MANIFEST_VERSION } from "./schemas.js";
+
+export type WorkspaceManifest = z.infer<typeof WorkspaceManifestSchema>;

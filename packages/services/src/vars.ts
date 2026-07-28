@@ -11,8 +11,9 @@ export function resolveVars(
 	variables: EnvironmentVariables,
 ): string {
 	return template.replace(VAR_PATTERN, (match, name: string) => {
-		if (Object.hasOwn(variables, name)) {
-			return variables[name]!;
+		const value = variables[name];
+		if (value !== undefined) {
+			return value;
 		}
 		return match;
 	});
