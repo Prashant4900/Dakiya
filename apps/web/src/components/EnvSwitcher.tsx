@@ -70,6 +70,7 @@ export function EnvSwitcher({
 type EnvEditorProps = {
 	name: string;
 	source: string;
+	error?: string | null;
 	onChange: (source: string) => void;
 	onSave: () => void;
 	onClose: () => void;
@@ -79,6 +80,7 @@ type EnvEditorProps = {
 export function EnvEditor({
 	name,
 	source,
+	error,
 	onChange,
 	onSave,
 	onClose,
@@ -106,6 +108,7 @@ export function EnvEditor({
 					onChange={(e) => onChange(e.target.value)}
 					spellCheck={false}
 				/>
+				{error && <p className="error-text modal-error">{error}</p>}
 				<div className="modal-actions">
 					<button
 						type="button"
@@ -119,23 +122,4 @@ export function EnvEditor({
 			</div>
 		</div>
 	);
-}
-
-export function formatExamples(
-	document: import("../api/types.js").RequestDocument,
-): string {
-	if (!document.examples?.length) return "No examples defined.";
-	return document.examples
-		.map((ex) => {
-			const lines = [`## ${ex.name}`];
-			if (ex.status !== undefined) lines.push(`status: ${ex.status}`);
-			if (ex.response?.type === "file") {
-				lines.push(`response: @file(${ex.response.path})`);
-			} else if (ex.response?.type === "inline") {
-				lines.push("response:");
-				lines.push(ex.response.content);
-			}
-			return lines.join("\n");
-		})
-		.join("\n\n");
 }

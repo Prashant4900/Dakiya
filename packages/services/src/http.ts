@@ -21,7 +21,15 @@ export function createFetchHttpClient(): HttpClient {
 				init.body = request.body;
 			}
 
-			const res = await fetch(request.url, init);
+			let res: Response;
+			try {
+				res = await fetch(request.url, init);
+			} catch (err) {
+				const reason = err instanceof Error ? err.message : String(err);
+				throw new Error(
+					`Request to ${request.url} failed: ${reason}. Is the target server running?`,
+				);
+			}
 			const body = await res.text();
 			const headers: Record<string, string> = {};
 			res.headers.forEach((value, key) => {

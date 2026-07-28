@@ -152,7 +152,7 @@ It is a small nod to Indian roots, and a reminder that the best tools are the on
 
 ## Current Status
 
-Dakiya is actively in development. **Phases 0–4 are complete** (shared core, CLI, local API, and web dashboard). **Phase 5 (polish & ship)** is next.
+Dakiya is actively in development. **MVP is complete** — Phases 0–5 (shared core, CLI, local API, web dashboard, polish). **Phase 6 (desktop)** is optional and deferred until there is market demand.
 
 | Surface | Status |
 |---------|--------|

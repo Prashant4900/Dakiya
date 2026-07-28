@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
 	fetchEnvironment,
 	fetchRequest,
@@ -15,6 +15,10 @@ import { ResponsePanel } from "./components/ResponsePanel.js";
 import { Sidebar } from "./components/Sidebar.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { TitleBar } from "./components/TitleBar.js";
+import {
+	buildRequestIndexFallback,
+	findFirstRequestPath,
+} from "./utils/tree.js";
 
 export function App() {
 	const queryClient = useQueryClient();
@@ -22,20 +26,50 @@ export function App() {
 	const [activeEnv, setActiveEnv] = useState<string>("local");
 	const [sendResult, setSendResult] = useState<SendResponse | null>(null);
 	const [sendError, setSendError] = useState<string | null>(null);
+	const [saveError, setSaveError] = useState<string | null>(null);
+	const [envSaveError, setEnvSaveError] = useState<string | null>(null);
+	const [requestDirty, setRequestDirty] = useState(false);
 	const [envEditorOpen, setEnvEditorOpen] = useState(false);
 	const [envDraft, setEnvDraft] = useState("");
+	const envInitialized = useRef(false);
+	const autoSelected = useRef(false);
 
 	const workspaceQuery = useQuery({
 		queryKey: ["workspace"],
 		queryFn: fetchWorkspace,
 	});
 
+	const tree = useMemo(
+		() => workspaceQuery.data?.tree ?? [],
+		[workspaceQuery.data?.tree],
+	);
+
+	const requestIndex = useMemo(() => {
+		const fromApi = workspaceQuery.data?.requestIndex ?? [];
+		if (fromApi.length > 0) return fromApi;
+		return buildRequestIndexFallback(tree);
+	}, [workspaceQuery.data?.requestIndex, tree]);
+
 	const environments = workspaceQuery.data?.environments ?? [];
-	const requestIndex = workspaceQuery.data?.requestIndex ?? [];
 	const defaultEnv =
 		workspaceQuery.data?.manifest.defaultEnv ?? environments[0] ?? "local";
 
 	const effectiveEnv = activeEnv || defaultEnv;
+
+	useEffect(() => {
+		if (envInitialized.current || !workspaceQuery.data) return;
+		setActiveEnv(defaultEnv);
+		envInitialized.current = true;
+	}, [workspaceQuery.data, defaultEnv]);
+
+	useEffect(() => {
+		if (autoSelected.current || !workspaceQuery.data || selectedPath) return;
+		const first = findFirstRequestPath(tree);
+		if (first) {
+			setSelectedPath(first);
+			autoSelected.current = true;
+		}
+	}, [workspaceQuery.data, selectedPath, tree]);
 
 	const requestQuery = useQuery({
 		queryKey: ["request", selectedPath],
@@ -53,18 +87,22 @@ export function App() {
 		mutationFn: ({ path, source }: { path: string; source: string }) =>
 			saveRequest(path, source),
 		onSuccess: (_data, { path }) => {
+			setSaveError(null);
 			queryClient.invalidateQueries({ queryKey: ["request", path] });
 			queryClient.invalidateQueries({ queryKey: ["workspace"] });
 		},
+		onError: (err: Error) => setSaveError(err.message),
 	});
 
 	const saveEnvMutation = useMutation({
 		mutationFn: ({ name, source }: { name: string; source: string }) =>
 			saveEnvironment(name, source),
 		onSuccess: (_data, { name }) => {
+			setEnvSaveError(null);
 			queryClient.invalidateQueries({ queryKey: ["environment", name] });
 			setEnvEditorOpen(false);
 		},
+		onError: (err: Error) => setEnvSaveError(err.message),
 	});
 
 	const sendMutation = useMutation({
@@ -85,11 +123,23 @@ export function App() {
 		},
 	});
 
-	const handleSelect = useCallback((path: string) => {
-		setSelectedPath(path);
-		setSendResult(null);
-		setSendError(null);
-	}, []);
+	const handleSelect = useCallback(
+		(path: string) => {
+			if (
+				requestDirty &&
+				selectedPath &&
+				path !== selectedPath &&
+				!window.confirm("Discard unsaved changes?")
+			) {
+				return;
+			}
+			setSelectedPath(path);
+			setSendResult(null);
+			setSendError(null);
+			setSaveError(null);
+		},
+		[requestDirty, selectedPath],
+	);
 
 	const handleSave = useCallback(
 		async (source: string) => {
@@ -106,15 +156,11 @@ export function App() {
 
 	const openEnvEditor = useCallback(() => {
 		setEnvDraft(envQuery.data?.source ?? "");
+		setEnvSaveError(null);
 		setEnvEditorOpen(true);
 	}, [envQuery.data?.source]);
 
 	const workspaceError = workspaceQuery.error;
-	const tree = useMemo(
-		() => workspaceQuery.data?.tree ?? [],
-		[workspaceQuery.data?.tree],
-	);
-
 	const workspaceName = workspaceQuery.data?.manifest.name ?? "Workspace";
 	const requestName =
 		requestQuery.data?.document.meta.name ??
@@ -141,6 +187,13 @@ export function App() {
 					Run <code>dakiya serve</code> from a project with a{" "}
 					<code>.dakiya/</code> folder.
 				</p>
+				<button
+					type="button"
+					className="send-button"
+					onClick={() => workspaceQuery.refetch()}
+				>
+					Retry
+				</button>
 			</div>
 		);
 	}
@@ -171,8 +224,10 @@ export function App() {
 								? requestQuery.error.message
 								: null
 						}
+						saveError={saveError}
 						onSave={handleSave}
 						onSend={handleSend}
+						onDirtyChange={setRequestDirty}
 						sending={sendMutation.isPending}
 						saving={saveMutation.isPending}
 					>
@@ -195,6 +250,7 @@ export function App() {
 				<EnvEditor
 					name={effectiveEnv}
 					source={envDraft}
+					error={envSaveError}
 					onChange={setEnvDraft}
 					onSave={() =>
 						saveEnvMutation.mutate({

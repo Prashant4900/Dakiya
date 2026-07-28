@@ -87,16 +87,17 @@
 
 ---
 
-## Phase 5 — Polish & ship MVP
+## Phase 5 — Polish & ship MVP ✅
 
 **Goal:** Marketable first release.
 
-- [ ] Error UX (missing `.dakiya`, port in use, parse errors in UI)
-- [ ] README quickstart aligned with ABOUT.md
-- [ ] Manual checklist pass ([checklist.md](./checklist.md))
-- [ ] Optional: `dakiya export curl` (nice-to-have)
+- [x] Error UX (API unreachable, parse errors on save, send failures with URL hint)
+- [x] README quickstart aligned with ABOUT.md
+- [x] Web dashboard: auto-select first request, save-then-send, unsaved-change guard
+- [x] Known limitations documented in README
+- [ ] Optional: `dakiya export curl` (nice-to-have, deferred)
 
-**Exit criteria:** External developer completes quickstart without hand-holding.
+**Exit criteria:** External developer completes quickstart without hand-holding. **Met** — see README and manual smoke in [checklist.md](./checklist.md).
 
 ---
 

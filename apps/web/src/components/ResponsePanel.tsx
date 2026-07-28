@@ -54,6 +54,9 @@ export function ResponsePanel({ result, error, loading }: ResponsePanelProps) {
 				<div className="resp-meta">
 					{result && (
 						<>
+							<span className="resolved-url mono" title={result.resolved.url}>
+								{result.resolved.method} {result.resolved.url}
+							</span>
 							<span>⚡ {result.response.durationMs}ms</span>
 							<span>📦 {formatBytes(result.response.body)}</span>
 						</>

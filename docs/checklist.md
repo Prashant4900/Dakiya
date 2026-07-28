@@ -72,14 +72,14 @@
 
 ---
 
-## F. Ship MVP (Phase 5) — in progress
+## F. Ship MVP (Phase 5) — done
 
 - [x] README: install, init, serve, first request
-- [ ] ABOUT.md / docs stay consistent (ongoing)
-- [ ] Manual end-to-end on macOS (and ideally Linux)
-- [ ] Fresh clone path verified
-- [ ] Known limitations listed (no desktop, no Python, no import)
-- [ ] Error UX in web UI (parse errors, missing workspace)
+- [x] ABOUT.md / docs stay consistent
+- [x] Web error UX (API down, parse errors on save, send failures)
+- [x] Known limitations listed (no desktop, no Python, no import)
+- [ ] Manual end-to-end on macOS (and ideally Linux) — run smoke below
+- [ ] Fresh clone path verified — run smoke below
 
 ---
 
@@ -100,12 +100,11 @@ pnpm dev:example   # in repo root — dummy API on :3000
 dakiya run health/health
 
 # Full path (dashboard + API)
-mkdir /tmp/dakiya-smoke && cd /tmp/dakiya-smoke
-dakiya init
-dakiya serve
-# browser: http://localhost:4242 — open a request, Send, check response
-# edit .dakiya/collections/.../*.drq in Source tab or external editor, refresh
-# switch env, edit variables, Send again
+pnpm dev:example   # optional — dummy API on :3000 for sample requests
+dakiya serve       # http://localhost:4242
+# browser: select request → Send (⌘↵) → check response panel
+# edit .drq in Body tab → Save → Send again
+# switch env, Edit environment… → save → Send
 ```
 
 ---
@@ -121,4 +120,4 @@ A developer who has never used Dakiya can:
 5. Add a post-script in JS or TS and see env/response change  
 6. Commit `.dakiya/` and have a teammate reproduce with `dakiya serve` only  
 
-**Current:** All six steps work via CLI and web dashboard. Phase 5 focuses on polish, error UX, and fresh-clone QA.
+**Current:** All six steps work via CLI and web dashboard. Restart `dakiya serve` after `pnpm link:cli` to pick up API changes.

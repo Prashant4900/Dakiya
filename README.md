@@ -6,7 +6,7 @@ Local-first API toolkit. **CLI + web dashboard first**; desktop optional later.
 
 ## Status
 
-**Stage 3 — MVP nearly complete.** Phases 0–4 done. **Next:** Phase 5 polish & ship.
+**Stage 3 — MVP complete.** Phases 0–5 done. **Next:** Phase 6 desktop (optional) or v0.2 features.
 
 | Phase | Status |
 |-------|--------|
@@ -15,7 +15,7 @@ Local-first API toolkit. **CLI + web dashboard first**; desktop optional later.
 | 2 — Services | Done |
 | 3 — CLI + API | Done |
 | 4 — Web dashboard | Done |
-| 5 — Ship MVP | Not started |
+| 5 — Ship MVP | Done |
 
 Run tests: `pnpm test` · Format reference: [docs/drq-format.md](./docs/drq-format.md)
 
@@ -89,6 +89,21 @@ dakiya serve   # http://localhost:4242
 
 The dashboard loads collections from `/api/workspace`, edits `.drq` files via the API, and sends requests with `POST /api/send`. `dakiya serve` runs Vite and the Hono API together on the same port (hot reload included).
 
+**Quick path:** select a request in the sidebar → **Send** (or ⌘↵). Edit the `.drq` source in the Body tab → **Save**. Switch environments from the sidebar dropdown.
+
+For requests that hit `localhost:3000`, start the dummy API first: `pnpm dev:example`.
+
+## Known limitations (MVP)
+
+- **Desktop app** — not started (Tauri stub only)
+- **Python scripts** — JS/TS only
+- **Import** — no Postman/Bruno import yet
+- **History** — no SQLite request history
+- **`@assert`** — parsed but not executed
+- **Dark theme** — light theme only in the web UI
+
+After pulling code changes, rebuild the CLI: `pnpm link:cli`, then restart `dakiya serve`.
+
 ## Layout
 
 ```
@@ -108,4 +123,4 @@ example/
 
 ## Next
 
-See [docs/phases.md](./docs/phases.md) — **Phase 5:** polish, manual QA, ship MVP.
+See [docs/phases.md](./docs/phases.md) — **Phase 6 (optional):** Tauri desktop, or v0.2 (import, history).

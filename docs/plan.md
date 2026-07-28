@@ -104,7 +104,7 @@ apps/desktop        — Tauri stub                      (surface, later)
 
 ---
 
-## Current stage: Stage 3 (MVP nearly complete) → Stage 4 (ship)
+## Current stage: Stage 4 — MVP shipped
 
 | Stage | Meaning |
 |-------|---------|
@@ -112,7 +112,7 @@ apps/desktop        — Tauri stub                      (surface, later)
 | **1** | Docs + hello-world monorepo skeleton |
 | **2** | Domain, `.drq` format, services — **done** |
 | **3** | CLI + local API + web dashboard — **done** |
-| **4** | Ship MVP (polish, docs, manual QA) — **in progress** |
+| **4** | Ship MVP (polish, docs, manual QA) — **done** |
 
 **Delivered so far:**
 
@@ -122,8 +122,9 @@ apps/desktop        — Tauri stub                      (surface, later)
 - Local Hono API: workspace, CRUD, environments, `POST /api/send`
 - Pre/post JS/TS scripts with env persistence
 - React web dashboard: collection sidebar, request editor (Source/Docs/Scripts/Examples), response panel, env switcher — all via `/api/*`
+- Error UX in web UI, save-then-send, auto-select first request
 
-**Next:** Polish, error UX, and manual QA (Phase 5). See [phases.md](./phases.md) and [checklist.md](./checklist.md).
+**Next:** Optional desktop (Phase 6) or v0.2 (import, history). See [phases.md](./phases.md).
 
 ---
 

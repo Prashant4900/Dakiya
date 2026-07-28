@@ -9,9 +9,22 @@ import type {
 const API = "/api";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-	const res = await fetch(`${API}${path}`, init);
+	let res: Response;
+	try {
+		res = await fetch(`${API}${path}`, init);
+	} catch {
+		throw new Error(
+			"Cannot reach Dakiya API. Run `dakiya serve` from a project with `.dakiya/`.",
+		);
+	}
+
 	const text = await res.text();
-	const data = text ? (JSON.parse(text) as T | ApiError) : ({} as T);
+	let data: T | ApiError;
+	try {
+		data = text ? (JSON.parse(text) as T | ApiError) : ({} as T);
+	} catch {
+		throw new Error(`Invalid API response (${res.status})`);
+	}
 
 	if (!res.ok) {
 		const message =
