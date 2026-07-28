@@ -7,6 +7,7 @@ export type { CollectionNode } from "./collection-tree.js";
 export { buildCollectionTree } from "./collection-tree.js";
 export { parseEnvironment } from "./environment.js";
 export {
+	listEnvironmentNames,
 	loadActiveEnvironment,
 	loadEnvironment,
 	readEnvironmentSource,

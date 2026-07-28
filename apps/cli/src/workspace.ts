@@ -6,6 +6,7 @@ import {
 	environmentsRoot,
 	hasManifest,
 	hasWorkspace,
+	listEnvironmentNames as listEnvironmentNamesService,
 	listRequestPaths as listRequestPathsService,
 	loadActiveEnvironment as loadActiveEnvironmentService,
 	loadEnvironment as loadEnvironmentService,
@@ -82,6 +83,10 @@ export function writeEnvironmentSource(
 
 export function listRequestPaths(cwd = process.cwd()) {
 	return listRequestPathsService(fs, cwd);
+}
+
+export function listEnvironmentNames(cwd = process.cwd()) {
+	return listEnvironmentNamesService(fs, cwd);
 }
 
 export function resolveRequestFile(arg: string, cwd = process.cwd()) {

@@ -152,13 +152,13 @@ It is a small nod to Indian roots, and a reminder that the best tools are the on
 
 ## Current Status
 
-Dakiya is actively in development. **Phases 0–3 are complete** (shared core + CLI + local API). **Phase 4 (web dashboard)** is next.
+Dakiya is actively in development. **Phases 0–4 are complete** (shared core, CLI, local API, and web dashboard). **Phase 5 (polish & ship)** is next.
 
 | Surface | Status |
 |---------|--------|
 | **Shared core** (`domain`, `format`, `services`) | Done — Zod types, `.drq` parse/serialize, send pipeline, tests |
 | **CLI** | Done — `init`, `list`, `run`, `serve`, Hono `/api/*`, script sandbox |
-| **Web dashboard** | Placeholder UI — needs wiring to local API |
+| **Web dashboard** | Done — sidebar tree, request/response panes, env switcher, send/save via API |
 | **Desktop app** | Reserved stub (Tauri, later) |
 
 All surfaces share the same `.dakiya` file format and core logic. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/phases.md](./docs/phases.md).

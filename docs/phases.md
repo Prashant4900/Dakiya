@@ -18,7 +18,7 @@
 | pnpm workspace + package stubs | Done |
 | Hello-world CLI / web / packages | Done |
 
-**Exit criteria:** `pnpm install` works; `pnpm hello` prints hello; `pnpm dev:web` shows a placeholder page.
+**Exit criteria:** `pnpm install` works; `pnpm hello` prints hello; `dakiya serve` serves the web dashboard.
 
 ---
 
@@ -55,7 +55,7 @@
 
 ---
 
-## Phase 3 — CLI app (`apps/cli`) ✅ (mostly)
+## Phase 3 — CLI app (`apps/cli`) ✅
 
 **Goal:** Real commands developers run — including a terminal API runner before the web dashboard.
 
@@ -71,19 +71,19 @@
 
 ---
 
-## Phase 4 — Web app (`apps/web`) — current
+## Phase 4 — Web app (`apps/web`) ✅
 
 **Goal:** Browser UI that uses the local API only (no direct disk).
 
-- [ ] Layout: sidebar tree, request editor, response panel
-- [ ] Tabs: Request, Body, Headers, Docs, Scripts (pre/post), Examples
-- [ ] TanStack Query (or equivalent) API client
-- [ ] Send via `POST /api/send`
-- [ ] Env switcher + save back to `.drq` / YAML through API
+- [x] Layout: titlebar, sidebar tree, request editor, response panel, status bar
+- [x] Postman-style split panes (request left, response right)
+- [x] Tabs: Source, Docs, Scripts (view), Examples
+- [x] TanStack Query API client
+- [x] Send via `POST /api/send`
+- [x] Env switcher + YAML editor modal through API
+- [x] Inter + JetBrains Mono typography; green accent theme
 
-**Exit criteria:** Full click-path without CLI knowledge beyond `dakiya serve`.
-
-**Current:** Placeholder “Hello world” page at `apps/web/src/App.tsx`. API backend is ready.
+**Exit criteria:** Full click-path without CLI knowledge beyond `dakiya serve`. **Met** (scripts edited via Source tab).
 
 ---
 

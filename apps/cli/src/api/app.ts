@@ -6,6 +6,7 @@ import { createVmScriptRunner } from "../sandbox/run-script.js";
 import {
 	buildCollectionTree,
 	deleteRequestFile,
+	listEnvironmentNames,
 	listRequestPaths,
 	loadEnvironment,
 	loadManifest,
@@ -42,10 +43,25 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 		try {
 			const manifest = loadManifest(cwd);
 			const requests = listRequestPaths(cwd);
+			const requestIndex = requests.map((path) => {
+				try {
+					const { source, relativeToDakiya } = readRequestSource(path, cwd);
+					const document = parseDrq(source, relativeToDakiya);
+					return {
+						path,
+						name: document.meta.name,
+						method: document.request.method,
+					};
+				} catch {
+					return { path, name: path, method: "GET" };
+				}
+			});
 			return c.json({
 				manifest,
 				requests,
+				requestIndex,
 				tree: buildCollectionTree(requests),
+				environments: listEnvironmentNames(cwd),
 				cwd,
 			});
 		} catch (err) {

@@ -58,27 +58,28 @@
 
 ---
 
-## E. Web app (Phase 4)
+## E. Web app (Phase 4) — done
 
-- [ ] Sidebar shows folders + requests
-- [ ] Select request loads editor
-- [ ] Docs tab renders Markdown
-- [ ] Scripts tab edits pre/post
-- [ ] Examples tab shows samples
-- [ ] Send shows status, timing, body, headers
-- [ ] Env switch works
-- [ ] Save persists to disk (verify in editor / git diff)
-- [ ] No `localStorage` as source of truth for collections
+- [x] Sidebar shows folders + requests (collapsible groups, method badges)
+- [x] Select request loads editor
+- [x] Docs tab renders Markdown
+- [x] Scripts tab shows pre/post (edit via Source tab + Save)
+- [x] Examples tab shows samples
+- [x] Send shows status, timing, body, headers
+- [x] Env switch works (+ edit modal saves via API)
+- [x] Save persists to disk (verify in editor / git diff)
+- [x] No `localStorage` as source of truth for collections
 
 ---
 
-## F. Ship MVP (Phase 5)
+## F. Ship MVP (Phase 5) — in progress
 
-- [ ] README: install, init, serve, first request
-- [ ] ABOUT.md / docs stay consistent
+- [x] README: install, init, serve, first request
+- [ ] ABOUT.md / docs stay consistent (ongoing)
 - [ ] Manual end-to-end on macOS (and ideally Linux)
 - [ ] Fresh clone path verified
 - [ ] Known limitations listed (no desktop, no Python, no import)
+- [ ] Error UX in web UI (parse errors, missing workspace)
 
 ---
 
@@ -98,13 +99,13 @@
 pnpm dev:example   # in repo root — dummy API on :3000
 dakiya run health/health
 
-# Full path (once Phase 4 lands)
+# Full path (dashboard + API)
 mkdir /tmp/dakiya-smoke && cd /tmp/dakiya-smoke
 dakiya init
 dakiya serve
-# browser: open sample request, Send, check response
-# edit .dakiya/collections/.../*.drq in an editor, refresh UI
-# change env var, Send again
+# browser: http://localhost:4242 — open a request, Send, check response
+# edit .dakiya/collections/.../*.drq in Source tab or external editor, refresh
+# switch env, edit variables, Send again
 ```
 
 ---
@@ -120,4 +121,4 @@ A developer who has never used Dakiya can:
 5. Add a post-script in JS or TS and see env/response change  
 6. Commit `.dakiya/` and have a teammate reproduce with `dakiya serve` only  
 
-**Current:** Steps 1–2 and 4–5 work from CLI/API. Step 3 serves a placeholder UI until Phase 4.
+**Current:** All six steps work via CLI and web dashboard. Phase 5 focuses on polish, error UX, and fresh-clone QA.
