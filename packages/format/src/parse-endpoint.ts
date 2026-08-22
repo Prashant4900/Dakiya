@@ -1,5 +1,5 @@
-import { parse } from "yaml";
 import { EndpointManifestSchema, type RequestDocument } from "@dakiya/domain";
+import { parse } from "yaml";
 
 export function parseEndpoint(
 	yamlSource: string,
@@ -24,11 +24,11 @@ export function parseEndpoint(
 		const postTs = scripts[`${method.id}.post.ts`];
 		const postJs = scripts[`${method.id}.post.js`];
 
-		let preBlock = undefined;
+		let preBlock: { lang: "ts" | "js"; source: string } | undefined;
 		if (preTs) preBlock = { lang: "ts" as const, source: preTs };
 		else if (preJs) preBlock = { lang: "js" as const, source: preJs };
 
-		let postBlock = undefined;
+		let postBlock: { lang: "ts" | "js"; source: string } | undefined;
 		if (postTs) postBlock = { lang: "ts" as const, source: postTs };
 		else if (postJs) postBlock = { lang: "js" as const, source: postJs };
 

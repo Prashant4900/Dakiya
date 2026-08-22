@@ -94,8 +94,6 @@ app.delete("/api/users/:id", (req, res) => {
 	res.status(204).end();
 });
 
-
-
 // v2 Users API
 app.get("/api/v2/users", (_req, res) => {
 	res.json({
@@ -163,7 +161,5 @@ app.use((_req, res) => {
 
 app.listen(PORT, "localhost", () => {
 	console.log(`[@example/server] listening on http://localhost:${PORT}`);
-	console.log(
-		`[@example/server] try GET /api/health  GET /api/v2/health`,
-	);
+	console.log(`[@example/server] try GET /api/health  GET /api/v2/health`);
 });

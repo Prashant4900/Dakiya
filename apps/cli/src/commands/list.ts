@@ -1,6 +1,6 @@
 import {
-	listEnvironmentNames,
 	listEndpointPaths,
+	listEnvironmentNames,
 	readEndpointRequests,
 	requireWorkspace,
 } from "../workspace.js";
@@ -28,9 +28,11 @@ export async function runList(): Promise<void> {
 			try {
 				const requests = readEndpointRequests(endpoint);
 				for (const req of requests) {
-					console.log(`  - ${req.relativePath}  (${req.request.method} ${req.request.url})`);
+					console.log(
+						`  - ${req.relativePath}  (${req.request.method} ${req.request.url})`,
+					);
 				}
-			} catch (err) {
+			} catch (_err) {
 				console.log(`  - ${endpoint}  (error loading)`);
 			}
 		}

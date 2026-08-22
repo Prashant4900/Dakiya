@@ -1,8 +1,5 @@
+import { SidebarLeftIcon, SidebarRightIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-	SidebarLeftIcon,
-	SidebarRightIcon,
-} from "@hugeicons/core-free-icons";
 
 type TitleBarProps = {
 	projectName: string;
@@ -47,7 +44,9 @@ export function TitleBar({
 					type="button"
 					className="sidebar-toggle"
 					onClick={onToggleResponse}
-					title={responseCollapsed ? "Show response panel" : "Hide response panel"}
+					title={
+						responseCollapsed ? "Show response panel" : "Hide response panel"
+					}
 				>
 					<HugeiconsIcon icon={SidebarRightIcon} size={16} />
 				</button>

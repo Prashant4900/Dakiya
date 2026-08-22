@@ -3,21 +3,23 @@ import {
 	collectionsRoot,
 	dakiyaRoot,
 	deleteRequestFile as deleteRequestFileService,
+	deleteScript as deleteScriptService,
 	environmentsRoot,
 	hasManifest,
 	hasWorkspace,
-	listEnvironmentNames as listEnvironmentNamesService,
 	listEndpointPaths as listEndpointPathsService,
+	listEnvironmentNames as listEnvironmentNamesService,
 	loadActiveEnvironment as loadActiveEnvironmentService,
 	loadEnvironment as loadEnvironmentService,
 	loadManifest as loadManifestService,
 	normalizeEndpointPath,
+	readEndpointRequests as readEndpointRequestsService,
 	readEnvironmentSource as readEnvironmentSourceService,
 	readRequestSource as readRequestSourceService,
-	readEndpointRequests as readEndpointRequestsService,
 	resolveEndpointPaths,
 	writeEnvironmentSource as writeEnvironmentSourceService,
 	writeRequestSource as writeRequestSourceService,
+	writeScript as writeScriptService,
 } from "@dakiya/services";
 import { createNodeFsClient } from "./fs/node-fs-client.js";
 
@@ -108,4 +110,21 @@ export function writeRequestSource() {
 
 export function deleteRequestFile() {
 	return deleteRequestFileService();
+}
+
+export function writeScript(
+	arg: string,
+	type: "pre" | "post",
+	source: string,
+	cwd = process.cwd(),
+) {
+	return writeScriptService(fs, arg, type, source, cwd);
+}
+
+export function deleteScript(
+	arg: string,
+	type: "pre" | "post",
+	cwd = process.cwd(),
+) {
+	return deleteScriptService(fs, arg, type, cwd);
 }

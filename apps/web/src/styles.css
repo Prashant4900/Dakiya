@@ -614,7 +614,9 @@ body {
 	font-weight: 600;
 	cursor: pointer;
 	font-family: inherit;
-	transition: background 0.15s, border-color 0.15s;
+	transition:
+		background 0.15s,
+		border-color 0.15s;
 	flex-shrink: 0;
 }
 
@@ -1181,7 +1183,6 @@ body {
 	gap: 4px;
 }
 
-
 .env-var-highlight {
 	color: var(--put);
 	cursor: pointer;
@@ -1214,8 +1215,14 @@ body {
 }
 
 @keyframes popover-fade-in {
-	from { opacity: 0; transform: translateY(-4px); }
-	to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .env-var-popover-value {
@@ -1298,4 +1305,3 @@ body {
 	padding: 6px 10px;
 	width: 100%;
 }
-

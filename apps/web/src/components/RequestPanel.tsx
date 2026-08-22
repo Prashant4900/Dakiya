@@ -1,11 +1,19 @@
-import { type ReactNode, useCallback, useEffect, useState, useRef } from "react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
+import { deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 const COMMON_HEADERS = [
 	"Accept",
@@ -42,7 +50,7 @@ const COMMON_HEADERS = [
 	"X-Requested-With",
 	"X-Forwarded-For",
 	"X-Forwarded-Host",
-	"X-Forwarded-Proto"
+	"X-Forwarded-Proto",
 ];
 
 const COMMON_CONTENT_TYPES = [
@@ -54,11 +62,7 @@ const COMMON_CONTENT_TYPES = [
 	"application/xml",
 ];
 
-const COMMON_ACCEPTS = [
-	"application/json",
-	"text/html",
-	"*/*",
-];
+const COMMON_ACCEPTS = ["application/json", "text/html", "*/*"];
 
 export type EditorTab =
 	| "body"
@@ -83,12 +87,18 @@ type RequestPanelProps = {
 };
 
 // Component for a single variable token with popover
-function EnvVarToken({ varName, val }: { varName: string; val: string | undefined }) {
+function EnvVarToken({
+	varName,
+	val,
+}: {
+	varName: string;
+	val: string | undefined;
+}) {
 	const [rect, setRect] = useState<DOMRect | null>(null);
 	const [isHovered, setIsHovered] = useState(false);
 	const timeoutRef = useRef<number | null>(null);
 
-	const handleMouseEnter = (e: React.MouseEvent) => {
+	const handleMouseEnter = (e: React.SyntheticEvent) => {
 		if (timeoutRef.current) clearTimeout(timeoutRef.current);
 		setRect(e.currentTarget.getBoundingClientRect());
 		setIsHovered(true);
@@ -109,34 +119,55 @@ function EnvVarToken({ varName, val }: { varName: string; val: string | undefine
 
 	return (
 		<>
-			<span
+			<button
+				type="button"
 				className={`env-var-highlight ${isResolved ? "" : "unresolved"}`}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
+				onFocus={handleMouseEnter}
+				onBlur={handleMouseLeave}
+				style={{
+					background: "transparent",
+					border: "none",
+					padding: 0,
+					font: "inherit",
+					cursor: "pointer",
+					color: "inherit",
+				}}
 			>
 				{`{{${varName}}}`}
-			</span>
-			{isHovered && rect && createPortal(
-				<div
-					className="env-var-popover"
-					style={{
-						top: rect.bottom + 6,
-						left: Math.min(rect.left, window.innerWidth - 340),
-					}}
-					onMouseEnter={handlePopoverEnter}
-					onMouseLeave={handleMouseLeave}
-				>
-					<div className="env-var-popover-value">
-						<input readOnly value={isResolved ? val : "Unresolved Variable"} className={!isResolved ? 'unresolved-input' : ''} />
-					</div>
-					<div className="env-var-popover-footer">
-						<div className="env-var-popover-scope">
-							<span className="env-var-popover-scope-icon">E</span> Environment
+			</button>
+			{isHovered &&
+				rect &&
+				createPortal(
+					<div
+						role="tooltip"
+						className="env-var-popover"
+						style={{
+							top: rect.bottom + 6,
+							left: Math.min(rect.left, window.innerWidth - 340),
+						}}
+						onMouseEnter={handlePopoverEnter}
+						onMouseLeave={handleMouseLeave}
+						onFocus={handlePopoverEnter}
+						onBlur={handleMouseLeave}
+					>
+						<div className="env-var-popover-value">
+							<input
+								readOnly
+								value={isResolved ? val : "Unresolved Variable"}
+								className={!isResolved ? "unresolved-input" : ""}
+							/>
 						</div>
-					</div>
-				</div>,
-				document.body
-			)}
+						<div className="env-var-popover-footer">
+							<div className="env-var-popover-scope">
+								<span className="env-var-popover-scope-icon">E</span>{" "}
+								Environment
+							</div>
+						</div>
+					</div>,
+					document.body,
+				)}
 		</>
 	);
 }
@@ -158,9 +189,11 @@ function EnvHighlight({
 				if (part.startsWith("{{") && part.endsWith("}}")) {
 					const varName = part.slice(2, -2).trim();
 					const val = variables[varName];
-					return <EnvVarToken key={i} varName={varName} val={val} />;
+					// biome-ignore lint/suspicious/noArrayIndexKey: parts are static
+					return <EnvVarToken key={varName + i} varName={varName} val={val} />;
 				}
-				return <span key={i}>{part}</span>;
+				// biome-ignore lint/suspicious/noArrayIndexKey: parts are static
+				return <span key={part + i}>{part}</span>;
 			})}
 		</>
 	);
@@ -183,9 +216,26 @@ function EnvEditableCell({
 	const [isFocused, setIsFocused] = useState(false);
 
 	return (
-		<div
+		<button
+			type="button"
 			className="kv-editable-cell"
 			onClick={() => setIsFocused(true)}
+			style={{
+				display: "block",
+				width: "100%",
+				background: "transparent",
+				border: "none",
+				padding: 0,
+				textAlign: "left",
+				font: "inherit",
+				color: "inherit",
+			}}
+			onKeyDown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					setIsFocused(true);
+				}
+			}}
 			onBlur={(e) => {
 				// Don't blur if we're clicking inside the same cell
 				if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -200,7 +250,6 @@ function EnvEditableCell({
 					placeholder={placeholder}
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-					autoFocus={isFocused}
 					list={list}
 				/>
 			) : (
@@ -208,7 +257,7 @@ function EnvEditableCell({
 					<EnvHighlight text={value} variables={variables} />
 				</div>
 			)}
-		</div>
+		</button>
 	);
 }
 
@@ -225,17 +274,53 @@ export function RequestPanel({
 	activeEnvVariables,
 	children,
 }: RequestPanelProps) {
-	const [tab, setTab] = useState<EditorTab>("body");
+	const [tab, setTab] = useState<EditorTab>(() => {
+		const saved = localStorage.getItem("dakiya_requestTab");
+		return (saved as EditorTab) || "body";
+	});
+
+	useEffect(() => {
+		localStorage.setItem("dakiya_requestTab", tab);
+	}, [tab]);
 	const [draft, setDraft] = useState("");
 	const [dirty, setDirty] = useState(false);
-	const [localHeaders, setLocalHeaders] = useState<{ id: number; key: string; value: string }[]>([]);
+	const [localHeaders, setLocalHeaders] = useState<
+		{ id: number; key: string; value: string }[]
+	>([]);
 	const [parseError, setParseError] = useState<string | null>(null);
+
+	const queryClient = useQueryClient();
+	const [draftPreScript, setDraftPreScript] = useState("");
+	const [draftPostScript, setDraftPostScript] = useState("");
+
+	const saveScriptMutation = useMutation({
+		mutationFn: ({ type, source }: { type: "pre" | "post"; source: string }) =>
+			saveScript(request?.relativePath ?? "", type, source),
+		onSuccess: () => {
+			if (request)
+				queryClient.invalidateQueries({
+					queryKey: ["request", request.relativePath],
+				});
+		},
+	});
+
+	const deleteScriptMutation = useMutation({
+		mutationFn: ({ type }: { type: "pre" | "post" }) =>
+			deleteScript(request?.relativePath ?? "", type),
+		onSuccess: () => {
+			if (request)
+				queryClient.invalidateQueries({
+					queryKey: ["request", request.relativePath],
+				});
+		},
+	});
 
 	useEffect(() => {
 		if (request) {
 			setDraft(request.source);
+			setDraftPreScript(request.document?.pre?.source ?? "");
+			setDraftPostScript(request.document?.post?.source ?? "");
 			setDirty(false);
-			setTab("body");
 		}
 	}, [request]);
 
@@ -243,7 +328,7 @@ export function RequestPanel({
 		onDirtyChange(dirty);
 	}, [dirty, onDirtyChange]);
 
-	let doc: RequestDocument | undefined = request?.document;
+	const doc: RequestDocument | undefined = request?.document;
 
 	const method = doc?.request.method ?? "GET";
 	const url = doc?.request.url ?? "";
@@ -259,7 +344,7 @@ export function RequestPanel({
 			setLocalHeaders(h);
 			setParseError(null);
 		}
-	}, [tab, request]);
+	}, [tab, doc]);
 
 	// Note: We included `draft` in dependencies above so if the user clicks "Save" and request reloads,
 	// or if the draft changes externally, headers reload. But wait, if they type in the table, it modifies draft!
@@ -285,12 +370,19 @@ export function RequestPanel({
 		// Editing not supported with YAML multi-file format yet
 	};
 
-	const handleHeaderChange = (index: number, field: "key" | "value", val: string) => {
+	const handleHeaderChange = (
+		index: number,
+		field: "key" | "value",
+		val: string,
+	) => {
 		const newHeaders = [...localHeaders];
 		newHeaders[index][field] = val;
 
 		// Add empty row if last row was modified
-		if (index === newHeaders.length - 1 && (newHeaders[index].key || newHeaders[index].value)) {
+		if (
+			index === newHeaders.length - 1 &&
+			(newHeaders[index].key || newHeaders[index].value)
+		) {
 			newHeaders.push({ id: Date.now(), key: "", value: "" });
 		}
 
@@ -299,8 +391,12 @@ export function RequestPanel({
 	};
 
 	const handleHeaderRemove = (index: number) => {
-		let newHeaders = localHeaders.filter((_, i) => i !== index);
-		if (newHeaders.length === 0 || (newHeaders[newHeaders.length - 1].key || newHeaders[newHeaders.length - 1].value)) {
+		const newHeaders = localHeaders.filter((_, i) => i !== index);
+		if (
+			newHeaders.length === 0 ||
+			newHeaders[newHeaders.length - 1].key ||
+			newHeaders[newHeaders.length - 1].value
+		) {
 			newHeaders.push({ id: Date.now(), key: "", value: "" });
 		}
 		setLocalHeaders(newHeaders);
@@ -319,7 +415,7 @@ export function RequestPanel({
 			setLocalHeaders(h);
 			setParseError(null);
 		}
-	}, [tab, request]);
+	}, [tab, doc]);
 
 	useEffect(() => {
 		const onKeyDown = (e: KeyboardEvent) => {
@@ -336,16 +432,16 @@ export function RequestPanel({
 
 	const tabs: { id: EditorTab; label: string; badge?: number }[] = doc
 		? [
-			{ id: "body", label: "Body" },
-			{
-				id: "headers",
-				label: "Headers",
-				badge: Object.keys(doc.request.headers).length || undefined,
-			},
-			{ id: "docs", label: "Docs" },
-			{ id: "pre-script", label: "Pre-script" },
-			{ id: "post-script", label: "Post-script" },
-		]
+				{ id: "body", label: "Body" },
+				{
+					id: "headers",
+					label: "Headers",
+					badge: Object.keys(doc.request.headers).length || undefined,
+				},
+				{ id: "docs", label: "Docs" },
+				{ id: "pre-script", label: "Pre-script" },
+				{ id: "post-script", label: "Post-script" },
+			]
 		: [];
 
 	if (doc?.examples?.length) {
@@ -368,7 +464,11 @@ export function RequestPanel({
 					{method}
 				</span>
 				<div className="url-input mono">
-					{url ? <EnvHighlight text={url} variables={activeEnvVariables} /> : "Select a request"}
+					{url ? (
+						<EnvHighlight text={url} variables={activeEnvVariables} />
+					) : (
+						"Select a request"
+					)}
 				</div>
 				<button
 					type="button"
@@ -465,7 +565,9 @@ export function RequestPanel({
 											</tr>
 										</thead>
 										<tbody
-											onFocus={() => { isEditingHeaders.current = true; }}
+											onFocus={() => {
+												isEditingHeaders.current = true;
+											}}
 											onBlur={(e) => {
 												// if focus completely leaves the tbody
 												if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -475,45 +577,53 @@ export function RequestPanel({
 										>
 											{localHeaders.map((h, i) => {
 												const keyLower = h.key.toLowerCase();
-												const valueListId = keyLower === "content-type" 
-													? "content-types" 
-													: keyLower === "accept" 
-													? "accept-types" 
-													: undefined;
+												const valueListId =
+													keyLower === "content-type"
+														? "content-types"
+														: keyLower === "accept"
+															? "accept-types"
+															: undefined;
 
 												return (
-												<tr key={h.id}>
-													<td className="kv-key">
-														<EnvEditableCell
-															placeholder="Header"
-															value={h.key}
-															onChange={(val) => handleHeaderChange(i, "key", val)}
-															variables={activeEnvVariables}
-															list="common-headers"
-														/>
-													</td>
-													<td className="kv-val">
-														<EnvEditableCell
-															placeholder="Value"
-															value={h.value}
-															onChange={(val) => handleHeaderChange(i, "value", val)}
-															variables={activeEnvVariables}
-															list={valueListId}
-														/>
-													</td>
-													<td className="kv-actions">
-														{i !== localHeaders.length - 1 && (
-															<button
-																type="button"
-																className="kv-remove-btn"
-																onClick={() => handleHeaderRemove(i)}
-																title="Remove header"
-															>
-																<HugeiconsIcon icon={Cancel01Icon} size={14} />
-															</button>
-														)}
-													</td>
-												</tr>
+													<tr key={h.id}>
+														<td className="kv-key">
+															<EnvEditableCell
+																placeholder="Header"
+																value={h.key}
+																onChange={(val) =>
+																	handleHeaderChange(i, "key", val)
+																}
+																variables={activeEnvVariables}
+																list="common-headers"
+															/>
+														</td>
+														<td className="kv-val">
+															<EnvEditableCell
+																placeholder="Value"
+																value={h.value}
+																onChange={(val) =>
+																	handleHeaderChange(i, "value", val)
+																}
+																variables={activeEnvVariables}
+																list={valueListId}
+															/>
+														</td>
+														<td className="kv-actions">
+															{i !== localHeaders.length - 1 && (
+																<button
+																	type="button"
+																	className="kv-remove-btn"
+																	onClick={() => handleHeaderRemove(i)}
+																	title="Remove header"
+																>
+																	<HugeiconsIcon
+																		icon={Cancel01Icon}
+																		size={14}
+																	/>
+																</button>
+															)}
+														</td>
+													</tr>
 												);
 											})}
 										</tbody>
@@ -543,11 +653,91 @@ export function RequestPanel({
 						<>
 							<div className="pane-header">
 								<span className="pane-title">Pre-request script</span>
-								<span className="pane-tag">{doc?.pre?.lang ?? "JS"}</span>
+								<span className="pane-tag">TS/JS</span>
 							</div>
-							<pre className="code-editor mono">
-								{doc?.pre?.source ?? "// No pre-script"}
-							</pre>
+							{doc?.pre?.source !== undefined ? (
+								<div
+									style={{
+										display: "flex",
+										flexDirection: "column",
+										height: "100%",
+									}}
+								>
+									<textarea
+										className="code-editor mono"
+										style={{ flex: 1, resize: "none", minHeight: "300px" }}
+										value={draftPreScript}
+										onChange={(e) => setDraftPreScript(e.target.value)}
+									/>
+									<div
+										className="pane-footer"
+										style={{
+											padding: "8px",
+											borderTop: "1px solid var(--border-color)",
+											display: "flex",
+											gap: "8px",
+										}}
+									>
+										<button
+											type="button"
+											className="send-button"
+											disabled={saveScriptMutation.isPending}
+											onClick={() =>
+												saveScriptMutation.mutate({
+													type: "pre",
+													source: draftPreScript,
+												})
+											}
+										>
+											{saveScriptMutation.isPending
+												? "Saving..."
+												: "Save Script"}
+										</button>
+										<button
+											type="button"
+											className="send-button"
+											style={{
+												background: "var(--danger-bg, #ffecec)",
+												color: "var(--danger-text, #d03030)",
+												border: "1px solid var(--danger-border, #ffcccc)",
+											}}
+											disabled={deleteScriptMutation.isPending}
+											onClick={() => {
+												if (window.confirm("Delete this pre-request script?")) {
+													deleteScriptMutation.mutate({ type: "pre" });
+												}
+											}}
+										>
+											Delete Script
+										</button>
+									</div>
+								</div>
+							) : (
+								<div
+									className="empty-state"
+									style={{ padding: "24px", textAlign: "center" }}
+								>
+									<p className="muted">
+										No pre-request script exists for this request.
+									</p>
+									<button
+										type="button"
+										className="send-button"
+										style={{ marginTop: "16px" }}
+										onClick={() => {
+											setDraftPreScript(
+												"// Enter your pre-request script here\n",
+											);
+											saveScriptMutation.mutate({
+												type: "pre",
+												source: "// Enter your pre-request script here\n",
+											});
+										}}
+									>
+										Create Script
+									</button>
+								</div>
+							)}
 						</>
 					)}
 
@@ -555,11 +745,93 @@ export function RequestPanel({
 						<>
 							<div className="pane-header">
 								<span className="pane-title">Post-response script</span>
-								<span className="pane-tag">{doc?.post?.lang ?? "JS"}</span>
+								<span className="pane-tag">TS/JS</span>
 							</div>
-							<pre className="code-editor mono">
-								{doc?.post?.source ?? "// No post-script"}
-							</pre>
+							{doc?.post?.source !== undefined ? (
+								<div
+									style={{
+										display: "flex",
+										flexDirection: "column",
+										height: "100%",
+									}}
+								>
+									<textarea
+										className="code-editor mono"
+										style={{ flex: 1, resize: "none", minHeight: "300px" }}
+										value={draftPostScript}
+										onChange={(e) => setDraftPostScript(e.target.value)}
+									/>
+									<div
+										className="pane-footer"
+										style={{
+											padding: "8px",
+											borderTop: "1px solid var(--border-color)",
+											display: "flex",
+											gap: "8px",
+										}}
+									>
+										<button
+											type="button"
+											className="send-button"
+											disabled={saveScriptMutation.isPending}
+											onClick={() =>
+												saveScriptMutation.mutate({
+													type: "post",
+													source: draftPostScript,
+												})
+											}
+										>
+											{saveScriptMutation.isPending
+												? "Saving..."
+												: "Save Script"}
+										</button>
+										<button
+											type="button"
+											className="send-button"
+											style={{
+												background: "var(--danger-bg, #ffecec)",
+												color: "var(--danger-text, #d03030)",
+												border: "1px solid var(--danger-border, #ffcccc)",
+											}}
+											disabled={deleteScriptMutation.isPending}
+											onClick={() => {
+												if (
+													window.confirm("Delete this post-response script?")
+												) {
+													deleteScriptMutation.mutate({ type: "post" });
+												}
+											}}
+										>
+											Delete Script
+										</button>
+									</div>
+								</div>
+							) : (
+								<div
+									className="empty-state"
+									style={{ padding: "24px", textAlign: "center" }}
+								>
+									<p className="muted">
+										No post-response script exists for this request.
+									</p>
+									<button
+										type="button"
+										className="send-button"
+										style={{ marginTop: "16px" }}
+										onClick={() => {
+											setDraftPostScript(
+												"// Enter your post-response script here\n",
+											);
+											saveScriptMutation.mutate({
+												type: "post",
+												source: "// Enter your post-response script here\n",
+											});
+										}}
+									>
+										Create Script
+									</button>
+								</div>
+							)}
 						</>
 					)}
 

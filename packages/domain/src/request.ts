@@ -4,6 +4,8 @@
 
 import type { z } from "zod";
 import type {
+	EndpointManifestSchema,
+	EndpointMethodSchema,
 	ExampleResponseSchema,
 	HttpMethodSchema,
 	HttpRequestLineSchema,
@@ -15,8 +17,6 @@ import type {
 	ScriptBlockSchema,
 	ScriptLangSchema,
 	SendResultSchema,
-	EndpointManifestSchema,
-	EndpointMethodSchema,
 } from "./schemas.js";
 
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;

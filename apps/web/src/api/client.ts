@@ -74,6 +74,27 @@ export function saveEnvironment(
 	});
 }
 
+export async function saveScript(
+	path: string,
+	type: "pre" | "post",
+	source: string,
+): Promise<void> {
+	await request(`/requests/${path}/scripts/${type}`, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ source }),
+	});
+}
+
+export async function deleteScript(
+	path: string,
+	type: "pre" | "post",
+): Promise<void> {
+	await request(`/requests/${path}/scripts/${type}`, {
+		method: "DELETE",
+	});
+}
+
 export function sendRequestApi(
 	path: string,
 	env: string,

@@ -34,10 +34,12 @@ export type { SendRequestOptions, SendRequestResult } from "./request.js";
 export { sendRequest } from "./request.js";
 export {
 	deleteRequestFile,
+	deleteScript,
 	listEndpointPaths,
 	readEndpointRequests,
 	readRequestSource,
 	writeRequestSource,
+	writeScript,
 } from "./request-service.js";
 export { resolveRequest } from "./resolve.js";
 export type { ScaffoldFile, ScaffoldResult } from "./scaffold.js";

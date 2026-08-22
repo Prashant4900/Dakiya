@@ -22,9 +22,15 @@ import {
 
 export function App() {
 	const queryClient = useQueryClient();
-	const [selectedPath, setSelectedPath] = useState<string | null>(null);
-	const [activeEnv, setActiveEnv] = useState<string>("local");
-	const [activeVersion, setActiveVersion] = useState<string | null>(null);
+	const [selectedPath, setSelectedPath] = useState<string | null>(() =>
+		localStorage.getItem("dakiya_selectedPath"),
+	);
+	const [activeEnv, setActiveEnv] = useState<string>(
+		() => localStorage.getItem("dakiya_activeEnv") || "local",
+	);
+	const [activeVersion, setActiveVersion] = useState<string | null>(() =>
+		localStorage.getItem("dakiya_activeVersion"),
+	);
 	const [sendResult, setSendResult] = useState<SendResponse | null>(null);
 	const [sendError, setSendError] = useState<string | null>(null);
 	const [saveError, setSaveError] = useState<string | null>(null);
@@ -36,6 +42,19 @@ export function App() {
 	const [responseCollapsed, setResponseCollapsed] = useState(false);
 	const envInitialized = useRef(false);
 	const autoSelected = useRef(false);
+
+	useEffect(() => {
+		if (selectedPath) localStorage.setItem("dakiya_selectedPath", selectedPath);
+	}, [selectedPath]);
+
+	useEffect(() => {
+		if (activeEnv) localStorage.setItem("dakiya_activeEnv", activeEnv);
+	}, [activeEnv]);
+
+	useEffect(() => {
+		if (activeVersion)
+			localStorage.setItem("dakiya_activeVersion", activeVersion);
+	}, [activeVersion]);
 
 	const workspaceQuery = useQuery({
 		queryKey: ["workspace"],
@@ -83,17 +102,32 @@ export function App() {
 
 	useEffect(() => {
 		if (envInitialized.current || !workspaceQuery.data) return;
-		setActiveEnv(defaultEnv);
+		const savedEnv = localStorage.getItem("dakiya_activeEnv");
+		if (!savedEnv) {
+			setActiveEnv(defaultEnv);
+		}
 		envInitialized.current = true;
 	}, [workspaceQuery.data, defaultEnv]);
 
 	useEffect(() => {
-		if (autoSelected.current || !workspaceQuery.data || selectedPath) return;
-		const first = findFirstRequestPath(tree);
-		if (first) {
-			setSelectedPath(first);
-			autoSelected.current = true;
+		if (autoSelected.current || !workspaceQuery.data) return;
+
+		let path = selectedPath;
+		if (path) {
+			const index = workspaceQuery.data.requestIndex?.length
+				? workspaceQuery.data.requestIndex
+				: buildRequestIndexFallback(tree);
+			const exists = index.some((r) => r.path === path);
+			if (!exists) path = null;
 		}
+
+		if (!path) {
+			const first = findFirstRequestPath(tree);
+			if (first) {
+				setSelectedPath(first);
+			}
+		}
+		autoSelected.current = true;
 	}, [workspaceQuery.data, selectedPath, tree]);
 
 	const requestQuery = useQuery({

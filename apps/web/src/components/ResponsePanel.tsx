@@ -1,7 +1,7 @@
+import { PackageIcon, ZapIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { PackageIcon, ZapIcon } from "@hugeicons/core-free-icons";
 import { formatBytes } from "../utils/method.js";
 
 type ResponsePanelProps = {
@@ -105,10 +105,12 @@ export function ResponsePanel({
 								{result.resolved.method} {result.resolved.url}
 							</span>
 							<span className="meta-item">
-								<HugeiconsIcon icon={ZapIcon} size={14} /> {result.response.durationMs}ms
+								<HugeiconsIcon icon={ZapIcon} size={14} />{" "}
+								{result.response.durationMs}ms
 							</span>
 							<span className="meta-item">
-								<HugeiconsIcon icon={PackageIcon} size={14} /> {formatBytes(result.response.body)}
+								<HugeiconsIcon icon={PackageIcon} size={14} />{" "}
+								{formatBytes(result.response.body)}
 							</span>
 						</>
 					)}

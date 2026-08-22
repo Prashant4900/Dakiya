@@ -4,13 +4,13 @@ import { persistEnvironmentVariables } from "../sandbox/persist-env.js";
 import { createVmScriptRunner } from "../sandbox/run-script.js";
 import {
 	buildCollectionTree,
-	listEnvironmentNames,
 	listEndpointPaths,
+	listEnvironmentNames,
 	loadEnvironment,
 	loadManifest,
+	readEndpointRequests,
 	readEnvironmentSource,
 	readRequestSource,
-	readEndpointRequests,
 	writeEnvironmentSource,
 } from "../workspace.js";
 
@@ -37,10 +37,10 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 		try {
 			const manifest = loadManifest(cwd);
 			const endpoints = listEndpointPaths(cwd);
-			
+
 			const requestPaths: string[] = [];
-			const requestIndex: any[] = [];
-			
+			const requestIndex: Record<string, unknown>[] = [];
+
 			for (const endpoint of endpoints) {
 				try {
 					const docs = readEndpointRequests(endpoint, cwd);
@@ -87,15 +87,64 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 	});
 
 	app.put("/requests/*", async (c) => {
-		return c.json({ error: "Writing requests is not supported in the YAML folder format yet." }, 400);
+		const fullPath = c.req.path.replace(/^\/requests\//, "");
+		if (
+			fullPath.endsWith("/scripts/pre") ||
+			fullPath.endsWith("/scripts/post")
+		) {
+			try {
+				const type = fullPath.endsWith("/scripts/pre") ? "pre" : "post";
+				const reqPath = fullPath.replace(/\/scripts\/(pre|post)$/, "");
+				const body = await c.req.json();
+				const { writeScript } = await import("../workspace.js");
+				writeScript(reqPath, type, body.source, cwd);
+				return c.json({ success: true });
+			} catch (err) {
+				return c.json({ error: errorMessage(err) }, 400);
+			}
+		}
+		return c.json(
+			{
+				error:
+					"Writing requests is not supported in the YAML folder format yet.",
+			},
+			400,
+		);
 	});
 
 	app.post("/requests/*", async (c) => {
-		return c.json({ error: "Writing requests is not supported in the YAML folder format yet." }, 400);
+		return c.json(
+			{
+				error:
+					"Writing requests is not supported in the YAML folder format yet.",
+			},
+			400,
+		);
 	});
 
-	app.delete("/requests/*", (c) => {
-		return c.json({ error: "Deleting requests is not supported in the YAML folder format yet." }, 400);
+	app.delete("/requests/*", async (c) => {
+		const fullPath = c.req.path.replace(/^\/requests\//, "");
+		if (
+			fullPath.endsWith("/scripts/pre") ||
+			fullPath.endsWith("/scripts/post")
+		) {
+			try {
+				const type = fullPath.endsWith("/scripts/pre") ? "pre" : "post";
+				const reqPath = fullPath.replace(/\/scripts\/(pre|post)$/, "");
+				const { deleteScript } = await import("../workspace.js");
+				deleteScript(reqPath, type, cwd);
+				return c.json({ success: true });
+			} catch (err) {
+				return c.json({ error: errorMessage(err) }, 400);
+			}
+		}
+		return c.json(
+			{
+				error:
+					"Deleting requests is not supported in the YAML folder format yet.",
+			},
+			400,
+		);
 	});
 
 	app.get("/environments/:name", (c) => {

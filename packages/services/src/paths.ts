@@ -38,7 +38,10 @@ export function environmentPath(cwd: string, name: string): string {
 	return posixJoin(environmentsRoot(cwd), `${name}.yaml`);
 }
 
-export function normalizeEndpointPath(arg: string): { folder: string; methodId?: string } {
+export function normalizeEndpointPath(arg: string): {
+	folder: string;
+	methodId?: string;
+} {
 	let cleaned = arg.trim().replace(/\\/g, "/");
 	if (cleaned.startsWith("/")) cleaned = cleaned.slice(1);
 	if (cleaned.startsWith(`${COLLECTIONS_DIR}/`)) {
@@ -70,7 +73,10 @@ export function resolveEndpointPaths(
 	const collectionsRootPath = collectionsRoot(cwd);
 	const absPath = posixJoin(collectionsRootPath, cleaned);
 
-	if (!absPath.startsWith(`${collectionsRootPath}/`) && absPath !== collectionsRootPath) {
+	if (
+		!absPath.startsWith(`${collectionsRootPath}/`) &&
+		absPath !== collectionsRootPath
+	) {
 		throw new Error(`Invalid request path: ${arg}`);
 	}
 
