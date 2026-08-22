@@ -3,7 +3,9 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
+import { CodeEditor } from "./CodeEditor.js";
 import { Tabs } from "./Tabs.js";
+import { PaneHeader } from "./PaneHeader.js";
 
 type ResponsePanelProps = {
 	result: SendResponse | null;
@@ -36,7 +38,7 @@ export function ResponsePanel({
 	collapsed,
 }: ResponsePanelProps) {
 	const [tab, setTab] = useState<ResponseTab>("body");
-	const [width, setWidth] = useState(340);
+	const [width, setWidth] = useState(400);
 	const [resizing, setResizing] = useState(false);
 	const draggingRef = useRef(false);
 
@@ -75,8 +77,8 @@ export function ResponsePanel({
 	const headersText =
 		result && Object.entries(result.response.headers).length > 0
 			? Object.entries(result.response.headers)
-					.map(([k, v]) => `${k}: ${v}`)
-					.join("\n")
+				.map(([k, v]) => `${k}: ${v}`)
+				.join("\n")
 			: "(none)";
 
 	return (
@@ -127,16 +129,14 @@ export function ResponsePanel({
 				onChange={setTab as (id: string) => void}
 			/>
 
-			<div className="pane-header">
-				<span className="pane-title">
-					{tab === "body" ? "Response body" : "Response headers"}
-				</span>
-				<span className="pane-tag">
-					{result?.response.headers["content-type"]?.includes("json")
+			<PaneHeader
+				title={tab === "body" ? "Response body" : "Response headers"}
+				tag={
+					result?.response.headers["content-type"]?.includes("json")
 						? "JSON"
-						: "Text"}
-				</span>
-			</div>
+						: "Text"
+				}
+			/>
 
 			{error && !loading && (
 				<pre className="code-editor mono error-text">{error}</pre>
@@ -147,12 +147,17 @@ export function ResponsePanel({
 			)}
 
 			{result && !error && tab === "body" && (
-				<pre className="code-editor mono">
-					{formatBody(
-						result.response.body,
-						result.response.headers["content-type"],
-					)}
-				</pre>
+				<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
+					<CodeEditor
+						value={formatBody(
+							result.response.body,
+							result.response.headers["content-type"],
+						)}
+						language={result.response.headers["content-type"]?.includes("json") ? "json" : "javascript"}
+						readOnly={true}
+						style={{ height: "100%" }}
+					/>
+				</div>
 			)}
 
 			{result && !error && tab === "headers" && (

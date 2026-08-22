@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Modal } from "./Modal.js";
+import { Button } from "./Button.js";
+import { CodeEditor } from "./CodeEditor.js";
 
 type EnvSwitcherProps = {
 	environments: string[];
@@ -91,26 +93,27 @@ export function EnvEditor({
 		<Modal onClose={onClose} titleId="env-editor-title">
 			<div className="modal-header">
 				<h2 id="env-editor-title">Environment: {name}</h2>
-				<button type="button" className="pane-action-btn" onClick={onClose}>
+				<Button variant="ghost" onClick={onClose}>
 					Close
-				</button>
+				</Button>
 			</div>
-			<textarea
-				className="editor env-editor mono"
-				value={source}
-				onChange={(e) => onChange(e.target.value)}
-				spellCheck={false}
-			/>
+			<div style={{ flex: 1, borderTop: "1px solid var(--border-color)", borderBottom: "1px solid var(--border-color)", overflow: "auto", display: "flex", flexDirection: "column" }}>
+				<CodeEditor
+					value={source}
+					onChange={onChange}
+					language="json"
+					style={{ flex: 1, height: "300px" }}
+				/>
+			</div>
 			{error && <p className="error-text modal-error">{error}</p>}
 			<div className="modal-actions">
-				<button
-					type="button"
-					className="send-button"
+				<Button
+					variant="primary"
 					onClick={onSave}
 					disabled={saving}
 				>
 					{saving ? "Saving…" : "Save"}
-				</button>
+				</Button>
 			</div>
 		</Modal>
 	);

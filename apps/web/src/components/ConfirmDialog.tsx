@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Modal } from "./Modal.js";
+import { Button } from "./Button.js";
 
 export interface ConfirmDialogProps {
 	title: string;
@@ -21,33 +22,23 @@ export function ConfirmDialog({
 	isDestructive = false,
 }: ConfirmDialogProps) {
 	return (
-		<Modal onClose={onCancel} titleId="confirm-dialog-title">
+		<Modal onClose={onCancel} titleId="confirm-dialog-title" maxWidth="420px">
 			<div className="modal-header">
 				<h2 id="confirm-dialog-title">{title}</h2>
 			</div>
-			<div style={{ padding: "0 24px", color: "var(--text-color)" }}>
+			<div style={{ color: "var(--text-color)", fontSize: "14px", lineHeight: "1.5" }}>
 				{message}
 			</div>
 			<div className="modal-actions">
-				<button type="button" className="pane-action-btn" onClick={onCancel}>
+				<Button variant="secondary" onClick={onCancel}>
 					{cancelText}
-				</button>
-				<button
-					type="button"
-					className="send-button"
-					style={
-						isDestructive
-							? {
-									background: "var(--danger-bg, #ffecec)",
-									color: "var(--danger-text, #d03030)",
-									border: "1px solid var(--danger-border, #ffcccc)",
-								}
-							: undefined
-					}
+				</Button>
+				<Button
+					variant={isDestructive ? "destructive" : "primary"}
 					onClick={onConfirm}
 				>
 					{confirmText}
-				</button>
+				</Button>
 			</div>
 		</Modal>
 	);

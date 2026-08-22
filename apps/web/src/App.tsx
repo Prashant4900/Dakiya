@@ -9,6 +9,7 @@ import {
 	sendRequestApi,
 } from "./api/client.js";
 import type { SendResponse } from "./api/types.js";
+import { Button } from "./components/Button.js";
 import { EnvEditor } from "./components/EnvSwitcher.js";
 import { RequestPanel } from "./components/RequestPanel.js";
 import { ResponsePanel } from "./components/ResponsePanel.js";
@@ -244,13 +245,9 @@ export function App() {
 					Run <code>dakiya serve</code> from a project with a{" "}
 					<code>.dakiya/</code> folder.
 				</p>
-				<button
-					type="button"
-					className="send-button"
-					onClick={() => workspaceQuery.refetch()}
-				>
+				<Button onClick={() => workspaceQuery.refetch()}>
 					Retry
-				</button>
+				</Button>
 			</div>
 		);
 	}

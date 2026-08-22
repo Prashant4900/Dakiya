@@ -14,8 +14,11 @@ import { deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
 import type { RequestBody } from "@dakiya/domain";
 import { BodyEditor } from "./BodyEditor.js";
+import { CodeEditor } from "./CodeEditor.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { Tabs } from "./Tabs.js";
+import { Button } from "./Button.js";
+import { PaneHeader } from "./PaneHeader.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
 
@@ -528,23 +531,21 @@ export function RequestPanel({
 						"Select a request"
 					)}
 				</div>
-				<button
-					type="button"
-					className="send-button"
+				<Button
+					variant="primary"
 					onClick={() => void handleSend()}
 					disabled={sending || saving || !request || loading}
 					title="Send (⌘↵)"
 				>
 					{sending ? "Sending…" : "Send"}
-				</button>
-				<button
-					type="button"
-					className="save-button"
+				</Button>
+				<Button
+					variant="secondary"
 					onClick={handleSave}
 					disabled={!dirty || saving || !request}
 				>
 					{saving ? "Saving…" : "Save"}
-				</button>
+				</Button>
 			</div>
 
 			{(saveError || error) && (
@@ -584,10 +585,7 @@ export function RequestPanel({
 
 					{showEditor && tab === "headers" && (
 						<>
-							<div className="pane-header">
-								<span className="pane-title">Request headers</span>
-								<span className="pane-tag">KV</span>
-							</div>
+							<PaneHeader title="Request headers" tag="KV" />
 
 							{parseError ? (
 								<div className="pane-empty error-text">{parseError}</div>
@@ -672,10 +670,7 @@ export function RequestPanel({
 
 					{showEditor && tab === "docs" && (
 						<>
-							<div className="pane-header">
-								<span className="pane-title">API documentation</span>
-								<span className="pane-tag">Markdown</span>
-							</div>
+							<PaneHeader title="API documentation" tag="Markdown" />
 							<div className="docs-area">
 								{doc?.docs ? (
 									<ReactMarkdown>{doc.docs}</ReactMarkdown>
@@ -688,11 +683,7 @@ export function RequestPanel({
 
 					{showEditor && tab === "pre-script" && (
 						<>
-							<div className="pane-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-								<div>
-									<span className="pane-title">Pre-request script</span>
-									<span className="pane-tag">TS/JS</span>
-								</div>
+							<PaneHeader title="Pre-request script" tag="TS/JS">
 								{doc?.pre?.source !== undefined && (
 									<button
 										type="button"
@@ -711,7 +702,7 @@ export function RequestPanel({
 										<HugeiconsIcon icon={Delete02Icon} size={18} />
 									</button>
 								)}
-							</div>
+							</PaneHeader>
 							<div style={{ padding: "8px 16px", background: "var(--highlight-bg, #fffbe6)", borderBottom: "1px solid var(--border-color)", fontSize: "0.9em", color: "var(--text-color)" }}>
 								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here currently. Please edit the script file directly in your code editor.
 							</div>
@@ -723,12 +714,15 @@ export function RequestPanel({
 										height: "100%",
 									}}
 								>
-									<textarea
-										className="code-editor mono"
-										style={{ flex: 1, resize: "none", minHeight: "300px", opacity: 0.8 }}
-										value={draftPreScript}
-										readOnly
-									/>
+									<div style={{ flex: 1, border: "1px solid var(--border-color)", borderTop: "none", overflow: "auto" }}>
+								<CodeEditor
+									value={draftPreScript}
+									onChange={setDraftPreScript}
+									language="javascript"
+									style={{ height: "100%" }}
+									readOnly={true}
+								/>
+									</div>
 								</div>
 							) : (
 								<div
@@ -738,9 +732,8 @@ export function RequestPanel({
 									<p className="muted">
 										No pre-request script exists for this request.
 									</p>
-									<button
-										type="button"
-										className="send-button"
+									<Button
+										variant="primary"
 										style={{ marginTop: "16px" }}
 										onClick={() => {
 											setDraftPreScript(
@@ -753,7 +746,7 @@ export function RequestPanel({
 										}}
 									>
 										Create Script
-									</button>
+									</Button>
 								</div>
 							)}
 						</>
@@ -761,11 +754,7 @@ export function RequestPanel({
 
 					{showEditor && tab === "post-script" && (
 						<>
-							<div className="pane-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-								<div>
-									<span className="pane-title">Post-response script</span>
-									<span className="pane-tag">TS/JS</span>
-								</div>
+							<PaneHeader title="Post-response script" tag="TS/JS">
 								{doc?.post?.source !== undefined && (
 									<button
 										type="button"
@@ -784,7 +773,7 @@ export function RequestPanel({
 										<HugeiconsIcon icon={Delete02Icon} size={18} />
 									</button>
 								)}
-							</div>
+							</PaneHeader>
 							<div style={{ padding: "8px 16px", background: "var(--highlight-bg, #fffbe6)", borderBottom: "1px solid var(--border-color)", fontSize: "0.9em", color: "var(--text-color)" }}>
 								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here currently. Please edit the script file directly in your code editor.
 							</div>
@@ -796,12 +785,15 @@ export function RequestPanel({
 										height: "100%",
 									}}
 								>
-									<textarea
-										className="code-editor mono"
-										style={{ flex: 1, resize: "none", minHeight: "300px", opacity: 0.8 }}
-										value={draftPostScript}
-										readOnly
-									/>
+									<div style={{ flex: 1, border: "1px solid var(--border-color)", borderTop: "none", overflow: "auto" }}>
+								<CodeEditor
+									value={draftPostScript}
+									onChange={setDraftPostScript}
+									language="javascript"
+									style={{ height: "100%" }}
+									readOnly={true}
+								/>
+									</div>
 								</div>
 							) : (
 								<div
@@ -811,9 +803,8 @@ export function RequestPanel({
 									<p className="muted">
 										No post-response script exists for this request.
 									</p>
-									<button
-										type="button"
-										className="send-button"
+									<Button
+										variant="primary"
 										style={{ marginTop: "16px" }}
 										onClick={() => {
 											setDraftPostScript(
@@ -826,7 +817,7 @@ export function RequestPanel({
 										}}
 									>
 										Create Script
-									</button>
+									</Button>
 								</div>
 							)}
 						</>
@@ -834,10 +825,7 @@ export function RequestPanel({
 
 					{showEditor && tab === "examples" && doc && (
 						<>
-							<div className="pane-header">
-								<span className="pane-title">Examples</span>
-								<span className="pane-tag">.drq</span>
-							</div>
+							<PaneHeader title="Examples" tag=".drq" />
 							<pre className="code-editor mono">{formatExamples(doc)}</pre>
 						</>
 					)}

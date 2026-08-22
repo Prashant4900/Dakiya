@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import type { RequestBody } from "@dakiya/domain";
 import { uploadFile } from "../api/client.js";
 
+import { CodeEditor } from "./CodeEditor.js";
+import { PaneHeader } from "./PaneHeader.js";
+
 type BodyEditorProps = {
 	body: RequestBody | undefined;
 	onChange: (body: RequestBody | undefined) => void;
@@ -156,13 +159,14 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 				)}
 
 				{mode === "raw" && typeof body === "object" && body?.type === "raw" && (
-					<textarea
-						className="code-editor mono"
-						style={{ flex: 1, resize: "none" }}
-						value={(body as any).raw?.content || ""}
-						onChange={(e) => handleRawChange(e.target.value)}
-						spellCheck={false}
-					/>
+					<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
+						<CodeEditor
+							value={(body as any).raw?.content || ""}
+							onChange={handleRawChange}
+							language="json"
+							style={{ height: "100%" }}
+						/>
+					</div>
 				)}
 
 				{mode === "binary" && typeof body === "object" && body?.type === "binary" && (
@@ -175,12 +179,16 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 				{mode === "graphql" && typeof body === "object" && body?.type === "graphql" && (
 					<div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 						<div style={{ flex: 2, display: "flex", flexDirection: "column" }}>
-							<div className="pane-header"><span className="pane-title">Query</span></div>
-							<textarea className="code-editor mono" style={{ flex: 1, resize: "none" }} value={(body as any).graphql?.query || ""} onChange={(e) => handleGraphqlQueryChange(e.target.value)} spellCheck={false} />
+							<PaneHeader title="Query" />
+							<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
+								<CodeEditor value={(body as any).graphql?.query || ""} onChange={handleGraphqlQueryChange} language="javascript" style={{ height: "100%" }} />
+							</div>
 						</div>
 						<div style={{ flex: 1, display: "flex", flexDirection: "column", borderTop: "1px solid var(--border-color)" }}>
-							<div className="pane-header"><span className="pane-title">Variables</span></div>
-							<textarea className="code-editor mono" style={{ flex: 1, resize: "none" }} value={(body as any).graphql?.variables || ""} onChange={(e) => handleGraphqlVarsChange(e.target.value)} spellCheck={false} />
+							<PaneHeader title="Variables" />
+							<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
+								<CodeEditor value={(body as any).graphql?.variables || ""} onChange={handleGraphqlVarsChange} language="json" style={{ height: "100%" }} />
+							</div>
 						</div>
 					</div>
 				)}
