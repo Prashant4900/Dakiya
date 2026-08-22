@@ -87,15 +87,6 @@ function resolveWebRoot(): string {
 	return candidate;
 }
 
-function isAddrInUse(err: unknown): boolean {
-	return (
-		typeof err === "object" &&
-		err !== null &&
-		"code" in err &&
-		(err as { code?: string }).code === "EADDRINUSE"
-	);
-}
-
 /** Start the web dashboard + `/api` on localhost (default 4242). */
 export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	const ready = await ensureDakiyaWorkspace();
@@ -108,27 +99,15 @@ export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	const api = createApiApp({ cwd: process.cwd() });
 
 	let server: Awaited<ReturnType<typeof createServer>>;
-	try {
-		server = await createServer({
-			root: webRoot,
-			configFile: path.join(webRoot, "vite.config.ts"),
-			server: {
-				port,
-				strictPort: true,
-				host: "localhost",
-			},
-		});
-	} catch (err) {
-		if (isAddrInUse(err)) {
-			console.error(`[dakiya] Port ${port} is already in use.`);
-			console.error(
-				`[dakiya] Try \`dakiya serve --port ${port + 1}\` or free the port and retry.`,
-			);
-			process.exitCode = 1;
-			return;
-		}
-		throw err;
-	}
+	server = await createServer({
+		root: webRoot,
+		configFile: path.join(webRoot, "vite.config.ts"),
+		server: {
+			port,
+			strictPort: false,
+			host: "localhost",
+		},
+	});
 
 	// Prepend so /api is handled before Vite's SPA / static fallback.
 	const apiMiddleware = createHonoMiddleware(api, "/api");
@@ -140,22 +119,20 @@ export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	try {
 		await server.listen();
 	} catch (err) {
-		if (isAddrInUse(err)) {
-			console.error(`[dakiya] Port ${port} is already in use.`);
-			console.error(
-				`[dakiya] Try \`dakiya serve --port ${port + 1}\` or free the port and retry.`,
-			);
-			await server.close();
-			process.exitCode = 1;
-			return;
-		}
-		throw err;
+		console.error(`[dakiya] Failed to start server:`, err);
+		process.exitCode = 1;
+		return;
 	}
 
-	const url = `http://localhost:${port}`;
+	const address = server.httpServer?.address();
+	const resolvedPort = typeof address === "object" && address !== null && "port" in address ? address.port : port;
+	const url = `http://localhost:${resolvedPort}`;
 	const manifest = loadManifest();
 	console.log(`[dakiya] Workspace: ${dakiyaDir()}`);
 	console.log(`[dakiya] Default version: v${manifest.version}`);
+	if (resolvedPort !== port) {
+		console.log(`[dakiya] Port ${port} was in use, using ${resolvedPort} instead.`);
+	}
 	console.log(`[dakiya] Serving dashboard at ${url}`);
 	console.log(`[dakiya] API health: ${url}/api/health`);
 	console.log(`[dakiya] Press Ctrl+C to stop`);

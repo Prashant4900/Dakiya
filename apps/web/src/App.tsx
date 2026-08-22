@@ -78,16 +78,26 @@ export function App() {
 	const manifestVersion = workspaceQuery.data?.manifest?.version?.toString();
 
 	useEffect(() => {
-		if (versions.length > 0 && !activeVersion) {
-			let defaultVer = versions[0];
-			if (manifestVersion && versions.includes(manifestVersion)) {
-				defaultVer = manifestVersion;
-			} else if (manifestVersion && versions.includes(`v${manifestVersion}`)) {
-				defaultVer = `v${manifestVersion}`;
-			} else if (versions.includes("v1")) {
-				defaultVer = "v1";
+		if (!activeVersion) {
+			if (versions.length > 0) {
+				let defaultVer = versions[0];
+				if (manifestVersion && versions.includes(manifestVersion)) {
+					defaultVer = manifestVersion;
+				} else if (manifestVersion && versions.includes(`v${manifestVersion}`)) {
+					defaultVer = `v${manifestVersion}`;
+				} else if (versions.includes("v1")) {
+					defaultVer = "v1";
+				}
+				setActiveVersion(defaultVer);
+			} else if (manifestVersion) {
+				setActiveVersion(
+					manifestVersion.startsWith("v")
+						? manifestVersion
+						: `v${manifestVersion}`,
+				);
+			} else {
+				setActiveVersion("v1");
 			}
-			setActiveVersion(defaultVer);
 		}
 	}, [versions, activeVersion, manifestVersion]);
 

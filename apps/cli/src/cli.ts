@@ -56,6 +56,10 @@ function parseServePort(argv: string[]): number {
 }
 
 async function main(): Promise<void> {
+	if (args.includes("-h") || args.includes("--help") || cmd === "-h" || cmd === "--help") {
+		usage(0);
+	}
+
 	switch (cmd) {
 		case "init":
 			runInit();

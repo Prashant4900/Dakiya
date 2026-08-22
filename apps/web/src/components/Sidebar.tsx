@@ -82,7 +82,7 @@ export function Sidebar({
 				<div className="logo-row">
 					<div className="logo-mark">D</div>
 					<span className="logo-name">Dakiya</span>
-					<span className="logo-version">{activeVersion || "v0.1"}</span>
+					<span className="logo-version">{activeVersion || "v1"}</span>
 				</div>
 				<div className="sidebar-switchers">
 					<EnvSwitcher
