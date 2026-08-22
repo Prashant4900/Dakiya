@@ -183,7 +183,8 @@ body {
 	border-right: 1px solid var(--border);
 	display: flex;
 	flex-direction: column;
-	overflow: hidden;
+	overflow: visible;
+	position: relative;
 }
 
 .sidebar-header {
@@ -597,6 +598,30 @@ body {
 	cursor: not-allowed;
 }
 
+.save-button {
+	background: var(--panel);
+	color: var(--foreground);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 6px 20px;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	font-family: inherit;
+	transition: background 0.15s, border-color 0.15s;
+	flex-shrink: 0;
+}
+
+.save-button:hover:not(:disabled) {
+	background: var(--surface);
+	border-color: var(--border-strong);
+}
+
+.save-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 .request-errors {
 	padding: 8px 16px;
 	background: var(--del-bg);
@@ -749,8 +774,21 @@ body {
 	transition: background 0.15s ease;
 }
 
+.resize-handle-right {
+	position: absolute;
+	right: -4px;
+	top: 0;
+	bottom: 0;
+	width: 8px;
+	cursor: col-resize;
+	z-index: 10;
+	transition: background 0.15s ease;
+}
+
 .resize-handle:hover,
-.resize-handle.active {
+.resize-handle-right:hover,
+.resize-handle.active,
+.resize-handle-right.active {
 	background: var(--accent);
 	opacity: 0.5;
 }
@@ -886,6 +924,52 @@ body {
 
 .kv-val {
 	color: var(--syn-val);
+}
+
+.editable-kv-table td {
+	padding: 0;
+}
+
+.kv-input {
+	width: 100%;
+	background: transparent;
+	border: none;
+	padding: 6px 10px;
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	outline: none;
+}
+
+.kv-input::placeholder {
+	color: var(--muted);
+}
+
+.kv-input:focus {
+	background: rgba(0, 0, 0, 0.03);
+}
+
+.kv-actions {
+	width: 32px;
+	text-align: center;
+	padding: 0;
+}
+
+.kv-remove-btn {
+	background: transparent;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.kv-remove-btn:hover {
+	background: var(--border);
+	color: var(--foreground);
 }
 
 /* Response */
@@ -1089,5 +1173,123 @@ body {
 	display: flex;
 	align-items: center;
 	gap: 4px;
+}
+
+
+.env-var-highlight {
+	color: var(--put);
+	cursor: pointer;
+	border-radius: 4px;
+	padding: 1px 3px;
+	background: var(--put-bg);
+	border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.env-var-highlight.unresolved {
+	color: var(--del);
+	background: var(--del-bg);
+	border: 1px dashed rgba(220, 38, 38, 0.3);
+}
+
+.env-var-popover {
+	position: fixed;
+	z-index: 9999;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+	width: 320px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	font-family: Inter, sans-serif;
+	font-size: 12px;
+	animation: popover-fade-in 0.15s ease-out;
+}
+
+@keyframes popover-fade-in {
+	from { opacity: 0; transform: translateY(-4px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.env-var-popover-value {
+	padding: 12px;
+	border-bottom: 1px solid var(--border);
+}
+
+.env-var-popover-value input {
+	width: 100%;
+	padding: 8px 10px;
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11px;
+	color: var(--foreground);
+	background: var(--surface);
+	outline: none;
+}
+.env-var-popover-value input.unresolved-input {
+	color: var(--del);
+}
+
+.env-var-popover-value input:focus {
+	border-color: var(--border-strong);
+}
+
+.env-var-popover-footer {
+	padding: 8px 12px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #f9fafb;
+}
+
+.env-var-popover-scope {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--muted);
+	font-size: 11px;
+}
+
+.env-var-popover-scope-icon {
+	background: #10b981;
+	color: white;
+	font-weight: 700;
+	font-size: 9px;
+	width: 16px;
+	height: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+}
+
+.env-var-popover-meta {
+	color: var(--muted);
+	font-size: 11px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	cursor: pointer;
+}
+.env-var-popover-meta:hover {
+	color: var(--foreground);
+}
+.env-var-popover-meta .arrow {
+	font-size: 12px;
+}
+
+.kv-editable-cell {
+	width: 100%;
+	min-height: 24px;
+	display: flex;
+	align-items: center;
+	cursor: text;
+}
+
+.kv-cell-preview {
+	padding: 6px 10px;
+	width: 100%;
 }
 

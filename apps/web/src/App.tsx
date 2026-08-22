@@ -241,6 +241,7 @@ export function App() {
 						onDirtyChange={setRequestDirty}
 						sending={sendMutation.isPending}
 						saving={saveMutation.isPending}
+						activeEnvVariables={envQuery.data?.environment.variables ?? {}}
 					>
 						<ResponsePanel
 							result={sendResult}

@@ -1,11 +1,47 @@
 @meta
+
 name: Echo GET
 type: http
 
 @request
+
 GET {{baseUrl}}/api/echo?message=12345
 X-Request-Id: {{requestId}}
 
 @docs
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Echo (GET)
 Echoes query params and selected headers.

@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { CollectionNode, RequestIndexItem } from "../api/types.js";
 import { CollectionTree } from "./CollectionTree.js";
 import { EnvSwitcher } from "./EnvSwitcher.js";
+
+const MIN_WIDTH = 150;
+const MAX_WIDTH = 350;
 
 type SidebarProps = {
 	workspaceName: string;
@@ -27,9 +30,43 @@ export function Sidebar({
 	onEditEnv,
 }: SidebarProps) {
 	const [search, setSearch] = useState("");
+	const [width, setWidth] = useState(230);
+	const [resizing, setResizing] = useState(false);
+	const draggingRef = useRef(false);
+
+	const startResize = (e: React.PointerEvent<HTMLDivElement>) => {
+		draggingRef.current = true;
+		setResizing(true);
+		e.currentTarget.setPointerCapture(e.pointerId);
+		document.body.style.userSelect = "none";
+		document.body.style.cursor = "col-resize";
+	};
+
+	const onResize = (e: React.PointerEvent<HTMLDivElement>) => {
+		if (!draggingRef.current) return;
+		const pane = e.currentTarget.parentElement;
+		if (!pane) return;
+		const next = e.clientX - pane.getBoundingClientRect().left;
+		setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, next)));
+	};
+
+	const endResize = (e: React.PointerEvent<HTMLDivElement>) => {
+		draggingRef.current = false;
+		setResizing(false);
+		document.body.style.userSelect = "";
+		document.body.style.cursor = "";
+		e.currentTarget.releasePointerCapture(e.pointerId);
+	};
 
 	return (
-		<aside className="sidebar">
+		<aside className="sidebar" style={{ width }}>
+			<div
+				className={`resize-handle-right${resizing ? " active" : ""}`}
+				onPointerDown={startResize}
+				onPointerMove={onResize}
+				onPointerUp={endResize}
+				title="Drag to resize"
+			/>
 			<div className="sidebar-header">
 				<div className="logo-row">
 					<div className="logo-mark">D</div>
