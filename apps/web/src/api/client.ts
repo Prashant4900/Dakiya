@@ -50,12 +50,21 @@ export function fetchRequest(path: string): Promise<RequestResponse> {
 
 export function saveRequest(
 	path: string,
-	source: string,
-): Promise<{ ok: true }> {
+	updates: any,
+): Promise<{ success: true; relativeToCollections: string }> {
 	return request(`/requests/${path}`, {
 		method: "PUT",
-		headers: { "Content-Type": "text/plain" },
-		body: source,
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(updates),
+	});
+}
+
+export function uploadFile(file: File): Promise<{ path: string }> {
+	const formData = new FormData();
+	formData.append("file", file);
+	return request<{ path: string }>("/upload", {
+		method: "POST",
+		body: formData,
 	});
 }
 

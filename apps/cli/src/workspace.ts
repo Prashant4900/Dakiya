@@ -104,8 +104,8 @@ export function readRequestSource(arg: string, cwd = process.cwd()) {
 	return readRequestSourceService(fs, arg, cwd);
 }
 
-export function writeRequestSource() {
-	return writeRequestSourceService();
+export function writeRequestSource(arg: string, updates: any, cwd = process.cwd()) {
+	return writeRequestSourceService(fs, arg, updates, cwd);
 }
 
 export function deleteRequestFile() {

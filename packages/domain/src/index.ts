@@ -29,6 +29,7 @@ export type {
 	ScriptBlock,
 	ScriptLang,
 	SendResult,
+	RequestBody,
 } from "./request.js";
 export {
 	EndpointManifestSchema,
@@ -46,6 +47,7 @@ export {
 	ScriptBlockSchema,
 	ScriptLangSchema,
 	SendResultSchema,
+	RequestBodySchema,
 	WorkspaceManifestSchema,
 } from "./schemas.js";
 export type { WorkspaceManifest } from "./workspace.js";

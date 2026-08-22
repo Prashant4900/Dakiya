@@ -15,6 +15,7 @@ import { ResponsePanel } from "./components/ResponsePanel.js";
 import { Sidebar } from "./components/Sidebar.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { TitleBar } from "./components/TitleBar.js";
+import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import {
 	buildRequestIndexFallback,
 	findFirstRequestPath,
@@ -40,6 +41,7 @@ export function App() {
 	const [envDraft, setEnvDraft] = useState("");
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [responseCollapsed, setResponseCollapsed] = useState(false);
+	const [pendingPath, setPendingPath] = useState<string | null>(null);
 	const envInitialized = useRef(false);
 	const autoSelected = useRef(false);
 
@@ -143,8 +145,8 @@ export function App() {
 	});
 
 	const saveMutation = useMutation({
-		mutationFn: ({ path, source }: { path: string; source: string }) =>
-			saveRequest(path, source),
+		mutationFn: ({ path, updates }: { path: string; updates: any }) =>
+			saveRequest(path, updates),
 		onSuccess: (_data, { path }) => {
 			setSaveError(null);
 			queryClient.invalidateQueries({ queryKey: ["request", path] });
@@ -184,12 +186,8 @@ export function App() {
 
 	const handleSelect = useCallback(
 		(path: string) => {
-			if (
-				requestDirty &&
-				selectedPath &&
-				path !== selectedPath &&
-				!window.confirm("Discard unsaved changes?")
-			) {
+			if (requestDirty && selectedPath && path !== selectedPath) {
+				setPendingPath(path);
 				return;
 			}
 			setSelectedPath(path);
@@ -201,9 +199,9 @@ export function App() {
 	);
 
 	const handleSave = useCallback(
-		async (source: string) => {
+		async (updates: any) => {
 			if (!selectedPath) return;
-			await saveMutation.mutateAsync({ path: selectedPath, source });
+			await saveMutation.mutateAsync({ path: selectedPath, updates });
 		},
 		[selectedPath, saveMutation],
 	);
@@ -333,6 +331,23 @@ export function App() {
 					}
 					onClose={() => setEnvEditorOpen(false)}
 					saving={saveEnvMutation.isPending}
+				/>
+			)}
+
+			{pendingPath && (
+				<ConfirmDialog
+					title="Discard Changes?"
+					message={<p style={{ margin: 0 }}>You have unsaved changes. Are you sure you want to discard them?</p>}
+					confirmText="Discard"
+					isDestructive={true}
+					onCancel={() => setPendingPath(null)}
+					onConfirm={() => {
+						setSelectedPath(pendingPath);
+						setSendResult(null);
+						setSendError(null);
+						setSaveError(null);
+						setPendingPath(null);
+					}}
 				/>
 			)}
 		</div>

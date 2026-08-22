@@ -1,4 +1,4 @@
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -12,6 +12,10 @@ import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import { deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
+import type { RequestBody } from "@dakiya/domain";
+import { BodyEditor } from "./BodyEditor.js";
+import { ConfirmDialog } from "./ConfirmDialog.js";
+import { Tabs } from "./Tabs.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
 
@@ -77,7 +81,7 @@ type RequestPanelProps = {
 	loading: boolean;
 	error: string | null;
 	saveError: string | null;
-	onSave: (source: string) => Promise<void>;
+	onSave: (updates: any) => Promise<void>;
 	onSend: () => void;
 	onDirtyChange: (dirty: boolean) => void;
 	sending: boolean;
@@ -282,7 +286,8 @@ export function RequestPanel({
 	useEffect(() => {
 		localStorage.setItem("dakiya_requestTab", tab);
 	}, [tab]);
-	const [draft, setDraft] = useState("");
+	
+	const [localBody, setLocalBody] = useState<RequestBody | undefined>(undefined);
 	const [dirty, setDirty] = useState(false);
 	const [localHeaders, setLocalHeaders] = useState<
 		{ id: number; key: string; value: string }[]
@@ -292,6 +297,7 @@ export function RequestPanel({
 	const queryClient = useQueryClient();
 	const [draftPreScript, setDraftPreScript] = useState("");
 	const [draftPostScript, setDraftPostScript] = useState("");
+	const [deleteConfirm, setDeleteConfirm] = useState<"pre" | "post" | null>(null);
 
 	const saveScriptMutation = useMutation({
 		mutationFn: ({ type, source }: { type: "pre" | "post"; source: string }) =>
@@ -317,7 +323,7 @@ export function RequestPanel({
 
 	useEffect(() => {
 		if (request) {
-			setDraft(request.source);
+			setLocalBody(request.document?.body);
 			setDraftPreScript(request.document?.pre?.source ?? "");
 			setDraftPostScript(request.document?.post?.source ?? "");
 			setDirty(false);
@@ -354,20 +360,72 @@ export function RequestPanel({
 	// Let's refactor the useEffect to only run when tab changes or request ID changes.
 
 	const handleSave = async () => {
-		await onSave(draft);
+		const headersObj = localHeaders.reduce((acc, h) => {
+			if (h.key) acc[h.key] = h.value;
+			return acc;
+		}, {} as Record<string, string>);
+		await onSave({ body: localBody, headers: headersObj });
 		setDirty(false);
 	};
 
 	const handleSend = useCallback(async () => {
 		if (dirty) {
-			await onSave(draft);
+			const headersObj = localHeaders.reduce((acc, h) => {
+				if (h.key) acc[h.key] = h.value;
+				return acc;
+			}, {} as Record<string, string>);
+			await onSave({ body: localBody, headers: headersObj });
 			setDirty(false);
 		}
 		onSend();
-	}, [dirty, draft, onSave, onSend]);
+	}, [dirty, localBody, localHeaders, onSave, onSend]);
+
+	const handleBodyChange = (newBody: RequestBody | undefined) => {
+		setLocalBody(newBody);
+		setDirty(true);
+
+		if (!newBody) return;
+
+		let autoContentType = "";
+		if (typeof newBody === "object") {
+			if (newBody.type === "raw" && newBody.raw) {
+				const format = newBody.raw.format;
+				if (format === "json") autoContentType = "application/json";
+				else if (format === "xml") autoContentType = "application/xml";
+				else if (format === "html") autoContentType = "text/html";
+				else if (format === "javascript") autoContentType = "application/javascript";
+				else autoContentType = "text/plain";
+			} else if (newBody.type === "graphql") {
+				autoContentType = "application/json";
+			} else if (newBody.type === "urlencoded") {
+				autoContentType = "application/x-www-form-urlencoded";
+			}
+		}
+
+		if (autoContentType) {
+			setLocalHeaders((prev) => {
+				const hasContentType = prev.some((h) => h.key.toLowerCase() === "content-type");
+				if (!hasContentType) {
+					const newHeaders = [...prev];
+					// Remove the trailing empty row if it exists
+					if (
+						newHeaders.length > 0 &&
+						!newHeaders[newHeaders.length - 1].key &&
+						!newHeaders[newHeaders.length - 1].value
+					) {
+						newHeaders.pop();
+					}
+					newHeaders.push({ id: Date.now(), key: "Content-Type", value: autoContentType });
+					newHeaders.push({ id: Date.now() + 1, key: "", value: "" }); // Add trailing empty row
+					return newHeaders;
+				}
+				return prev;
+			});
+		}
+	};
 
 	const updateDraftHeaders = () => {
-		// Editing not supported with YAML multi-file format yet
+		setDirty(true);
 	};
 
 	const handleHeaderChange = (
@@ -432,16 +490,16 @@ export function RequestPanel({
 
 	const tabs: { id: EditorTab; label: string; badge?: number }[] = doc
 		? [
-				{ id: "body", label: "Body" },
-				{
-					id: "headers",
-					label: "Headers",
-					badge: Object.keys(doc.request.headers).length || undefined,
-				},
-				{ id: "docs", label: "Docs" },
-				{ id: "pre-script", label: "Pre-script" },
-				{ id: "post-script", label: "Post-script" },
-			]
+			{ id: "body", label: "Body" },
+			{
+				id: "headers",
+				label: "Headers",
+				badge: Object.keys(doc.request.headers).length || undefined,
+			},
+			{ id: "docs", label: "Docs" },
+			{ id: "pre-script", label: "Pre-script" },
+			{ id: "post-script", label: "Post-script" },
+		]
 		: [];
 
 	if (doc?.examples?.length) {
@@ -497,22 +555,13 @@ export function RequestPanel({
 			)}
 
 			{showEditor && (
-				<div className="request-tabs">
-					{tabs.map((t) => (
-						<button
-							key={t.id}
-							type="button"
-							className={`tab-item${tab === t.id ? " active" : ""}`}
-							onClick={() => setTab(t.id)}
-						>
-							{t.label}
-							{t.badge !== undefined && t.badge > 0 && (
-								<span className="tab-badge">{t.badge}</span>
-							)}
-						</button>
-					))}
+				<Tabs
+					tabs={tabs}
+					activeTab={tab}
+					onChange={setTab as (id: string) => void}
+				>
 					{dirty && <span className="dirty-hint">unsaved</span>}
-				</div>
+				</Tabs>
 			)}
 
 			<div className="content-split">
@@ -530,19 +579,7 @@ export function RequestPanel({
 					)}
 
 					{showEditor && tab === "body" && (
-						<>
-							<div className="pane-header">
-								<span className="pane-title">Request source</span>
-								<span className="pane-tag">.drq</span>
-							</div>
-							<textarea
-								className="code-editor mono"
-								value="Editing request body is not supported with the YAML multi-file structure yet. Please edit the requests.yaml file directly."
-								onChange={() => {}}
-								spellCheck={false}
-								disabled
-							/>
-						</>
+						<BodyEditor body={localBody} onChange={handleBodyChange} />
 					)}
 
 					{showEditor && tab === "headers" && (
@@ -651,9 +688,32 @@ export function RequestPanel({
 
 					{showEditor && tab === "pre-script" && (
 						<>
-							<div className="pane-header">
-								<span className="pane-title">Pre-request script</span>
-								<span className="pane-tag">TS/JS</span>
+							<div className="pane-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+								<div>
+									<span className="pane-title">Pre-request script</span>
+									<span className="pane-tag">TS/JS</span>
+								</div>
+								{doc?.pre?.source !== undefined && (
+									<button
+										type="button"
+										style={{
+											background: "transparent",
+											border: "none",
+											color: "var(--danger-text, #d03030)",
+											cursor: "pointer",
+											fontSize: "1.2em",
+											padding: "4px"
+										}}
+										disabled={deleteScriptMutation.isPending}
+										onClick={() => setDeleteConfirm("pre")}
+										title="Delete Script"
+									>
+										<HugeiconsIcon icon={Delete02Icon} size={18} />
+									</button>
+								)}
+							</div>
+							<div style={{ padding: "8px 16px", background: "var(--highlight-bg, #fffbe6)", borderBottom: "1px solid var(--border-color)", fontSize: "0.9em", color: "var(--text-color)" }}>
+								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here currently. Please edit the script file directly in your code editor.
 							</div>
 							{doc?.pre?.source !== undefined ? (
 								<div
@@ -665,52 +725,10 @@ export function RequestPanel({
 								>
 									<textarea
 										className="code-editor mono"
-										style={{ flex: 1, resize: "none", minHeight: "300px" }}
+										style={{ flex: 1, resize: "none", minHeight: "300px", opacity: 0.8 }}
 										value={draftPreScript}
-										onChange={(e) => setDraftPreScript(e.target.value)}
+										readOnly
 									/>
-									<div
-										className="pane-footer"
-										style={{
-											padding: "8px",
-											borderTop: "1px solid var(--border-color)",
-											display: "flex",
-											gap: "8px",
-										}}
-									>
-										<button
-											type="button"
-											className="send-button"
-											disabled={saveScriptMutation.isPending}
-											onClick={() =>
-												saveScriptMutation.mutate({
-													type: "pre",
-													source: draftPreScript,
-												})
-											}
-										>
-											{saveScriptMutation.isPending
-												? "Saving..."
-												: "Save Script"}
-										</button>
-										<button
-											type="button"
-											className="send-button"
-											style={{
-												background: "var(--danger-bg, #ffecec)",
-												color: "var(--danger-text, #d03030)",
-												border: "1px solid var(--danger-border, #ffcccc)",
-											}}
-											disabled={deleteScriptMutation.isPending}
-											onClick={() => {
-												if (window.confirm("Delete this pre-request script?")) {
-													deleteScriptMutation.mutate({ type: "pre" });
-												}
-											}}
-										>
-											Delete Script
-										</button>
-									</div>
 								</div>
 							) : (
 								<div
@@ -743,9 +761,32 @@ export function RequestPanel({
 
 					{showEditor && tab === "post-script" && (
 						<>
-							<div className="pane-header">
-								<span className="pane-title">Post-response script</span>
-								<span className="pane-tag">TS/JS</span>
+							<div className="pane-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+								<div>
+									<span className="pane-title">Post-response script</span>
+									<span className="pane-tag">TS/JS</span>
+								</div>
+								{doc?.post?.source !== undefined && (
+									<button
+										type="button"
+										style={{
+											background: "transparent",
+											border: "none",
+											color: "var(--danger-text, #d03030)",
+											cursor: "pointer",
+											fontSize: "1.2em",
+											padding: "4px"
+										}}
+										disabled={deleteScriptMutation.isPending}
+										onClick={() => setDeleteConfirm("post")}
+										title="Delete Script"
+									>
+										<HugeiconsIcon icon={Delete02Icon} size={18} />
+									</button>
+								)}
+							</div>
+							<div style={{ padding: "8px 16px", background: "var(--highlight-bg, #fffbe6)", borderBottom: "1px solid var(--border-color)", fontSize: "0.9em", color: "var(--text-color)" }}>
+								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here currently. Please edit the script file directly in your code editor.
 							</div>
 							{doc?.post?.source !== undefined ? (
 								<div
@@ -757,54 +798,10 @@ export function RequestPanel({
 								>
 									<textarea
 										className="code-editor mono"
-										style={{ flex: 1, resize: "none", minHeight: "300px" }}
+										style={{ flex: 1, resize: "none", minHeight: "300px", opacity: 0.8 }}
 										value={draftPostScript}
-										onChange={(e) => setDraftPostScript(e.target.value)}
+										readOnly
 									/>
-									<div
-										className="pane-footer"
-										style={{
-											padding: "8px",
-											borderTop: "1px solid var(--border-color)",
-											display: "flex",
-											gap: "8px",
-										}}
-									>
-										<button
-											type="button"
-											className="send-button"
-											disabled={saveScriptMutation.isPending}
-											onClick={() =>
-												saveScriptMutation.mutate({
-													type: "post",
-													source: draftPostScript,
-												})
-											}
-										>
-											{saveScriptMutation.isPending
-												? "Saving..."
-												: "Save Script"}
-										</button>
-										<button
-											type="button"
-											className="send-button"
-											style={{
-												background: "var(--danger-bg, #ffecec)",
-												color: "var(--danger-text, #d03030)",
-												border: "1px solid var(--danger-border, #ffcccc)",
-											}}
-											disabled={deleteScriptMutation.isPending}
-											onClick={() => {
-												if (
-													window.confirm("Delete this post-response script?")
-												) {
-													deleteScriptMutation.mutate({ type: "post" });
-												}
-											}}
-										>
-											Delete Script
-										</button>
-									</div>
 								</div>
 							) : (
 								<div
@@ -865,6 +862,25 @@ export function RequestPanel({
 					<option key={t} value={t} />
 				))}
 			</datalist>
+
+			{deleteConfirm && (
+				<ConfirmDialog
+					title="Delete Script?"
+					message={
+						<p style={{ margin: 0 }}>
+							Are you sure you want to delete this{" "}
+							{deleteConfirm === "pre" ? "pre-request" : "post-response"} script?
+						</p>
+					}
+					confirmText="Delete"
+					isDestructive={true}
+					onCancel={() => setDeleteConfirm(null)}
+					onConfirm={() => {
+						deleteScriptMutation.mutate({ type: deleteConfirm });
+						setDeleteConfirm(null);
+					}}
+				/>
+			)}
 		</>
 	);
 }

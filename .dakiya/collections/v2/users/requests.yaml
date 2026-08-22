@@ -10,19 +10,23 @@ methods:
     name: Get User
     method: GET
     url: "{{baseUrl}}/api/v2/users/{{userId}}"
-    
+
   - id: create
     name: Create User
     method: POST
     url: "{{baseUrl}}/api/v2/users"
     headers:
       Content-Type: application/json
-    body: |
-      {
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "{{userEmail}}"
-      }
+    body:
+      type: raw
+      raw:
+        content: |-
+          {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "{{userEmail}}"
+          }
+        format: json
 
   - id: update
     name: Update User

@@ -1,10 +1,10 @@
 import type { RequestDocument, ScriptBlock } from "@dakiya/domain";
 import { describe, expect, it } from "vitest";
-import type { HttpClient } from "./http.js";
-import { sendRequest } from "./request.js";
-import { resolveRequest } from "./resolve.js";
-import type { ScriptRunner } from "./script.js";
-import { resolveRecord, resolveVars } from "./vars.js";
+import type { HttpClient } from "../src/http.js";
+import { sendRequest } from "../src/request.js";
+import { resolveRequest } from "../src/resolve.js";
+import type { ScriptRunner } from "../src/script.js";
+import { resolveRecord, resolveVars } from "../src/vars.js";
 
 describe("resolveVars", () => {
 	it("substitutes known variables", () => {

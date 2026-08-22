@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Modal } from "./Modal.js";
 
 type EnvSwitcherProps = {
 	environments: string[];
@@ -87,39 +88,30 @@ export function EnvEditor({
 	saving,
 }: EnvEditorProps) {
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismiss
-		<div
-			className="modal-backdrop"
-			role="presentation"
-			onMouseDown={(e) => {
-				if (e.target === e.currentTarget) onClose();
-			}}
-		>
-			<div className="modal" role="dialog" aria-labelledby="env-editor-title">
-				<div className="modal-header">
-					<h2 id="env-editor-title">Environment: {name}</h2>
-					<button type="button" className="pane-action-btn" onClick={onClose}>
-						Close
-					</button>
-				</div>
-				<textarea
-					className="editor env-editor mono"
-					value={source}
-					onChange={(e) => onChange(e.target.value)}
-					spellCheck={false}
-				/>
-				{error && <p className="error-text modal-error">{error}</p>}
-				<div className="modal-actions">
-					<button
-						type="button"
-						className="send-button"
-						onClick={onSave}
-						disabled={saving}
-					>
-						{saving ? "Saving…" : "Save"}
-					</button>
-				</div>
+		<Modal onClose={onClose} titleId="env-editor-title">
+			<div className="modal-header">
+				<h2 id="env-editor-title">Environment: {name}</h2>
+				<button type="button" className="pane-action-btn" onClick={onClose}>
+					Close
+				</button>
 			</div>
-		</div>
+			<textarea
+				className="editor env-editor mono"
+				value={source}
+				onChange={(e) => onChange(e.target.value)}
+				spellCheck={false}
+			/>
+			{error && <p className="error-text modal-error">{error}</p>}
+			<div className="modal-actions">
+				<button
+					type="button"
+					className="send-button"
+					onClick={onSave}
+					disabled={saving}
+				>
+					{saving ? "Saving…" : "Save"}
+				</button>
+			</div>
+		</Modal>
 	);
 }

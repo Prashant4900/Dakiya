@@ -1,7 +1,10 @@
 import { parseEnvironment, sendRequest } from "@dakiya/services";
 import { Hono } from "hono";
+import { readFile } from "fs/promises";
+import { join } from "path";
 import { persistEnvironmentVariables } from "../sandbox/persist-env.js";
 import { createVmScriptRunner } from "../sandbox/run-script.js";
+import { createFetchHttpClient } from "@dakiya/services";
 import {
 	buildCollectionTree,
 	listEndpointPaths,
@@ -32,6 +35,30 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 	const app = new Hono();
 
 	app.get("/health", (c) => c.json({ status: "ok" }));
+
+	app.post("/upload", async (c) => {
+		try {
+			const body = await c.req.parseBody();
+			const file = body["file"] as File;
+			if (!file) {
+				return c.json({ error: "No file provided" }, 400);
+			}
+
+			const filesDir = join(cwd, ".dakiya", "files");
+			const { mkdir, writeFile } = await import("fs/promises");
+			await mkdir(filesDir, { recursive: true });
+
+			const fileName = `${Date.now()}-${file.name}`;
+			const filePath = join(filesDir, fileName);
+			
+			const arrayBuffer = await file.arrayBuffer();
+			await writeFile(filePath, Buffer.from(arrayBuffer));
+
+			return c.json({ path: `.dakiya/files/${fileName}` });
+		} catch (err) {
+			return c.json({ error: errorMessage(err) }, 500);
+		}
+	});
 
 	app.get("/workspace", (c) => {
 		try {
@@ -103,13 +130,15 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 				return c.json({ error: errorMessage(err) }, 400);
 			}
 		}
-		return c.json(
-			{
-				error:
-					"Writing requests is not supported in the YAML folder format yet.",
-			},
-			400,
-		);
+
+		try {
+			const body = await c.req.json();
+			const { writeRequestSource } = await import("../workspace.js");
+			const result = writeRequestSource(fullPath, body, cwd);
+			return c.json({ success: true, relativeToCollections: result.relativeToCollections });
+		} catch (err) {
+			return c.json({ error: errorMessage(err) }, 400);
+		}
 	});
 
 	app.post("/requests/*", async (c) => {
@@ -190,6 +219,14 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 				document,
 				variables: environment.variables,
 				scripts: createVmScriptRunner(),
+				http: createFetchHttpClient({
+					readFileAsBlob: async (filePath: string) => {
+						// Resolve path relative to the workspace (.dakiya/files for instance, or just cwd)
+						const absPath = join(cwd, filePath);
+						const buffer = await readFile(absPath);
+						return new Blob([buffer]);
+					}
+				})
 			});
 
 			if (Object.keys(result.persistedVariables).length > 0) {

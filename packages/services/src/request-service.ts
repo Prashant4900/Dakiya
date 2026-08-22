@@ -1,5 +1,5 @@
-import type { RequestDocument } from "@dakiya/domain";
-import { parseEndpoint } from "@dakiya/format";
+import type { RequestDocument, RequestBody } from "@dakiya/domain";
+import { parseEndpoint, updateEndpointMethod } from "@dakiya/format";
 import type { FsClient } from "./fs-client.js";
 import { collectionsRoot, posixJoin, resolveEndpointPaths } from "./paths.js";
 
@@ -119,13 +119,33 @@ export function readRequestSource(
 	return req;
 }
 
-export function writeRequestSource(): {
+export function writeRequestSource(
+	fs: FsClient,
+	arg: string,
+	updates: { body?: RequestBody; headers?: Record<string, string> },
+	cwd: string,
+): {
 	relativeToCollections: string;
 	created: boolean;
 } {
-	throw new Error(
-		"Writing is not supported with requests.yaml multi-file structure yet.",
-	);
+	const { endpointPath, methodId } = resolveEndpointAndMethod(fs, arg, cwd);
+	if (!methodId) {
+		throw new Error(`Expected a specific method request, got endpoint: ${arg}`);
+	}
+
+	const yamlPath = posixJoin(endpointPath, "requests.yaml");
+	const yamlSource = fs.readFile(yamlPath);
+	const updatedYaml = updateEndpointMethod(yamlSource, methodId, updates);
+	fs.writeFile(yamlPath, updatedYaml);
+
+	const collectionsRootPath = collectionsRoot(cwd);
+	let relPath = endpointPath.slice(collectionsRootPath.length);
+	if (relPath.startsWith("/")) relPath = relPath.slice(1);
+
+	return {
+		relativeToCollections: `${relPath}/${methodId}`,
+		created: false,
+	};
 }
 
 export function deleteRequestFile(): void {

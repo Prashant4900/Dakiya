@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
+import { Tabs } from "./Tabs.js";
 
 type ResponsePanelProps = {
 	result: SendResponse | null;
@@ -116,23 +117,15 @@ export function ResponsePanel({
 					)}
 				</div>
 			</div>
-
-			<div className="response-tabs">
-				<button
-					type="button"
-					className={`tab-item${tab === "body" ? " active" : ""}`}
-					onClick={() => setTab("body")}
-				>
-					Body
-				</button>
-				<button
-					type="button"
-					className={`tab-item${tab === "headers" ? " active" : ""}`}
-					onClick={() => setTab("headers")}
-				>
-					Headers
-				</button>
-			</div>
+			<Tabs
+				className="response-tabs"
+				tabs={[
+					{ id: "body", label: "Body" },
+					{ id: "headers", label: "Headers" },
+				]}
+				activeTab={tab}
+				onChange={setTab as (id: string) => void}
+			/>
 
 			<div className="pane-header">
 				<span className="pane-title">

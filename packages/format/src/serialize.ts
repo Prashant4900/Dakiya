@@ -60,9 +60,9 @@ function serializeExample(
 export function serializeDrq(doc: RequestDocument): string {
 	const blocks: DrqBlock[] = [serializeMeta(doc), serializeRequest(doc)];
 
-	if (doc.body !== undefined && doc.body !== "") {
-		blocks.push({ name: "body", attrs: "", body: doc.body });
-	}
+	// if (doc.body !== undefined && doc.body !== "") {
+	// 	blocks.push({ name: "body", attrs: "", body: doc.body });
+	// }
 	if (doc.docs !== undefined && doc.docs !== "") {
 		blocks.push({ name: "docs", attrs: "", body: doc.docs });
 	}

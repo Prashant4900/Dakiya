@@ -32,6 +32,18 @@ export function parseEndpoint(
 		if (postTs) postBlock = { lang: "ts" as const, source: postTs };
 		else if (postJs) postBlock = { lang: "js" as const, source: postJs };
 
+		let normalizedBody = method.body;
+		if (typeof method.body === "string") {
+			normalizedBody = {
+				type: "raw",
+				raw: {
+					content: method.body,
+					// Try to guess if it's JSON
+					format: method.body.trim().startsWith("{") || method.body.trim().startsWith("[") ? "json" : "text",
+				},
+			};
+		}
+
 		return {
 			relativePath: requestPath,
 			meta: {
@@ -43,7 +55,7 @@ export function parseEndpoint(
 				url: method.url,
 				headers: method.headers || {},
 			},
-			...(method.body ? { body: method.body } : {}),
+			...(normalizedBody ? { body: normalizedBody } : {}),
 			...(docs ? { docs } : {}),
 			...(preBlock ? { pre: preBlock } : {}),
 			...(postBlock ? { post: postBlock } : {}),

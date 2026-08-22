@@ -46,7 +46,7 @@ function buildReqApi(request: MutableRequest) {
 		get body() {
 			return request.body;
 		},
-		set body(value: string | undefined) {
+		set body(value: any) {
 			request.body = value;
 		},
 		getHeader(name: string): string | undefined {
