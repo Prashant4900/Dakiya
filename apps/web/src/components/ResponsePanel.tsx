@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
 
@@ -22,8 +22,38 @@ function formatBody(body: string, contentType?: string): string {
 	return body;
 }
 
+const MIN_WIDTH = 400;
+const MAX_WIDTH = 800;
+
 export function ResponsePanel({ result, error, loading }: ResponsePanelProps) {
 	const [tab, setTab] = useState<ResponseTab>("body");
+	const [width, setWidth] = useState(340);
+	const [resizing, setResizing] = useState(false);
+	const draggingRef = useRef(false);
+
+	const startResize = (e: React.PointerEvent<HTMLDivElement>) => {
+		draggingRef.current = true;
+		setResizing(true);
+		e.currentTarget.setPointerCapture(e.pointerId);
+		document.body.style.userSelect = "none";
+		document.body.style.cursor = "col-resize";
+	};
+
+	const onResize = (e: React.PointerEvent<HTMLDivElement>) => {
+		if (!draggingRef.current) return;
+		const pane = e.currentTarget.parentElement;
+		if (!pane) return;
+		const next = pane.getBoundingClientRect().right - e.clientX;
+		setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, next)));
+	};
+
+	const endResize = (e: React.PointerEvent<HTMLDivElement>) => {
+		draggingRef.current = false;
+		setResizing(false);
+		document.body.style.userSelect = "";
+		document.body.style.cursor = "";
+		e.currentTarget.releasePointerCapture(e.pointerId);
+	};
 
 	const statusClass = !result
 		? "pending"
@@ -39,7 +69,14 @@ export function ResponsePanel({ result, error, loading }: ResponsePanelProps) {
 			: "(none)";
 
 	return (
-		<div className="response-pane">
+		<div className="response-pane" style={{ width }}>
+			<div
+				className={`resize-handle${resizing ? " active" : ""}`}
+				onPointerDown={startResize}
+				onPointerMove={onResize}
+				onPointerUp={endResize}
+				title="Drag to resize"
+			/>
 			<div className="response-status">
 				{loading && <span className="status-pill pending">—</span>}
 				{error && !loading && <span className="status-pill error">Error</span>}

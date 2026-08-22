@@ -3,7 +3,7 @@ name: Echo GET
 type: http
 
 @request
-GET {{baseUrl}}/api/echo?message=hello
+GET {{baseUrl}}/api/echo?message=12345
 X-Request-Id: {{requestId}}
 
 @docs

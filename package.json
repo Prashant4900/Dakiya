@@ -3,7 +3,7 @@
 	"private": true,
 	"version": "0.0.0",
 	"description": "Local-first API toolkit — CLI + web dashboard (desktop later)",
-	"packageManager": "pnpm@9.15.0",
+	"packageManager": "pnpm@11.22.0",
 	"scripts": {
 		"build": "pnpm -r run build",
 		"dev:web": "pnpm --filter @dakiya/web dev",

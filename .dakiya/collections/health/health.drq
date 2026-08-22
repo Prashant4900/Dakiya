@@ -7,4 +7,4 @@ GET {{baseUrl}}/api/health
 
 @docs
 # Health
-Liveness check for `@example/server`.
+Liveness check for `@example/server 1`.

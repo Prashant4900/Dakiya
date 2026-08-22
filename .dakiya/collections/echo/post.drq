@@ -10,7 +10,7 @@ X-Request-Id: {{requestId}}
 @body
 {
   "ping": true,
-  "source": "dakiya"
+  "source": "dakiya app"
 }
 
 @docs
