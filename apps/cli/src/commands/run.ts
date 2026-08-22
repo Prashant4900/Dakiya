@@ -1,4 +1,4 @@
-import { parseDrq } from "@dakiya/format";
+// import { parseEndpoint } from "@dakiya/format";
 import { sendRequest } from "@dakiya/services";
 import { persistEnvironmentVariables } from "../sandbox/persist-env.js";
 import { createVmScriptRunner } from "../sandbox/run-script.js";
@@ -31,10 +31,9 @@ export async function runRun(requestArg: string | undefined): Promise<void> {
 
 	requireWorkspace();
 	const env = loadActiveEnvironment();
-	const { source, relativeToDakiya } = readRequestSource(requestArg);
-	const document = parseDrq(source, relativeToDakiya);
+	const document = readRequestSource(requestArg);
 
-	console.log(`[dakiya] ${document.meta.name}  (${relativeToDakiya})`);
+	console.log(`[dakiya] ${document.meta.name}  (${document.relativePath})`);
 	console.log(`[dakiya] Env: ${env.name}`);
 
 	const { resolved, response, persistedVariables, logs } = await sendRequest({

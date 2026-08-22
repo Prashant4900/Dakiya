@@ -1,28 +1,38 @@
 import {
-	listRequestPaths,
-	loadManifest,
+	listEnvironmentNames,
+	listEndpointPaths,
+	readEndpointRequests,
 	requireWorkspace,
 } from "../workspace.js";
 
-/** Print the collection tree of `.drq` files. */
-export function runList(): void {
+export async function runList(): Promise<void> {
 	requireWorkspace();
-	const manifest = loadManifest();
-	const paths = listRequestPaths();
 
-	console.log(`[dakiya] Workspace: ${manifest.name}`);
-	if (manifest.defaultEnv) {
-		console.log(`[dakiya] Default env: ${manifest.defaultEnv}`);
+	const envs = listEnvironmentNames();
+	console.log("Environments:");
+	if (envs.length === 0) {
+		console.log("  (none)");
+	} else {
+		for (const env of envs) {
+			console.log(`  - ${env}`);
+		}
 	}
 	console.log("");
 
-	if (paths.length === 0) {
-		console.log("(no requests in .dakiya/collections)");
-		return;
-	}
-
+	const endpoints = listEndpointPaths();
 	console.log("Requests:");
-	for (const p of paths) {
-		console.log(`  ${p}`);
+	if (endpoints.length === 0) {
+		console.log("  (none)");
+	} else {
+		for (const endpoint of endpoints) {
+			try {
+				const requests = readEndpointRequests(endpoint);
+				for (const req of requests) {
+					console.log(`  - ${req.relativePath}  (${req.request.method} ${req.request.url})`);
+				}
+			} catch (err) {
+				console.log(`  - ${endpoint}  (error loading)`);
+			}
+		}
 	}
 }

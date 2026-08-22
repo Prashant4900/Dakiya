@@ -1,19 +1,17 @@
-import { parseDrq } from "@dakiya/format";
 import { parseEnvironment, sendRequest } from "@dakiya/services";
 import { Hono } from "hono";
 import { persistEnvironmentVariables } from "../sandbox/persist-env.js";
 import { createVmScriptRunner } from "../sandbox/run-script.js";
 import {
 	buildCollectionTree,
-	deleteRequestFile,
 	listEnvironmentNames,
-	listRequestPaths,
+	listEndpointPaths,
 	loadEnvironment,
 	loadManifest,
 	readEnvironmentSource,
 	readRequestSource,
+	readEndpointRequests,
 	writeEnvironmentSource,
-	writeRequestSource,
 } from "../workspace.js";
 
 export type ApiOptions = {
@@ -28,10 +26,6 @@ function isNotFound(message: string): boolean {
 	return message.includes("not found") || message.includes("No workspace");
 }
 
-function isConflict(message: string): boolean {
-	return message.includes("already exists");
-}
-
 /** Local HTTP API for the dashboard — mounted under `/api`. */
 export function createApiApp(options: ApiOptions = {}): Hono {
 	const cwd = options.cwd ?? process.cwd();
@@ -42,25 +36,32 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 	app.get("/workspace", (c) => {
 		try {
 			const manifest = loadManifest(cwd);
-			const requests = listRequestPaths(cwd);
-			const requestIndex = requests.map((path) => {
+			const endpoints = listEndpointPaths(cwd);
+			
+			const requestPaths: string[] = [];
+			const requestIndex: any[] = [];
+			
+			for (const endpoint of endpoints) {
 				try {
-					const { source, relativeToDakiya } = readRequestSource(path, cwd);
-					const document = parseDrq(source, relativeToDakiya);
-					return {
-						path,
-						name: document.meta.name,
-						method: document.request.method,
-					};
-				} catch {
-					return { path, name: path, method: "GET" };
+					const docs = readEndpointRequests(endpoint, cwd);
+					for (const doc of docs) {
+						requestPaths.push(doc.relativePath);
+						requestIndex.push({
+							path: doc.relativePath,
+							name: doc.meta.name,
+							method: doc.request.method,
+						});
+					}
+				} catch (err) {
+					console.error("Failed to parse endpoint", endpoint, err);
 				}
-			});
+			}
+
 			return c.json({
 				manifest,
-				requests,
+				requests: requestPaths,
 				requestIndex,
-				tree: buildCollectionTree(requests),
+				tree: buildCollectionTree(requestPaths),
 				environments: listEnvironmentNames(cwd),
 				cwd,
 			});
@@ -72,13 +73,11 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 	app.get("/requests/*", (c) => {
 		const pathParam = c.req.path.replace(/^\/requests\//, "");
 		try {
-			const { source, relativeToDakiya, relativeToCollections } =
-				readRequestSource(pathParam, cwd);
-			const document = parseDrq(source, relativeToDakiya);
+			const document = readRequestSource(pathParam, cwd);
 			return c.json({
-				path: relativeToCollections,
-				relativePath: relativeToDakiya,
-				source,
+				path: document.relativePath,
+				relativePath: `collections/${document.relativePath}`,
+				source: "", // No longer a single source file to return
 				document,
 			});
 		} catch (err) {
@@ -88,65 +87,15 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 	});
 
 	app.put("/requests/*", async (c) => {
-		const pathParam = c.req.path.replace(/^\/requests\//, "");
-		try {
-			const source = await c.req.text();
-			if (!source.trim()) {
-				return c.json({ error: "Request body (raw .drq) is required" }, 400);
-			}
-			// Validate parse before write.
-			parseDrq(source, `collections/${pathParam}`);
-			const result = writeRequestSource(pathParam, source, cwd);
-			return c.json({
-				ok: true,
-				path: result.relativeToCollections,
-				created: result.created,
-			});
-		} catch (err) {
-			const message = errorMessage(err);
-			return c.json({ error: message }, isNotFound(message) ? 404 : 400);
-		}
+		return c.json({ error: "Writing requests is not supported in the YAML folder format yet." }, 400);
 	});
 
 	app.post("/requests/*", async (c) => {
-		const pathParam = c.req.path.replace(/^\/requests\//, "");
-		try {
-			const source = await c.req.text();
-			if (!source.trim()) {
-				return c.json({ error: "Request body (raw .drq) is required" }, 400);
-			}
-			parseDrq(source, `collections/${pathParam}`);
-			const result = writeRequestSource(pathParam, source, cwd, {
-				createOnly: true,
-			});
-			return c.json(
-				{
-					ok: true,
-					path: result.relativeToCollections,
-					created: result.created,
-				},
-				201,
-			);
-		} catch (err) {
-			const message = errorMessage(err);
-			const status = isConflict(message)
-				? 409
-				: isNotFound(message)
-					? 404
-					: 400;
-			return c.json({ error: message }, status);
-		}
+		return c.json({ error: "Writing requests is not supported in the YAML folder format yet." }, 400);
 	});
 
 	app.delete("/requests/*", (c) => {
-		const pathParam = c.req.path.replace(/^\/requests\//, "");
-		try {
-			deleteRequestFile(pathParam, cwd);
-			return c.json({ ok: true });
-		} catch (err) {
-			const message = errorMessage(err);
-			return c.json({ error: message }, isNotFound(message) ? 404 : 400);
-		}
+		return c.json({ error: "Deleting requests is not supported in the YAML folder format yet." }, 400);
 	});
 
 	app.get("/environments/:name", (c) => {
@@ -186,9 +135,7 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 			const manifest = loadManifest(cwd);
 			const envName = body.env ?? manifest.defaultEnv ?? "local";
 			const environment = loadEnvironment(envName, cwd);
-			const { source, relativeToDakiya, relativeToCollections } =
-				readRequestSource(body.path, cwd);
-			const document = parseDrq(source, relativeToDakiya);
+			const document = readRequestSource(body.path, cwd);
 
 			const result = await sendRequest({
 				document,
@@ -201,7 +148,7 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 			}
 
 			return c.json({
-				path: relativeToCollections,
+				path: document.relativePath,
 				env: envName,
 				resolved: result.resolved,
 				response: result.response,

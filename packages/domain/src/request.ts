@@ -15,6 +15,8 @@ import type {
 	ScriptBlockSchema,
 	ScriptLangSchema,
 	SendResultSchema,
+	EndpointManifestSchema,
+	EndpointMethodSchema,
 } from "./schemas.js";
 
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
@@ -28,3 +30,5 @@ export type RequestAssert = z.infer<typeof RequestAssertSchema>;
 export type RequestDocument = z.infer<typeof RequestDocumentSchema>;
 export type ResolvedHttpRequest = z.infer<typeof ResolvedHttpRequestSchema>;
 export type SendResult = z.infer<typeof SendResultSchema>;
+export type EndpointManifest = z.infer<typeof EndpointManifestSchema>;
+export type EndpointMethod = z.infer<typeof EndpointMethodSchema>;

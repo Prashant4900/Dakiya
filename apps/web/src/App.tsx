@@ -60,6 +60,8 @@ export function App() {
 			let defaultVer = versions[0];
 			if (manifestVersion && versions.includes(manifestVersion)) {
 				defaultVer = manifestVersion;
+			} else if (manifestVersion && versions.includes(`v${manifestVersion}`)) {
+				defaultVer = `v${manifestVersion}`;
 			} else if (versions.includes("v1")) {
 				defaultVer = "v1";
 			}

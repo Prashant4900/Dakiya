@@ -15,7 +15,8 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@dakiya/domain": "workspace:*"
+		"@dakiya/domain": "workspace:*",
+		"yaml": "^2.9.0"
 	},
 	"devDependencies": {
 		"typescript": "~5.8.3",

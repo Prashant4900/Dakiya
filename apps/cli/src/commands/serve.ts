@@ -9,6 +9,7 @@ import {
 	dakiyaDir,
 	hasDakiyaManifest,
 	hasDakiyaWorkspace,
+	loadManifest,
 } from "../workspace.js";
 import { runInit } from "./init.js";
 
@@ -152,7 +153,9 @@ export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	}
 
 	const url = `http://localhost:${port}`;
+	const manifest = loadManifest();
 	console.log(`[dakiya] Workspace: ${dakiyaDir()}`);
+	console.log(`[dakiya] Default version: v${manifest.version}`);
 	console.log(`[dakiya] Serving dashboard at ${url}`);
 	console.log(`[dakiya] API health: ${url}/api/health`);
 	console.log(`[dakiya] Press Ctrl+C to stop`);

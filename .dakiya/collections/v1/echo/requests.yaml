@@ -1,0 +1,22 @@
+name: echo
+type: http
+methods:
+  - id: get
+    name: Echo GET
+    method: GET
+    url: "{{baseUrl}}/api/echo?message=12345"
+    headers:
+      X-Request-Id: "{{requestId}}"
+  - id: post
+    name: Echo POST
+    method: POST
+    url: "{{baseUrl}}/api/echo"
+    headers:
+      Content-Type: "application/json"
+      X-Request-Id: "{{requestId}}"
+    body: |
+      @body
+      {
+        "ping": true,
+        "source": "dakiya app"
+      }

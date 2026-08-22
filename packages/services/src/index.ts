@@ -27,14 +27,15 @@ export {
 	environmentsRoot,
 	MANIFEST_FILE,
 	manifestPath,
-	normalizeRequestPath,
-	resolveRequestPaths,
+	normalizeEndpointPath,
+	resolveEndpointPaths,
 } from "./paths.js";
 export type { SendRequestOptions, SendRequestResult } from "./request.js";
 export { sendRequest } from "./request.js";
 export {
 	deleteRequestFile,
-	listRequestPaths,
+	listEndpointPaths,
+	readEndpointRequests,
 	readRequestSource,
 	writeRequestSource,
 } from "./request-service.js";

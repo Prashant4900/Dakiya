@@ -1,0 +1,7 @@
+name: teams
+type: http
+methods:
+  - id: get
+    name: List teams
+    method: GET
+    url: "{{baseUrl}}/api/v2/teams"

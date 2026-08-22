@@ -7,14 +7,15 @@ import {
 	hasManifest,
 	hasWorkspace,
 	listEnvironmentNames as listEnvironmentNamesService,
-	listRequestPaths as listRequestPathsService,
+	listEndpointPaths as listEndpointPathsService,
 	loadActiveEnvironment as loadActiveEnvironmentService,
 	loadEnvironment as loadEnvironmentService,
 	loadManifest as loadManifestService,
-	normalizeRequestPath,
+	normalizeEndpointPath,
 	readEnvironmentSource as readEnvironmentSourceService,
 	readRequestSource as readRequestSourceService,
-	resolveRequestPaths,
+	readEndpointRequests as readEndpointRequestsService,
+	resolveEndpointPaths,
 	writeEnvironmentSource as writeEnvironmentSourceService,
 	writeRequestSource as writeRequestSourceService,
 } from "@dakiya/services";
@@ -22,7 +23,7 @@ import { createNodeFsClient } from "./fs/node-fs-client.js";
 
 const fs = createNodeFsClient();
 
-export { buildCollectionTree, normalizeRequestPath };
+export { buildCollectionTree, normalizeEndpointPath };
 export type CollectionNode =
 	| { name: string; type: "folder"; children: CollectionNode[] }
 	| { name: string; type: "request"; path: string };
@@ -81,31 +82,30 @@ export function writeEnvironmentSource(
 	return writeEnvironmentSourceService(fs, envName, source, cwd);
 }
 
-export function listRequestPaths(cwd = process.cwd()) {
-	return listRequestPathsService(fs, cwd);
+export function listEndpointPaths(cwd = process.cwd()) {
+	return listEndpointPathsService(fs, cwd);
 }
 
 export function listEnvironmentNames(cwd = process.cwd()) {
 	return listEnvironmentNamesService(fs, cwd);
 }
 
-export function resolveRequestFile(arg: string, cwd = process.cwd()) {
-	return resolveRequestPaths(arg, cwd);
+export function resolveEndpointFile(arg: string, cwd = process.cwd()) {
+	return resolveEndpointPaths(arg, cwd);
+}
+
+export function readEndpointRequests(arg: string, cwd = process.cwd()) {
+	return readEndpointRequestsService(fs, arg, cwd);
 }
 
 export function readRequestSource(arg: string, cwd = process.cwd()) {
 	return readRequestSourceService(fs, arg, cwd);
 }
 
-export function writeRequestSource(
-	arg: string,
-	source: string,
-	cwd = process.cwd(),
-	options?: { createOnly?: boolean },
-) {
-	return writeRequestSourceService(fs, arg, source, cwd, options);
+export function writeRequestSource() {
+	return writeRequestSourceService();
 }
 
-export function deleteRequestFile(arg: string, cwd = process.cwd()) {
-	return deleteRequestFileService(fs, arg, cwd);
+export function deleteRequestFile() {
+	return deleteRequestFileService();
 }

@@ -38,19 +38,13 @@ export function environmentPath(cwd: string, name: string): string {
 	return posixJoin(environmentsRoot(cwd), `${name}.yaml`);
 }
 
-/**
- * Normalize a collections-relative request path.
- * Accepts `health/health`, `health/health.drq`, or `collections/health/health.drq`.
- */
-export function normalizeRequestPath(arg: string): string {
+export function normalizeEndpointPath(arg: string): { folder: string; methodId?: string } {
 	let cleaned = arg.trim().replace(/\\/g, "/");
 	if (cleaned.startsWith("/")) cleaned = cleaned.slice(1);
 	if (cleaned.startsWith(`${COLLECTIONS_DIR}/`)) {
 		cleaned = cleaned.slice(`${COLLECTIONS_DIR}/`.length);
 	}
-	if (!cleaned.endsWith(".drq")) {
-		cleaned = `${cleaned}.drq`;
-	}
+	// e.g. "v2/echo/get"
 	if (
 		cleaned.includes("..") ||
 		cleaned.startsWith("/") ||
@@ -58,22 +52,25 @@ export function normalizeRequestPath(arg: string): string {
 	) {
 		throw new Error(`Invalid request path: ${arg}`);
 	}
-	return cleaned;
+
+	// Assume the last part might be a methodId, but we don't know without the YAML.
+	// Actually, let's keep it simple. The CLI and Web UI pass the full path e.g. "v2/echo/get"
+	return { folder: cleaned };
 }
 
-export function resolveRequestPaths(
+export function resolveEndpointPaths(
 	arg: string,
 	cwd: string,
 ): {
-	absPath: string;
+	absPath: string; // Path to the folder
 	relativeToDakiya: string;
 	relativeToCollections: string;
 } {
-	const cleaned = normalizeRequestPath(arg);
+	const cleaned = normalizeEndpointPath(arg).folder;
 	const collectionsRootPath = collectionsRoot(cwd);
 	const absPath = posixJoin(collectionsRootPath, cleaned);
 
-	if (!absPath.startsWith(`${collectionsRootPath}/`)) {
+	if (!absPath.startsWith(`${collectionsRootPath}/`) && absPath !== collectionsRootPath) {
 		throw new Error(`Invalid request path: ${arg}`);
 	}
 

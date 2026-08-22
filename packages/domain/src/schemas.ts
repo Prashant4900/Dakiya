@@ -47,7 +47,7 @@ export const RequestAssertSchema = z.object({
 });
 
 export const RequestDocumentSchema = z.object({
-	relativePath: z.string(),
+	relativePath: z.string(), // e.g. v2/users/get
 	meta: RequestMetaSchema,
 	request: HttpRequestLineSchema,
 	body: z.string().optional(),
@@ -56,6 +56,21 @@ export const RequestDocumentSchema = z.object({
 	post: ScriptBlockSchema.optional(),
 	examples: z.array(RequestExampleSchema).optional(),
 	asserts: z.array(RequestAssertSchema).optional(),
+});
+
+export const EndpointMethodSchema = z.object({
+	id: z.string().min(1),
+	name: z.string().min(1),
+	method: HttpMethodSchema,
+	url: z.string().min(1),
+	headers: z.record(z.string(), z.string()).optional(),
+	body: z.string().optional(),
+});
+
+export const EndpointManifestSchema = z.object({
+	name: z.string().min(1),
+	type: z.literal("http").default("http"),
+	methods: z.array(EndpointMethodSchema),
 });
 
 export const ResolvedHttpRequestSchema = z.object({

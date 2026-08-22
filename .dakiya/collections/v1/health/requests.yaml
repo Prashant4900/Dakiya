@@ -1,0 +1,7 @@
+name: health
+type: http
+methods:
+  - id: health
+    name: Health
+    method: GET
+    url: "{{baseUrl}}/api/health"

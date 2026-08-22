@@ -1,0 +1,43 @@
+name: Users
+type: http
+methods:
+  - id: list
+    name: List Users
+    method: GET
+    url: "{{baseUrl}}/api/v2/users"
+
+  - id: get
+    name: Get User
+    method: GET
+    url: "{{baseUrl}}/api/v2/users/{{userId}}"
+    
+  - id: create
+    name: Create User
+    method: POST
+    url: "{{baseUrl}}/api/v2/users"
+    headers:
+      Content-Type: application/json
+    body: |
+      {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "{{userEmail}}"
+      }
+
+  - id: update
+    name: Update User
+    method: PUT
+    url: "{{baseUrl}}/api/v2/users/{{userId}}"
+    headers:
+      Content-Type: application/json
+    body: |
+      {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "{{userEmail}}"
+      }
+
+  - id: delete
+    name: Delete User
+    method: DELETE
+    url: "{{baseUrl}}/api/v2/users/{{userId}}"

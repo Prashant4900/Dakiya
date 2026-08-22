@@ -2,7 +2,6 @@ import { type ReactNode, useCallback, useEffect, useState, useRef } from "react"
 import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
-import { parseDrq, serializeDrq } from "@dakiya/format";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -245,35 +244,22 @@ export function RequestPanel({
 	}, [dirty, onDirtyChange]);
 
 	let doc: RequestDocument | undefined = request?.document;
-	try {
-		if (draft) {
-			doc = parseDrq(draft);
-		}
-	} catch (e) {
-		// Fallback to saved doc if draft is currently invalid
-	}
 
 	const method = doc?.request.method ?? "GET";
 	const url = doc?.request.url ?? "";
 
 	// Sync headers to local state when entering headers tab
 	useEffect(() => {
-		if (tab === "headers") {
-			try {
-				const parsed = parseDrq(draft);
-				const h = Object.entries(parsed.request.headers).map(([k, v], i) => ({
-					id: i,
-					key: k,
-					value: v,
-				}));
-				h.push({ id: Date.now(), key: "", value: "" }); // Always provide an empty row
-				setLocalHeaders(h);
-				setParseError(null);
-			} catch (e: any) {
-				setParseError("Cannot edit headers: The request source contains syntax errors.");
-			}
+		if (tab === "headers" && doc) {
+			const h = Object.entries(doc.request.headers || {}).map(([k, v], i) => ({
+				id: i,
+				key: k,
+				value: String(v),
+			}));
+			setLocalHeaders(h);
+			setParseError(null);
 		}
-	}, [tab, draft, request]);
+	}, [tab, request]);
 
 	// Note: We included `draft` in dependencies above so if the user clicks "Save" and request reloads,
 	// or if the draft changes externally, headers reload. But wait, if they type in the table, it modifies draft!
@@ -295,22 +281,8 @@ export function RequestPanel({
 		onSend();
 	}, [dirty, draft, onSave, onSend]);
 
-	const updateDraftHeaders = (newHeaders: { key: string; value: string }[]) => {
-		try {
-			const parsed = parseDrq(draft);
-			parsed.request.headers = {};
-			for (const h of newHeaders) {
-				const k = h.key.trim();
-				if (k) {
-					parsed.request.headers[k] = h.value;
-				}
-			}
-			const newDraft = serializeDrq(parsed);
-			setDraft(newDraft);
-			setDirty(true);
-		} catch (e) {
-			// ignore, format error
-		}
+	const updateDraftHeaders = () => {
+		// Editing not supported with YAML multi-file format yet
 	};
 
 	const handleHeaderChange = (index: number, field: "key" | "value", val: string) => {
@@ -323,7 +295,7 @@ export function RequestPanel({
 		}
 
 		setLocalHeaders(newHeaders);
-		updateDraftHeaders(newHeaders);
+		updateDraftHeaders();
 	};
 
 	const handleHeaderRemove = (index: number) => {
@@ -332,26 +304,20 @@ export function RequestPanel({
 			newHeaders.push({ id: Date.now(), key: "", value: "" });
 		}
 		setLocalHeaders(newHeaders);
-		updateDraftHeaders(newHeaders);
+		updateDraftHeaders();
 	};
 
 	// We fix the syncing issue by using a ref to track if we are actively editing headers.
 	const isEditingHeaders = useRef(false);
 	useEffect(() => {
-		if (tab === "headers" && !isEditingHeaders.current) {
-			try {
-				const parsed = parseDrq(draft);
-				const h = Object.entries(parsed.request.headers).map(([k, v], i) => ({
-					id: i,
-					key: k,
-					value: v,
-				}));
-				h.push({ id: Date.now(), key: "", value: "" });
-				setLocalHeaders(h);
-				setParseError(null);
-			} catch (e: any) {
-				setParseError("Cannot edit headers: The request source contains syntax errors.");
-			}
+		if (tab === "headers" && !isEditingHeaders.current && doc) {
+			const h = Object.entries(doc.request.headers || {}).map(([k, v], i) => ({
+				id: i,
+				key: k,
+				value: String(v),
+			}));
+			setLocalHeaders(h);
+			setParseError(null);
 		}
 	}, [tab, request]);
 
@@ -471,12 +437,10 @@ export function RequestPanel({
 							</div>
 							<textarea
 								className="code-editor mono"
-								value={draft}
-								onChange={(e) => {
-									setDraft(e.target.value);
-									setDirty(true);
-								}}
+								value="Editing request body is not supported with the YAML multi-file structure yet. Please edit the requests.yaml file directly."
+								onChange={() => {}}
 								spellCheck={false}
+								disabled
 							/>
 						</>
 					)}

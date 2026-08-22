@@ -16,6 +16,8 @@ export function hello(): HelloMessage {
 
 export type { Environment, EnvironmentVariables } from "./environment.js";
 export type {
+	EndpointManifest,
+	EndpointMethod,
 	ExampleResponse,
 	HttpMethod,
 	HttpRequestLine,
@@ -29,6 +31,8 @@ export type {
 	SendResult,
 } from "./request.js";
 export {
+	EndpointManifestSchema,
+	EndpointMethodSchema,
 	EnvironmentSchema,
 	EnvironmentVariablesSchema,
 	ExampleResponseSchema,
