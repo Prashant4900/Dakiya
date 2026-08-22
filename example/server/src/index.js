@@ -16,6 +16,10 @@ app.get("/api/health", (_req, res) => {
 	res.json({ status: "ok", service: "@example/server" });
 });
 
+app.get("/api/v2/health", (_req, res) => {
+	res.json({ status: "ok", service: "@example/server", version: "v2" });
+});
+
 app.get("/api/echo", (req, res) => {
 	res.json({
 		method: req.method,
@@ -90,6 +94,69 @@ app.delete("/api/users/:id", (req, res) => {
 	res.status(204).end();
 });
 
+
+
+// v2 Users API
+app.get("/api/v2/users", (_req, res) => {
+	res.json({
+		users: [...users.values()].map((u) => {
+			const parts = u.name.split(" ");
+			return {
+				id: u.id,
+				firstName: parts[0] || "",
+				lastName: parts.slice(1).join(" ") || "",
+				email: u.email,
+			};
+		}),
+	});
+});
+
+app.post("/api/v2/users", (req, res) => {
+	const { firstName, lastName, email } = req.body ?? {};
+	if (typeof firstName !== "string" || typeof email !== "string") {
+		res.status(400).json({ error: "firstName_and_email_required" });
+		return;
+	}
+	const user = {
+		id: nextId++,
+		name: `${firstName} ${lastName || ""}`.trim(),
+		email,
+	};
+	users.set(user.id, user);
+	res.status(201).json({
+		id: user.id,
+		firstName,
+		lastName: lastName || "",
+		email: user.email,
+	});
+});
+
+app.get("/api/v2/users/:id", (req, res) => {
+	const id = Number(req.params.id);
+	const user = users.get(id);
+	if (!user) {
+		res.status(404).json({ error: "user_not_found", id });
+		return;
+	}
+	const parts = user.name.split(" ");
+	res.json({
+		id: user.id,
+		firstName: parts[0] || "",
+		lastName: parts.slice(1).join(" ") || "",
+		email: user.email,
+	});
+});
+
+// v2 Teams API
+const teams = [
+	{ id: 1, name: "Engineering" },
+	{ id: 2, name: "Marketing" },
+];
+
+app.get("/api/v2/teams", (_req, res) => {
+	res.json({ teams });
+});
+
 app.use((_req, res) => {
 	res.status(404).json({ error: "not_found" });
 });
@@ -97,6 +164,6 @@ app.use((_req, res) => {
 app.listen(PORT, "localhost", () => {
 	console.log(`[@example/server] listening on http://localhost:${PORT}`);
 	console.log(
-		`[@example/server] try GET /api/health  /api/users  POST /api/echo`,
+		`[@example/server] try GET /api/health  GET /api/v2/health`,
 	);
 });

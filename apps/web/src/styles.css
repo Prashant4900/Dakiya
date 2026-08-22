@@ -192,6 +192,12 @@ body {
 	border-bottom: 1px solid var(--border);
 }
 
+.sidebar-switchers {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
 .logo-row {
 	display: flex;
 	align-items: center;

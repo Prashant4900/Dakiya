@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import type { CollectionNode, RequestIndexItem } from "../api/types.js";
 import { CollectionTree } from "./CollectionTree.js";
 import { EnvSwitcher } from "./EnvSwitcher.js";
+import { VersionSwitcher } from "./VersionSwitcher.js";
 
 const MIN_WIDTH = 150;
 const MAX_WIDTH = 350;
@@ -16,6 +17,9 @@ type SidebarProps = {
 	activeEnv: string;
 	onEnvChange: (name: string) => void;
 	onEditEnv: () => void;
+	versions: string[];
+	activeVersion: string | null;
+	onVersionChange: (name: string) => void;
 };
 
 export function Sidebar({
@@ -28,6 +32,9 @@ export function Sidebar({
 	activeEnv,
 	onEnvChange,
 	onEditEnv,
+	versions,
+	activeVersion,
+	onVersionChange,
 }: SidebarProps) {
 	const [search, setSearch] = useState("");
 	const [width, setWidth] = useState(230);
@@ -58,6 +65,10 @@ export function Sidebar({
 		e.currentTarget.releasePointerCapture(e.pointerId);
 	};
 
+	const versionNode = tree.find((node) => node.name === activeVersion);
+	const versionTree =
+		versionNode?.type === "folder" ? versionNode.children : [];
+
 	return (
 		<aside className="sidebar" style={{ width }}>
 			<div
@@ -71,14 +82,21 @@ export function Sidebar({
 				<div className="logo-row">
 					<div className="logo-mark">D</div>
 					<span className="logo-name">Dakiya</span>
-					<span className="logo-version">v0.1</span>
+					<span className="logo-version">{activeVersion || "v0.1"}</span>
 				</div>
-				<EnvSwitcher
-					environments={environments}
-					activeEnv={activeEnv}
-					onEnvChange={onEnvChange}
-					onEdit={onEditEnv}
-				/>
+				<div className="sidebar-switchers">
+					<EnvSwitcher
+						environments={environments}
+						activeEnv={activeEnv}
+						onEnvChange={onEnvChange}
+						onEdit={onEditEnv}
+					/>
+					<VersionSwitcher
+						versions={versions}
+						activeVersion={activeVersion}
+						onVersionChange={onVersionChange}
+					/>
+				</div>
 			</div>
 
 			<div className="sidebar-search">
@@ -92,11 +110,11 @@ export function Sidebar({
 
 			<div className="sidebar-body">
 				<div className="section-label">Requests</div>
-				{tree.length === 0 ? (
-					<p className="empty-hint">No requests in collections/</p>
+				{versionTree.length === 0 ? (
+					<p className="empty-hint">No requests in this version</p>
 				) : (
 					<CollectionTree
-						nodes={tree}
+						nodes={versionTree}
 						requestIndex={requestIndex}
 						selectedPath={selectedPath}
 						onSelect={onSelect}

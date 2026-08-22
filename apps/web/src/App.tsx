@@ -24,6 +24,7 @@ export function App() {
 	const queryClient = useQueryClient();
 	const [selectedPath, setSelectedPath] = useState<string | null>(null);
 	const [activeEnv, setActiveEnv] = useState<string>("local");
+	const [activeVersion, setActiveVersion] = useState<string | null>(null);
 	const [sendResult, setSendResult] = useState<SendResponse | null>(null);
 	const [sendError, setSendError] = useState<string | null>(null);
 	const [saveError, setSaveError] = useState<string | null>(null);
@@ -45,6 +46,26 @@ export function App() {
 		() => workspaceQuery.data?.tree ?? [],
 		[workspaceQuery.data?.tree],
 	);
+
+	const versions = useMemo(() => {
+		return tree
+			.filter((node) => node.type === "folder")
+			.map((node) => node.name);
+	}, [tree]);
+
+	const manifestVersion = workspaceQuery.data?.manifest?.version?.toString();
+
+	useEffect(() => {
+		if (versions.length > 0 && !activeVersion) {
+			let defaultVer = versions[0];
+			if (manifestVersion && versions.includes(manifestVersion)) {
+				defaultVer = manifestVersion;
+			} else if (versions.includes("v1")) {
+				defaultVer = "v1";
+			}
+			setActiveVersion(defaultVer);
+		}
+	}, [versions, activeVersion, manifestVersion]);
 
 	const requestIndex = useMemo(() => {
 		const fromApi = workspaceQuery.data?.requestIndex ?? [];
@@ -223,6 +244,9 @@ export function App() {
 						activeEnv={effectiveEnv}
 						onEnvChange={setActiveEnv}
 						onEditEnv={openEnvEditor}
+						versions={versions}
+						activeVersion={activeVersion}
+						onVersionChange={setActiveVersion}
 					/>
 				)}
 

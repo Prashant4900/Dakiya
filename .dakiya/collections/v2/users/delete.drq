@@ -1,0 +1,10 @@
+@meta
+name: Delete user
+type: http
+
+@request
+DELETE {{baseUrl}}/api/v2/users/{{userId}}
+
+@docs
+# Delete user
+Deletes a user by `userId`. Expects `204` with empty body.
