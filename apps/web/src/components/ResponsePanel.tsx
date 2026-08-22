@@ -1,11 +1,14 @@
 import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PackageIcon, ZapIcon } from "@hugeicons/core-free-icons";
 import { formatBytes } from "../utils/method.js";
 
 type ResponsePanelProps = {
 	result: SendResponse | null;
 	error: string | null;
 	loading: boolean;
+	collapsed: boolean;
 };
 
 type ResponseTab = "body" | "headers";
@@ -25,11 +28,18 @@ function formatBody(body: string, contentType?: string): string {
 const MIN_WIDTH = 400;
 const MAX_WIDTH = 800;
 
-export function ResponsePanel({ result, error, loading }: ResponsePanelProps) {
+export function ResponsePanel({
+	result,
+	error,
+	loading,
+	collapsed,
+}: ResponsePanelProps) {
 	const [tab, setTab] = useState<ResponseTab>("body");
 	const [width, setWidth] = useState(340);
 	const [resizing, setResizing] = useState(false);
 	const draggingRef = useRef(false);
+
+	if (collapsed) return null;
 
 	const startResize = (e: React.PointerEvent<HTMLDivElement>) => {
 		draggingRef.current = true;
@@ -94,8 +104,12 @@ export function ResponsePanel({ result, error, loading }: ResponsePanelProps) {
 							<span className="resolved-url mono" title={result.resolved.url}>
 								{result.resolved.method} {result.resolved.url}
 							</span>
-							<span>⚡ {result.response.durationMs}ms</span>
-							<span>📦 {formatBytes(result.response.body)}</span>
+							<span className="meta-item">
+								<HugeiconsIcon icon={ZapIcon} size={14} /> {result.response.durationMs}ms
+							</span>
+							<span className="meta-item">
+								<HugeiconsIcon icon={PackageIcon} size={14} /> {formatBytes(result.response.body)}
+							</span>
 						</>
 					)}
 				</div>

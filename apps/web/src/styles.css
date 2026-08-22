@@ -88,29 +88,6 @@ body {
 	flex-shrink: 0;
 }
 
-.traffic-lights {
-	display: flex;
-	gap: 6px;
-}
-
-.tl {
-	width: 12px;
-	height: 12px;
-	border-radius: 50%;
-}
-
-.tl-close {
-	background: #ff5f56;
-}
-
-.tl-min {
-	background: #febc2e;
-}
-
-.tl-max {
-	background: #28c840;
-}
-
 .titlebar-center {
 	flex: 1;
 	display: flex;
@@ -138,6 +115,40 @@ body {
 
 .titlebar-actions {
 	width: 60px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.titlebar-actions.left {
+	justify-content: flex-start;
+}
+
+.titlebar-actions.right {
+	justify-content: flex-end;
+}
+
+.sidebar-toggle {
+	width: 26px;
+	height: 26px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--panel);
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+
+.sidebar-toggle:hover {
+	background: var(--accent);
+	color: var(--accent-fg);
 }
 
 /* Workspace */
@@ -1073,3 +1084,10 @@ body {
 		border-bottom: 1px solid var(--border);
 	}
 }
+
+.meta-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+

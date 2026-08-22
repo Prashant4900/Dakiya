@@ -31,6 +31,8 @@ export function App() {
 	const [requestDirty, setRequestDirty] = useState(false);
 	const [envEditorOpen, setEnvEditorOpen] = useState(false);
 	const [envDraft, setEnvDraft] = useState("");
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+	const [responseCollapsed, setResponseCollapsed] = useState(false);
 	const envInitialized = useRef(false);
 	const autoSelected = useRef(false);
 
@@ -200,20 +202,29 @@ export function App() {
 
 	return (
 		<div className="app-shell">
-			<TitleBar projectName={workspaceName} requestName={requestName} />
+			<TitleBar
+				projectName={workspaceName}
+				requestName={requestName}
+				sidebarCollapsed={sidebarCollapsed}
+				onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
+				responseCollapsed={responseCollapsed}
+				onToggleResponse={() => setResponseCollapsed((c) => !c)}
+			/>
 
 			<div className="workspace">
-				<Sidebar
-					workspaceName={workspaceName}
-					tree={tree}
-					requestIndex={requestIndex}
-					selectedPath={selectedPath}
-					onSelect={handleSelect}
-					environments={environments.length > 0 ? environments : [defaultEnv]}
-					activeEnv={effectiveEnv}
-					onEnvChange={setActiveEnv}
-					onEditEnv={openEnvEditor}
-				/>
+				{!sidebarCollapsed && (
+					<Sidebar
+						workspaceName={workspaceName}
+						tree={tree}
+						requestIndex={requestIndex}
+						selectedPath={selectedPath}
+						onSelect={handleSelect}
+						environments={environments.length > 0 ? environments : [defaultEnv]}
+						activeEnv={effectiveEnv}
+						onEnvChange={setActiveEnv}
+						onEditEnv={openEnvEditor}
+					/>
+				)}
 
 				<div className="main-content">
 					<RequestPanel
@@ -235,6 +246,7 @@ export function App() {
 							result={sendResult}
 							error={sendError}
 							loading={sendMutation.isPending}
+							collapsed={responseCollapsed}
 						/>
 					</RequestPanel>
 

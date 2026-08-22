@@ -1,15 +1,37 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+	SidebarLeftIcon,
+	SidebarRightIcon,
+} from "@hugeicons/core-free-icons";
+
 type TitleBarProps = {
 	projectName: string;
 	requestName: string | null;
+	sidebarCollapsed: boolean;
+	onToggleSidebar: () => void;
+	responseCollapsed: boolean;
+	onToggleResponse: () => void;
 };
 
-export function TitleBar({ projectName, requestName }: TitleBarProps) {
+export function TitleBar({
+	projectName,
+	requestName,
+	sidebarCollapsed,
+	onToggleSidebar,
+	responseCollapsed,
+	onToggleResponse,
+}: TitleBarProps) {
 	return (
 		<div className="titlebar">
-			<div className="traffic-lights">
-				<div className="tl tl-close" />
-				<div className="tl tl-min" />
-				<div className="tl tl-max" />
+			<div className="titlebar-actions left">
+				<button
+					type="button"
+					className="sidebar-toggle"
+					onClick={onToggleSidebar}
+					title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+				>
+					<HugeiconsIcon icon={SidebarLeftIcon} size={16} />
+				</button>
 			</div>
 			<div className="titlebar-center">
 				<span className="titlebar-project">{projectName}</span>
@@ -20,7 +42,16 @@ export function TitleBar({ projectName, requestName }: TitleBarProps) {
 					</>
 				)}
 			</div>
-			<div className="titlebar-actions" />
+			<div className="titlebar-actions right">
+				<button
+					type="button"
+					className="sidebar-toggle"
+					onClick={onToggleResponse}
+					title={responseCollapsed ? "Show response panel" : "Hide response panel"}
+				>
+					<HugeiconsIcon icon={SidebarRightIcon} size={16} />
+				</button>
+			</div>
 		</div>
 	);
 }
