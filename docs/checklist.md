@@ -78,8 +78,8 @@
 - [x] ABOUT.md / docs stay consistent
 - [x] Web error UX (API down, parse errors on save, send failures)
 - [x] Known limitations listed (no desktop, no Python, no import)
-- [ ] Manual end-to-end on macOS (and ideally Linux) — run smoke below
-- [ ] Fresh clone path verified — run smoke below
+- [x] Manual end-to-end on macOS (and ideally Linux) — run smoke below
+- [x] Fresh clone path verified — run smoke below
 
 ---
 

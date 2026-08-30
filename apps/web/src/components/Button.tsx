@@ -1,6 +1,16 @@
 import { forwardRef } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
+/**
+ * Defines the visual style of the button.
+ * - primary: Solid prominent button (e.g. Send)
+ * - secondary: Subtle solid button (e.g. Save)
+ * - ghost: Transparent background, bordered, suitable for inline actions
+ * - destructive: Red styling for dangerous actions (e.g. Delete)
+ * - dashed: Dashed border, suitable for "Add" actions
+ * - icon: Minimal padding, transparent, intended for icon-only buttons
+ * - unstyled: Stripped of all default button styling, useful for wrapping elements
+ */
 export type ButtonVariant =
 	| "primary"
 	| "secondary"
@@ -11,8 +21,11 @@ export type ButtonVariant =
 	| "unstyled";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+	/** Visual style variant of the button */
 	variant?: ButtonVariant;
+	/** Optional icon to render alongside or instead of text */
 	icon?: ReactNode;
+	/** Standard React children for button content */
 	children?: ReactNode;
 }
 
