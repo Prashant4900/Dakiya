@@ -59,6 +59,15 @@ export function saveRequest(
 	});
 }
 
+export function createRequestAPI(
+	path: string,
+): Promise<{ success: true; relativeToCollections: string }> {
+	return request(`/requests/${path}`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+	});
+}
+
 export function uploadFile(file: File): Promise<{ path: string }> {
 	const formData = new FormData();
 	formData.append("file", file);

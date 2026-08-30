@@ -163,7 +163,13 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 						<CodeEditor
 							value={(body as any).raw?.content || ""}
 							onChange={handleRawChange}
-							language="json"
+							language={
+								(body as any).raw?.format === "javascript"
+									? "javascript"
+									: (body as any).raw?.format === "json"
+										? "json"
+										: "text"
+							}
 							style={{ height: "100%" }}
 						/>
 					</div>

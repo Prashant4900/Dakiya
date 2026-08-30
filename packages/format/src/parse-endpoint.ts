@@ -34,12 +34,16 @@ export function parseEndpoint(
 
 		let normalizedBody = method.body;
 		if (typeof method.body === "string") {
+			// Strip legacy @body directive line if present
+			const bodyLines = method.body.split("\n");
+			const stripped = bodyLines[0].trim() === "@body" ? bodyLines.slice(1).join("\n") : method.body;
+			const trimmed = stripped.trim();
 			normalizedBody = {
 				type: "raw",
 				raw: {
-					content: method.body,
-					// Try to guess if it's JSON
-					format: method.body.trim().startsWith("{") || method.body.trim().startsWith("[") ? "json" : "text",
+					content: trimmed,
+					// Detect JSON
+					format: trimmed.startsWith("{") || trimmed.startsWith("[") ? "json" : "text",
 				},
 			};
 		}

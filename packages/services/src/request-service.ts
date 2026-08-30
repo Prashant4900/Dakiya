@@ -1,5 +1,5 @@
 import type { RequestDocument, RequestBody } from "@dakiya/domain";
-import { parseEndpoint, updateEndpointMethod } from "@dakiya/format";
+import { parseEndpoint, updateEndpointMethod, addEndpointMethod } from "@dakiya/format";
 import type { FsClient } from "./fs-client.js";
 import { collectionsRoot, posixJoin, resolveEndpointPaths } from "./paths.js";
 
@@ -145,6 +145,44 @@ export function writeRequestSource(
 	return {
 		relativeToCollections: `${relPath}/${methodId}`,
 		created: false,
+	};
+}
+
+export function createRequestSource(
+	fs: FsClient,
+	arg: string, // e.g. "users/list/get"
+	cwd: string,
+): { relativeToCollections: string } {
+	const resolved = resolveEndpointPaths(arg, cwd);
+	const parent = resolved.absPath.slice(0, resolved.absPath.lastIndexOf("/"));
+	const methodId = resolved.absPath.slice(
+		resolved.absPath.lastIndexOf("/") + 1,
+	);
+
+	if (!methodId) {
+		throw new Error(`Expected a specific method request to create, got: ${arg}`);
+	}
+
+	const yamlPath = posixJoin(parent, "requests.yaml");
+	let yamlSource = "";
+
+	if (!fs.exists(parent)) {
+		fs.mkdir(parent);
+	}
+
+	if (fs.exists(yamlPath)) {
+		yamlSource = fs.readFile(yamlPath);
+	}
+
+	const updatedYaml = addEndpointMethod(yamlSource, methodId);
+	fs.writeFile(yamlPath, updatedYaml);
+
+	const collectionsRootPath = collectionsRoot(cwd);
+	let relPath = parent.slice(collectionsRootPath.length);
+	if (relPath.startsWith("/")) relPath = relPath.slice(1);
+
+	return {
+		relativeToCollections: `${relPath}/${methodId}`,
 	};
 }
 

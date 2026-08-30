@@ -142,13 +142,14 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 	});
 
 	app.post("/requests/*", async (c) => {
-		return c.json(
-			{
-				error:
-					"Writing requests is not supported in the YAML folder format yet.",
-			},
-			400,
-		);
+		const fullPath = c.req.path.replace(/^\/requests\//, "");
+		try {
+			const { createRequestSource } = await import("../workspace.js");
+			const result = createRequestSource(fullPath, cwd);
+			return c.json({ success: true, relativeToCollections: result.relativeToCollections });
+		} catch (err) {
+			return c.json({ error: errorMessage(err) }, 400);
+		}
 	});
 
 	app.delete("/requests/*", async (c) => {

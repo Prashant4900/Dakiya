@@ -8,7 +8,6 @@ methods:
     headers:
       Content-Type: "application/json"
     body: |
-      @body
       {
         "name": "{{userName}}",
         "email": "{{userEmail}}"
@@ -32,7 +31,6 @@ methods:
     headers:
       Content-Type: "application/json"
     body: |
-      @body
       {
         "name": "{{userName}}",
         "email": "{{userEmail}}"

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+	createRequestAPI,
 	fetchEnvironment,
 	fetchRequest,
 	fetchWorkspace,
@@ -11,6 +12,7 @@ import {
 import type { SendResponse } from "./api/types.js";
 import { Button } from "./components/Button.js";
 import { EnvEditor } from "./components/EnvSwitcher.js";
+import { NewRequestModal } from "./components/NewRequestModal.js";
 import { RequestPanel } from "./components/RequestPanel.js";
 import { ResponsePanel } from "./components/ResponsePanel.js";
 import { Sidebar } from "./components/Sidebar.js";
@@ -39,6 +41,7 @@ export function App() {
 	const [envSaveError, setEnvSaveError] = useState<string | null>(null);
 	const [requestDirty, setRequestDirty] = useState(false);
 	const [envEditorOpen, setEnvEditorOpen] = useState(false);
+	const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
 	const [envDraft, setEnvDraft] = useState("");
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [responseCollapsed, setResponseCollapsed] = useState(false);
@@ -222,6 +225,13 @@ export function App() {
 		sendMutation.mutate({ path: selectedPath, env: effectiveEnv });
 	}, [selectedPath, effectiveEnv, sendMutation]);
 
+	const handleCreateRequest = async (path: string, method: string) => {
+		const result = await createRequestAPI(`${path}/${method}`);
+		workspaceQuery.refetch();
+		setSelectedPath(result.relativeToCollections);
+		setIsNewRequestModalOpen(false);
+	};
+
 	const openEnvEditor = useCallback(() => {
 		setEnvDraft(envQuery.data?.source ?? "");
 		setEnvSaveError(null);
@@ -288,6 +298,7 @@ export function App() {
 						versions={versions}
 						activeVersion={activeVersion}
 						onVersionChange={setActiveVersion}
+						onNewRequest={() => setIsNewRequestModalOpen(true)}
 					/>
 				)}
 
@@ -338,6 +349,14 @@ export function App() {
 					}
 					onClose={() => setEnvEditorOpen(false)}
 					saving={saveEnvMutation.isPending}
+				/>
+			)}
+
+			{isNewRequestModalOpen && (
+				<NewRequestModal
+					activeVersion={activeVersion}
+					onClose={() => setIsNewRequestModalOpen(false)}
+					onCreate={handleCreateRequest}
 				/>
 			)}
 

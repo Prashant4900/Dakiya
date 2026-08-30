@@ -12,11 +12,13 @@ methods:
     method: POST
     url: "{{baseUrl}}/api/echo"
     headers:
-      Content-Type: "application/json"
-      X-Request-Id: "{{requestId}}"
-    body: |
-      @body
-      {
-        "ping": true,
-        "source": "dakiya app"
-      }
+      Content-Type: application/javascript
+    body:
+      type: raw
+      raw:
+        content: |
+          {
+            "ping": true,
+            "source": "dakiya app"
+          }
+        format: json

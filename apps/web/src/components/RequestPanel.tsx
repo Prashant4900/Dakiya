@@ -134,12 +134,8 @@ function EnvVarToken({
 				onFocus={handleMouseEnter}
 				onBlur={handleMouseLeave}
 				style={{
-					background: "transparent",
-					border: "none",
-					padding: 0,
 					font: "inherit",
 					cursor: "pointer",
-					color: "inherit",
 				}}
 			>
 				{`{{${varName}}}`}
@@ -289,7 +285,7 @@ export function RequestPanel({
 	useEffect(() => {
 		localStorage.setItem("dakiya_requestTab", tab);
 	}, [tab]);
-	
+
 	const [localBody, setLocalBody] = useState<RequestBody | undefined>(undefined);
 	const [dirty, setDirty] = useState(false);
 	const [localHeaders, setLocalHeaders] = useState<
@@ -715,13 +711,13 @@ export function RequestPanel({
 									}}
 								>
 									<div style={{ flex: 1, border: "1px solid var(--border-color)", borderTop: "none", overflow: "auto" }}>
-								<CodeEditor
-									value={draftPreScript}
-									onChange={setDraftPreScript}
-									language="javascript"
-									style={{ height: "100%" }}
-									readOnly={true}
-								/>
+										<CodeEditor
+											value={draftPreScript}
+											onChange={setDraftPreScript}
+											language="javascript"
+											style={{ height: "100%" }}
+											readOnly={true}
+										/>
 									</div>
 								</div>
 							) : (
@@ -786,13 +782,13 @@ export function RequestPanel({
 									}}
 								>
 									<div style={{ flex: 1, border: "1px solid var(--border-color)", borderTop: "none", overflow: "auto" }}>
-								<CodeEditor
-									value={draftPostScript}
-									onChange={setDraftPostScript}
-									language="javascript"
-									style={{ height: "100%" }}
-									readOnly={true}
-								/>
+										<CodeEditor
+											value={draftPostScript}
+											onChange={setDraftPostScript}
+											language="javascript"
+											style={{ height: "100%" }}
+											readOnly={true}
+										/>
 									</div>
 								</div>
 							) : (

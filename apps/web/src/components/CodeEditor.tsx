@@ -1,12 +1,14 @@
 import ReactCodeMirror from "@uiw/react-codemirror";
 import { githubLight } from "@uiw/codemirror-theme-github";
-import { json } from "@codemirror/lang-json";
+import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { javascript } from "@codemirror/lang-javascript";
+import { linter, lintKeymap } from "@codemirror/lint";
+import { keymap } from "@codemirror/view";
 
 export type CodeEditorProps = {
 	value: string;
 	onChange?: (value: string) => void;
-	language?: "json" | "javascript";
+	language?: "json" | "javascript" | "text";
 	readOnly?: boolean;
 	style?: React.CSSProperties;
 	className?: string;
@@ -20,7 +22,16 @@ export function CodeEditor({
 	style,
 	className,
 }: CodeEditorProps) {
-	const extensions = [language === "json" ? json() : javascript()];
+	const extensions = [];
+
+	if (language === "json") {
+		extensions.push(json());
+		extensions.push(linter(jsonParseLinter()));
+		extensions.push(keymap.of(lintKeymap));
+	} else if (language === "javascript") {
+		extensions.push(javascript());
+	}
+	// "text" gets no language extension — plain text, no highlighting
 
 	return (
 		<ReactCodeMirror

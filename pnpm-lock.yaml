@@ -50,6 +50,12 @@ importers:
       '@codemirror/lang-json':
         specifier: ^6.0.2
         version: 6.0.2
+      '@codemirror/lint':
+        specifier: ^6.9.7
+        version: 6.9.7
+      '@codemirror/view':
+        specifier: ^6.43.9
+        version: 6.43.9
       '@dakiya/domain':
         specifier: workspace:*
         version: link:../../packages/domain

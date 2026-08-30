@@ -17,6 +17,7 @@ type SidebarProps = {
 	activeEnv: string;
 	onEnvChange: (name: string) => void;
 	onEditEnv: () => void;
+	onNewRequest: () => void;
 	versions: string[];
 	activeVersion: string | null;
 	onVersionChange: (name: string) => void;
@@ -32,6 +33,7 @@ export function Sidebar({
 	activeEnv,
 	onEnvChange,
 	onEditEnv,
+	onNewRequest,
 	versions,
 	activeVersion,
 	onVersionChange,
@@ -100,12 +102,30 @@ export function Sidebar({
 			</div>
 
 			<div className="sidebar-search">
-				<input
-					className="search-input"
-					placeholder="Search requests…"
-					value={search}
-					onChange={(e) => setSearch(e.target.value)}
-				/>
+				<div style={{ display: "flex", gap: "0.5rem" }}>
+					<input
+						className="search-input"
+						placeholder="Search requests…"
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						style={{ flex: 1 }}
+					/>
+					<button
+						onClick={onNewRequest}
+						style={{
+							background: "var(--primary-color)",
+							color: "white",
+							border: "none",
+							borderRadius: "4px",
+							padding: "0 0.5rem",
+							cursor: "pointer",
+							fontWeight: "bold",
+						}}
+						title="New Request"
+					>
+						+
+					</button>
+				</div>
 			</div>
 
 			<div className="sidebar-body">

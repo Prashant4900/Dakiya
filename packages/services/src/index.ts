@@ -33,6 +33,7 @@ export {
 export type { SendRequestOptions, SendRequestResult } from "./request.js";
 export { sendRequest } from "./request.js";
 export {
+	createRequestSource,
 	deleteRequestFile,
 	deleteScript,
 	listEndpointPaths,

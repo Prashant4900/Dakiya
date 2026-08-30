@@ -19,6 +19,7 @@ import {
 	resolveEndpointPaths,
 	writeEnvironmentSource as writeEnvironmentSourceService,
 	writeRequestSource as writeRequestSourceService,
+	createRequestSource as createRequestSourceService,
 	writeScript as writeScriptService,
 } from "@dakiya/services";
 import { createNodeFsClient } from "./fs/node-fs-client.js";
@@ -104,8 +105,16 @@ export function readRequestSource(arg: string, cwd = process.cwd()) {
 	return readRequestSourceService(fs, arg, cwd);
 }
 
-export function writeRequestSource(arg: string, updates: any, cwd = process.cwd()) {
+export function writeRequestSource(
+	arg: string,
+	updates: any,
+	cwd = process.cwd(),
+) {
 	return writeRequestSourceService(fs, arg, updates, cwd);
+}
+
+export function createRequestSource(arg: string, cwd = process.cwd()) {
+	return createRequestSourceService(fs, arg, cwd);
 }
 
 export function deleteRequestFile() {

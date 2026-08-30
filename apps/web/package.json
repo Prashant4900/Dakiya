@@ -12,6 +12,8 @@
 	"dependencies": {
 		"@codemirror/lang-javascript": "^6.2.5",
 		"@codemirror/lang-json": "^6.0.2",
+		"@codemirror/lint": "^6.9.7",
+		"@codemirror/view": "^6.43.9",
 		"@dakiya/domain": "workspace:*",
 		"@dakiya/format": "workspace:*",
 		"@hugeicons/core-free-icons": "^4.3.0",
