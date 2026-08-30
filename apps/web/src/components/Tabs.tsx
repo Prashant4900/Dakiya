@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Button } from "./Button.js";
 
 export interface TabOption<T extends string> {
 	id: T;
@@ -24,17 +25,17 @@ export function Tabs<T extends string>({
 	return (
 		<div className={className}>
 			{tabs.map((t) => (
-				<button
+				<Button
 					key={t.id}
-					type="button"
 					className={`tab-item${activeTab === t.id ? " active" : ""}`}
 					onClick={() => onChange(t.id)}
+					variant="unstyled"
 				>
 					{t.label}
 					{t.badge !== undefined && t.badge > 0 && (
 						<span className="tab-badge">{t.badge}</span>
 					)}
-				</button>
+				</Button>
 			))}
 			{children}
 		</div>

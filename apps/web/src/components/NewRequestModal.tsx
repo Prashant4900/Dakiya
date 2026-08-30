@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "./Button.js";
+import { Cancel01Icon } from "./icons/Cancel01Icon.js";
 import { Modal } from "./Modal.js";
 
 const HTTP_METHODS = [
@@ -42,23 +43,13 @@ export function NewRequestModal({
 		<Modal onClose={onClose} titleId="new-request-modal-title" maxWidth="460px">
 			<div className="modal-header">
 				<h2 id="new-request-modal-title">New Request</h2>
-				<button
-					type="button"
-					className="icon-btn"
+				<Button
+					variant="icon"
 					onClick={onClose}
 					aria-label="Close"
-					style={{
-						background: "none",
-						border: "none",
-						cursor: "pointer",
-						color: "var(--text-muted)",
-						fontSize: "20px",
-						lineHeight: 1,
-						padding: "2px 6px",
-					}}
-				>
-					×
-				</button>
+					icon={<Cancel01Icon size={18} />}
+					style={{ color: "var(--text-muted)" }}
+				/>
 			</div>
 
 			<form onSubmit={handleSubmit}>

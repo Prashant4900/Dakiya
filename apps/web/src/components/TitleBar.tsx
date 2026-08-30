@@ -1,3 +1,4 @@
+import { Button } from "./Button.js";
 import { SidebarLeftIcon } from "./icons/SidebarLeftIcon.js";
 import { SidebarRightIcon } from "./icons/SidebarRightIcon.js";
 
@@ -21,14 +22,13 @@ export function TitleBar({
 	return (
 		<div className="titlebar">
 			<div className="titlebar-actions left">
-				<button
-					type="button"
+				<Button
 					className="sidebar-toggle"
 					onClick={onToggleSidebar}
 					title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-				>
-					<SidebarLeftIcon size={16} />
-				</button>
+					icon={<SidebarLeftIcon size={16} />}
+					variant="icon"
+				/>
 			</div>
 			<div className="titlebar-center">
 				<span className="titlebar-project">{projectName}</span>
@@ -40,16 +40,15 @@ export function TitleBar({
 				)}
 			</div>
 			<div className="titlebar-actions right">
-				<button
-					type="button"
+				<Button
 					className="sidebar-toggle"
 					onClick={onToggleResponse}
 					title={
 						responseCollapsed ? "Show response panel" : "Hide response panel"
 					}
-				>
-					<SidebarRightIcon size={16} />
-				</button>
+					icon={<SidebarRightIcon size={16} />}
+					variant="icon"
+				/>
 			</div>
 		</div>
 	);

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
+import { Button } from "./Button.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { CopyIcon } from "./icons/CopyIcon.js";
 import { PackageIcon } from "./icons/PackageIcon.js";
@@ -169,8 +170,7 @@ export function ResponsePanel({
 						readOnly={true}
 						style={{ height: "100%" }}
 					/>
-					<button
-						type="button"
+					<Button
 						onClick={async () => {
 							if (!result?.response.body) return;
 							const text = formatBody(
@@ -185,29 +185,17 @@ export function ResponsePanel({
 								console.error("Failed to copy", e);
 							}
 						}}
+						variant="secondary"
 						style={{
 							position: "absolute",
 							top: "8px",
 							right: "16px",
-							background: "var(--bg-color)",
-							border: "1px solid var(--border-color)",
-							color: "var(--text-color)",
-							padding: "4px 8px",
-							borderRadius: "4px",
-							cursor: "pointer",
-							display: "flex",
-							alignItems: "center",
-							gap: "4px",
-							fontSize: "12px",
 							zIndex: 10,
-							opacity: 0.8,
 						}}
-						onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-						onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.8")}
+						icon={<CopyIcon />}
 					>
-						<CopyIcon />
 						{copied ? "Copied!" : "Copy"}
-					</button>
+					</Button>
 				</div>
 			)}
 

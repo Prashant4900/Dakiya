@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Button } from "./Button.js";
 
 type VersionSwitcherProps = {
 	versions: string[];
@@ -28,28 +29,28 @@ export function VersionSwitcher({
 
 	return (
 		<div className={`env-switcher${open ? " open" : ""}`} ref={ref}>
-			<button
-				type="button"
+			<Button
 				className="env-switcher-trigger"
 				onClick={() => setOpen((v) => !v)}
+				variant="unstyled"
 			>
 				<span className="env-name">Version: {activeVersion}</span>
 				<span className="env-arrow">▾</span>
-			</button>
+			</Button>
 			<div className="env-dropdown">
 				{versions.map((name) => (
-					<button
+					<Button
 						key={name}
-						type="button"
 						className={`env-option${name === activeVersion ? " active" : ""}`}
 						onClick={() => {
 							onVersionChange(name);
 							setOpen(false);
 						}}
+						variant="unstyled"
 					>
 						<span className="dot" />
 						{name}
-					</button>
+					</Button>
 				))}
 			</div>
 		</div>

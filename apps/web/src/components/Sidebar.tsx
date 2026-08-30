@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { CollectionNode, RequestIndexItem } from "../api/types.js";
+import { Button } from "./Button.js";
 import type { CollectionTreeActions } from "./CollectionTree.js";
 import { CollectionTree } from "./CollectionTree.js";
 import { EnvSwitcher } from "./EnvSwitcher.js";
@@ -117,25 +118,12 @@ export function Sidebar({
 						onChange={(e) => setSearch(e.target.value)}
 						style={{ flex: 1 }}
 					/>
-					<button
-						type="button"
+					<Button
 						onClick={onNewRequest}
-						className="icon-btn"
-						style={{
-							background: "transparent",
-							border: "none",
-							color: "var(--text-color)",
-							opacity: 0.6,
-							cursor: "pointer",
-							padding: "4px",
-							display: "flex",
-							alignItems: "center",
-							borderRadius: "4px",
-						}}
 						title="New Request"
-					>
-						<FilePlusIcon />
-					</button>
+						icon={<FilePlusIcon />}
+						variant="icon"
+					/>
 				</div>
 			</div>
 
@@ -149,24 +137,12 @@ export function Sidebar({
 					}}
 				>
 					<span>REQUESTS</span>
-					<button
-						type="button"
+					<Button
 						onClick={onNewFolder}
-						className="icon-btn"
-						style={{
-							background: "transparent",
-							border: "none",
-							color: "var(--text-color)",
-							opacity: 0.6,
-							cursor: "pointer",
-							padding: 0,
-							display: "flex",
-							alignItems: "center",
-						}}
 						title="New Folder"
-					>
-						<FolderPlusIcon />
-					</button>
+						icon={<FolderPlusIcon />}
+						variant="icon"
+					/>
 				</div>
 				{versionTree.length === 0 ? (
 					<p className="empty-hint">No requests in this version</p>

@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CollectionNode, RequestIndexItem } from "../api/types.js";
 import { methodBadgeClass } from "../utils/method.js";
+import { Button } from "./Button.js";
 
 // ── Context menu ────────────────────────────────────────────────────────────
 
@@ -36,18 +37,18 @@ function ContextMenu({
 	return createPortal(
 		<div ref={ref} className="ctx-menu" style={{ top, left }} role="menu">
 			{items.map((item) => (
-				<button
+				<Button
 					key={item.label}
-					type="button"
 					role="menuitem"
 					className={`ctx-menu-item${item.danger ? " danger" : ""}`}
 					onClick={() => {
 						item.onClick();
 						onClose();
 					}}
+					variant="unstyled"
 				>
 					{item.label}
-				</button>
+				</Button>
 			))}
 		</div>,
 		document.body,
@@ -161,11 +162,11 @@ function FolderGroup({
 	return (
 		<div className="collection-group">
 			<div className="group-row-wrap">
-				<button
+				<Button
 					ref={btnRef}
-					type="button"
 					className="group-row"
 					onClick={() => setOpen((v) => !v)}
+					variant="unstyled"
 				>
 					<span className={`group-chevron${open ? " open" : ""}`}>▶</span>
 					<span className="group-icon">📁</span>
@@ -182,20 +183,20 @@ function FolderGroup({
 						<span className="group-name">{name}</span>
 					)}
 					<span className="group-count">{count}</span>
-				</button>
+				</Button>
 
 				{!renaming && actions && (
-					<button
-						type="button"
+					<Button
 						className="item-action-btn"
 						title="Folder options"
 						onClick={(e) => {
 							e.stopPropagation();
 							setMenuRect(e.currentTarget.getBoundingClientRect());
 						}}
+						variant="unstyled"
 					>
 						⋯
-					</button>
+					</Button>
 				)}
 			</div>
 
@@ -353,10 +354,10 @@ function RequestItem({
 	return (
 		<>
 			<div className={`request-item-wrap${active ? " active" : ""}`}>
-				<button
-					type="button"
+				<Button
 					className={`request-item${active ? " active" : ""}`}
 					onClick={() => onSelect(path)}
+					variant="unstyled"
 				>
 					<span className={`method-badge ${methodBadgeClass(method)}`}>
 						{method === "DELETE" ? "DEL" : method}
@@ -373,20 +374,20 @@ function RequestItem({
 					) : (
 						<span className="req-name">{name}</span>
 					)}
-				</button>
+				</Button>
 
 				{!renaming && actions && (
-					<button
-						type="button"
+					<Button
 						className="item-action-btn"
 						title="Request options"
 						onClick={(e) => {
 							e.stopPropagation();
 							setMenuRect(e.currentTarget.getBoundingClientRect());
 						}}
+						variant="unstyled"
 					>
 						⋯
-					</button>
+					</Button>
 				)}
 			</div>
 
@@ -443,22 +444,13 @@ function RequestItem({
 								</select>
 							</label>
 							<div className="modal-actions">
-								<button
-									type="button"
+								<Button
 									onClick={() => setShowMoveDialog(false)}
-									style={{
-										background: "none",
-										border: "1px solid var(--border)",
-										borderRadius: 6,
-										padding: "6px 14px",
-										cursor: "pointer",
-										fontSize: 13,
-									}}
+									variant="secondary"
 								>
 									Cancel
-								</button>
-								<button
-									type="button"
+								</Button>
+								<Button
 									onClick={() => {
 										if (moveTarget) {
 											actions?.onRequestMove?.(path);
@@ -474,19 +466,10 @@ function RequestItem({
 										}
 										setShowMoveDialog(false);
 									}}
-									style={{
-										background: "var(--primary-color)",
-										color: "white",
-										border: "none",
-										borderRadius: 6,
-										padding: "6px 14px",
-										cursor: "pointer",
-										fontSize: 13,
-										fontWeight: 600,
-									}}
+									variant="primary"
 								>
 									Move
-								</button>
+								</Button>
 							</div>
 						</div>
 					</div>,

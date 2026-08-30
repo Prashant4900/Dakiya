@@ -358,7 +358,7 @@ export function RequestPanel({
 	// Note: We included `draft` in dependencies above so if the user clicks "Save" and request reloads,
 	// or if the draft changes externally, headers reload. But wait, if they type in the table, it modifies draft!
 	// This would cause a re-render loop or focus loss. Let's fix this by only updating if not editing.
-	// Actually, it's safer to only sync when tab changes or request changes.
+	// Actually, it's safer to only sync when tab changes or request ID changes.
 
 	// Let's refactor the useEffect to only run when tab changes or request ID changes.
 
@@ -662,14 +662,13 @@ export function RequestPanel({
 														</td>
 														<td className="kv-actions">
 															{i !== localHeaders.length - 1 && (
-																<button
-																	type="button"
+																<Button
 																	className="kv-remove-btn"
 																	onClick={() => handleHeaderRemove(i)}
 																	title="Remove header"
-																>
-																	<Cancel01Icon size={14} />
-																</button>
+																	icon={<Cancel01Icon size={14} />}
+																	variant="icon"
+																/>
 															)}
 														</td>
 													</tr>
@@ -699,22 +698,14 @@ export function RequestPanel({
 						<>
 							<PaneHeader title="Pre-request script" tag="TS/JS">
 								{doc?.pre?.source !== undefined && (
-									<button
-										type="button"
-										style={{
-											background: "transparent",
-											border: "none",
-											color: "var(--danger-text, #d03030)",
-											cursor: "pointer",
-											fontSize: "1.2em",
-											padding: "4px",
-										}}
+									<Button
 										disabled={deleteScriptMutation.isPending}
 										onClick={() => setDeleteConfirm("pre")}
 										title="Delete Script"
-									>
-										<Delete02Icon size={18} />
-									</button>
+										icon={<Delete02Icon size={18} />}
+										variant="icon"
+										style={{ color: "var(--danger-text, #d03030)" }}
+									/>
 								)}
 							</PaneHeader>
 							<div
@@ -788,22 +779,14 @@ export function RequestPanel({
 						<>
 							<PaneHeader title="Post-response script" tag="TS/JS">
 								{doc?.post?.source !== undefined && (
-									<button
-										type="button"
-										style={{
-											background: "transparent",
-											border: "none",
-											color: "var(--danger-text, #d03030)",
-											cursor: "pointer",
-											fontSize: "1.2em",
-											padding: "4px",
-										}}
+									<Button
 										disabled={deleteScriptMutation.isPending}
 										onClick={() => setDeleteConfirm("post")}
 										title="Delete Script"
-									>
-										<Delete02Icon size={18} />
-									</button>
+										icon={<Delete02Icon size={18} />}
+										variant="icon"
+										style={{ color: "var(--danger-text, #d03030)" }}
+									/>
 								)}
 							</PaneHeader>
 							<div

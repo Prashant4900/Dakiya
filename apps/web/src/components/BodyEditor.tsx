@@ -2,7 +2,9 @@ import type { RequestBody } from "@dakiya/domain";
 import { useEffect, useState } from "react";
 import { uploadFile } from "../api/client.js";
 
+import { Button } from "./Button.js";
 import { CodeEditor } from "./CodeEditor.js";
+import { Cancel01Icon } from "./icons/Cancel01Icon.js";
 import { PaneHeader } from "./PaneHeader.js";
 
 type BodyEditorProps = {
@@ -223,20 +225,9 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 						}}
 					>
 						{(body as any).raw?.format === "json" && (
-							<button
-								type="button"
-								onClick={handleFormatJson}
-								style={{
-									padding: "2px 8px",
-									fontSize: "0.85em",
-									cursor: "pointer",
-									background: "transparent",
-									border: "1px solid var(--border-color)",
-									borderRadius: "4px",
-								}}
-							>
+							<Button onClick={handleFormatJson} variant="ghost">
 								Beautify
-							</button>
+							</Button>
 						)}
 						<select
 							value={(body as any).raw?.format || "json"}
@@ -446,31 +437,20 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 											)}
 										</td>
 										<td className="kv-actions">
-											<button
-												type="button"
+											<Button
 												className="kv-remove-btn"
 												onClick={() => removeKvItem(mode, idx)}
-											>
-												✕
-											</button>
+												icon={<Cancel01Icon size={14} />}
+												variant="icon"
+											/>
 										</td>
 									</tr>
 								))}
 								<tr>
 									<td colSpan={3} style={{ padding: "8px" }}>
-										<button
-											type="button"
-											onClick={() => addKvItem(mode)}
-											style={{
-												background: "transparent",
-												border: "1px dashed var(--border-color)",
-												padding: "4px 8px",
-												cursor: "pointer",
-												borderRadius: "4px",
-											}}
-										>
+										<Button onClick={() => addKvItem(mode)} variant="dashed">
 											+ Add Item
-										</button>
+										</Button>
 									</td>
 								</tr>
 							</tbody>

@@ -31,40 +31,40 @@ export function EnvSwitcher({
 
 	return (
 		<div className={`env-switcher${open ? " open" : ""}`} ref={ref}>
-			<button
-				type="button"
+			<Button
 				className="env-switcher-trigger"
 				onClick={() => setOpen((v) => !v)}
+				variant="unstyled"
 			>
 				<span className="env-dot" />
 				<span className="env-name">{activeEnv}</span>
 				<span className="env-arrow">▾</span>
-			</button>
+			</Button>
 			<div className="env-dropdown">
 				{environments.map((name) => (
-					<button
+					<Button
 						key={name}
-						type="button"
 						className={`env-option${name === activeEnv ? " active" : ""}`}
 						onClick={() => {
 							onEnvChange(name);
 							setOpen(false);
 						}}
+						variant="unstyled"
 					>
 						<span className="dot" />
 						{name}
-					</button>
+					</Button>
 				))}
-				<button
-					type="button"
+				<Button
 					className="env-option env-option-edit"
 					onClick={() => {
 						setOpen(false);
 						onEdit();
 					}}
+					variant="unstyled"
 				>
 					Edit environment…
-				</button>
+				</Button>
 			</div>
 		</div>
 	);
