@@ -202,7 +202,6 @@ function EnvHighlight({
 	);
 }
 
-// Editable Cell component that shows EnvHighlight when not focused
 function EnvEditableCell({
 	value,
 	placeholder,
@@ -217,11 +216,20 @@ function EnvEditableCell({
 	list?: string;
 }) {
 	const [isFocused, setIsFocused] = useState(false);
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	// Focus the input automatically whenever this cell becomes active
+	useEffect(() => {
+		if (isFocused && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [isFocused]);
 
 	return (
-		<button
-			type="button"
+		<div
 			className="kv-editable-cell"
+			tabIndex={0}
+			onFocus={() => setIsFocused(true)}
 			onClick={() => setIsFocused(true)}
 			style={{
 				display: "block",
@@ -232,6 +240,7 @@ function EnvEditableCell({
 				textAlign: "left",
 				font: "inherit",
 				color: "inherit",
+				cursor: "text",
 			}}
 			onKeyDown={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
@@ -248,6 +257,7 @@ function EnvEditableCell({
 		>
 			{isFocused || !value ? (
 				<input
+					ref={inputRef}
 					type="text"
 					className="kv-input"
 					placeholder={placeholder}
@@ -260,7 +270,7 @@ function EnvEditableCell({
 					<EnvHighlight text={value} variables={variables} />
 				</div>
 			)}
-		</button>
+		</div>
 	);
 }
 
@@ -341,23 +351,6 @@ export function RequestPanel({
 
 	const method = doc?.request.method ?? "GET";
 	const url = doc?.request.url ?? "";
-
-	// Sync headers to local state when entering headers tab
-	useEffect(() => {
-		if (tab === "headers" && doc) {
-			const h = Object.entries(doc.request.headers || {}).map(([k, v], i) => ({
-				id: i,
-				key: k,
-				value: String(v),
-			}));
-			setLocalHeaders(h);
-			setParseError(null);
-		}
-	}, [tab, doc]);
-
-	// Note: We included `draft` in dependencies above so if the user clicks "Save" and request reloads,
-	// or if the draft changes externally, headers reload. But wait, if they type in the table, it modifies draft!
-	// This would cause a re-render loop or focus loss. Let's fix this by only updating if not editing.
 	// Actually, it's safer to only sync when tab changes or request ID changes.
 
 	// Let's refactor the useEffect to only run when tab changes or request ID changes.
@@ -477,7 +470,6 @@ export function RequestPanel({
 		updateDraftHeaders();
 	};
 
-	// We fix the syncing issue by using a ref to track if we are actively editing headers.
 	const isEditingHeaders = useRef(false);
 	useEffect(() => {
 		if (tab === "headers" && !isEditingHeaders.current && doc) {
@@ -486,6 +478,8 @@ export function RequestPanel({
 				key: k,
 				value: String(v),
 			}));
+			// ALWAYS add a trailing empty row so users can start typing new headers
+			h.push({ id: Date.now(), key: "", value: "" });
 			setLocalHeaders(h);
 			setParseError(null);
 		}

@@ -30,7 +30,22 @@ function formatBody(body: string, contentType?: string): string {
 	return body;
 }
 
-const MIN_WIDTH = 400;
+function escapeShell(str: string): string {
+	return `'${str.replace(/'/g, "'\\''")}'`;
+}
+
+function buildCurl(resolved: SendResponse["resolved"]): string {
+	let curl = `curl -X ${resolved.method} '${resolved.url}'`;
+	for (const [key, value] of Object.entries(resolved.headers)) {
+		curl += ` \\\n  -H ${escapeShell(`${key}: ${value}`)}`;
+	}
+	if (resolved.body) {
+		curl += ` \\\n  -d ${escapeShell(resolved.body)}`;
+	}
+	return curl;
+}
+
+const MIN_WIDTH = 500;
 const MAX_WIDTH = 800;
 
 export function ResponsePanel({
@@ -41,7 +56,8 @@ export function ResponsePanel({
 }: ResponsePanelProps) {
 	const [tab, setTab] = useState<ResponseTab>("body");
 	const [copied, setCopied] = useState(false);
-	const [width, setWidth] = useState(400);
+	const [copiedCurl, setCopiedCurl] = useState(false);
+	const [width, setWidth] = useState(500);
 	const [resizing, setResizing] = useState(false);
 	const draggingRef = useRef(false);
 
@@ -80,8 +96,8 @@ export function ResponsePanel({
 	const headersText =
 		result && Object.entries(result.response.headers).length > 0
 			? Object.entries(result.response.headers)
-					.map(([k, v]) => `${k}: ${v}`)
-					.join("\n")
+				.map(([k, v]) => `${k}: ${v}`)
+				.join("\n")
 			: "(none)";
 
 	return (
@@ -116,6 +132,22 @@ export function ResponsePanel({
 							<span className="meta-item">
 								<PackageIcon size={14} /> {formatBytes(result.response.body)}
 							</span>
+							<Button
+								variant="secondary"
+								icon={<CopyIcon />}
+								onClick={async () => {
+									try {
+										await navigator.clipboard.writeText(buildCurl(result.resolved));
+										setCopiedCurl(true);
+										setTimeout(() => setCopiedCurl(false), 2000);
+									} catch (e) {
+										console.error("Failed to copy cURL", e);
+									}
+								}}
+								style={{ marginLeft: "auto", height: "24px", padding: "0 8px", fontSize: "11px" }}
+							>
+								{copiedCurl ? "Copied!" : "cURL"}
+							</Button>
 						</>
 					)}
 				</div>
