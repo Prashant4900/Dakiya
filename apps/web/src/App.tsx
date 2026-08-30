@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+	createFolderAPI,
 	createRequestAPI,
 	deleteFolderAPI,
 	deleteRequestAPI,
@@ -19,6 +20,7 @@ import { Button } from "./components/Button.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import { EnvEditor } from "./components/EnvSwitcher.js";
 import { NewRequestModal } from "./components/NewRequestModal.js";
+import { PromptDialog } from "./components/PromptDialog.js";
 import { RequestPanel } from "./components/RequestPanel.js";
 import { ResponsePanel } from "./components/ResponsePanel.js";
 import { Sidebar } from "./components/Sidebar.js";
@@ -26,6 +28,7 @@ import { StatusBar } from "./components/StatusBar.js";
 import { TitleBar } from "./components/TitleBar.js";
 import {
 	buildRequestIndexFallback,
+	extractFolders,
 	findFirstRequestPath,
 } from "./utils/tree.js";
 
@@ -48,6 +51,7 @@ export function App() {
 	const [envEditorOpen, setEnvEditorOpen] = useState(false);
 	const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
 	const [envDraft, setEnvDraft] = useState("");
+	const [isNewFolderPromptOpen, setIsNewFolderPromptOpen] = useState(false);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [responseCollapsed, setResponseCollapsed] = useState(false);
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
@@ -82,6 +86,15 @@ export function App() {
 			.filter((node) => node.type === "folder")
 			.map((node) => node.name);
 	}, [tree]);
+
+	const versionTree = useMemo(() => {
+		const node = tree.find((n) => n.name === activeVersion);
+		return node?.type === "folder" ? node.children : [];
+	}, [tree, activeVersion]);
+
+	const activeVersionFolders = useMemo(() => {
+		return extractFolders(versionTree);
+	}, [versionTree]);
 
 	const manifestVersion = workspaceQuery.data?.manifest?.version?.toString();
 
@@ -225,6 +238,13 @@ export function App() {
 			if (selectedPath?.startsWith(`${data.oldPath}/`)) {
 				setSelectedPath(data.newPath + selectedPath.slice(data.oldPath.length));
 			}
+		},
+	});
+
+	const createFolderMutation = useMutation({
+		mutationFn: (folderPath: string) => createFolderAPI(folderPath),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["workspace"] });
 		},
 	});
 
@@ -380,6 +400,7 @@ export function App() {
 						activeVersion={activeVersion}
 						onVersionChange={setActiveVersion}
 						onNewRequest={() => setIsNewRequestModalOpen(true)}
+						onNewFolder={() => setIsNewFolderPromptOpen(true)}
 						actions={
 							{
 								onFolderRename: (folderPath, newName) =>
@@ -433,6 +454,22 @@ export function App() {
 				</div>
 			</div>
 
+			{isNewFolderPromptOpen && (
+				<PromptDialog
+					title="Create New Folder"
+					placeholder="Enter folder name (e.g. auth)"
+					confirmText="Create"
+					onConfirm={(name) => {
+						const targetPath = activeVersion
+							? `${activeVersion}/${name}`
+							: name;
+						createFolderMutation.mutate(targetPath);
+						setIsNewFolderPromptOpen(false);
+					}}
+					onCancel={() => setIsNewFolderPromptOpen(false)}
+				/>
+			)}
+
 			{envEditorOpen && (
 				<EnvEditor
 					name={effectiveEnv}
@@ -453,6 +490,7 @@ export function App() {
 			{isNewRequestModalOpen && (
 				<NewRequestModal
 					activeVersion={activeVersion}
+					folders={activeVersionFolders}
 					onClose={() => setIsNewRequestModalOpen(false)}
 					onCreate={handleCreateRequest}
 				/>

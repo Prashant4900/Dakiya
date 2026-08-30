@@ -1,6 +1,4 @@
 import type { RequestBody } from "@dakiya/domain";
-import { Cancel01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	type ReactNode,
@@ -19,6 +17,8 @@ import { BodyEditor } from "./BodyEditor.js";
 import { Button } from "./Button.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
+import { Cancel01Icon } from "./icons/Cancel01Icon.js";
+import { Delete02Icon } from "./icons/Delete02Icon.js";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
 
@@ -593,7 +593,11 @@ export function RequestPanel({
 					)}
 
 					{showEditor && tab === "body" && (
-						<BodyEditor body={localBody} onChange={handleBodyChange} />
+						<BodyEditor
+							body={localBody}
+							onChange={handleBodyChange}
+							variables={activeEnvVariables}
+						/>
 					)}
 
 					{showEditor && tab === "headers" && (
@@ -664,10 +668,7 @@ export function RequestPanel({
 																	onClick={() => handleHeaderRemove(i)}
 																	title="Remove header"
 																>
-																	<HugeiconsIcon
-																		icon={Cancel01Icon}
-																		size={14}
-																	/>
+																	<Cancel01Icon size={14} />
 																</button>
 															)}
 														</td>
@@ -712,7 +713,7 @@ export function RequestPanel({
 										onClick={() => setDeleteConfirm("pre")}
 										title="Delete Script"
 									>
-										<HugeiconsIcon icon={Delete02Icon} size={18} />
+										<Delete02Icon size={18} />
 									</button>
 								)}
 							</PaneHeader>
@@ -749,6 +750,7 @@ export function RequestPanel({
 											value={draftPreScript}
 											onChange={setDraftPreScript}
 											language="javascript"
+											variables={activeEnvVariables}
 											style={{ height: "100%" }}
 											readOnly={true}
 										/>
@@ -800,7 +802,7 @@ export function RequestPanel({
 										onClick={() => setDeleteConfirm("post")}
 										title="Delete Script"
 									>
-										<HugeiconsIcon icon={Delete02Icon} size={18} />
+										<Delete02Icon size={18} />
 									</button>
 								)}
 							</PaneHeader>
@@ -837,6 +839,7 @@ export function RequestPanel({
 											value={draftPostScript}
 											onChange={setDraftPostScript}
 											language="javascript"
+											variables={activeEnvVariables}
 											style={{ height: "100%" }}
 											readOnly={true}
 										/>

@@ -26,3 +26,15 @@ export function buildRequestIndexFallback(
 	walk(tree);
 	return items;
 }
+
+export function extractFolders(nodes: CollectionNode[], prefix = ""): string[] {
+	let folders: string[] = [];
+	for (const node of nodes) {
+		if (node.type === "folder") {
+			const currentPath = prefix ? `${prefix}/${node.name}` : node.name;
+			folders.push(currentPath);
+			folders = folders.concat(extractFolders(node.children, currentPath));
+		}
+	}
+	return folders;
+}

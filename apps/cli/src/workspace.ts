@@ -1,6 +1,7 @@
 import {
 	buildCollectionTree,
 	collectionsRoot,
+	createFolder as createFolderService,
 	createRequestSource as createRequestSourceService,
 	dakiyaRoot,
 	deleteFolder as deleteFolderService,
@@ -149,6 +150,10 @@ export function renameFolder(
 	cwd = process.cwd(),
 ) {
 	return renameFolderService(fs, folderPath, newName, cwd);
+}
+
+export function createFolder(folderPath: string, cwd = process.cwd()) {
+	return createFolderService(fs, folderPath, cwd);
 }
 
 export function deleteFolder(folderPath: string, cwd = process.cwd()) {

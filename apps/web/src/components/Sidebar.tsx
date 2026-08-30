@@ -3,6 +3,8 @@ import type { CollectionNode, RequestIndexItem } from "../api/types.js";
 import type { CollectionTreeActions } from "./CollectionTree.js";
 import { CollectionTree } from "./CollectionTree.js";
 import { EnvSwitcher } from "./EnvSwitcher.js";
+import { FilePlusIcon } from "./icons/FilePlusIcon.js";
+import { FolderPlusIcon } from "./icons/FolderPlusIcon.js";
 import { VersionSwitcher } from "./VersionSwitcher.js";
 
 const MIN_WIDTH = 150;
@@ -19,6 +21,7 @@ type SidebarProps = {
 	onEnvChange: (name: string) => void;
 	onEditEnv: () => void;
 	onNewRequest: () => void;
+	onNewFolder: () => void;
 	versions: string[];
 	activeVersion: string | null;
 	onVersionChange: (name: string) => void;
@@ -36,6 +39,7 @@ export function Sidebar({
 	onEnvChange,
 	onEditEnv,
 	onNewRequest,
+	onNewFolder,
 	versions,
 	activeVersion,
 	onVersionChange,
@@ -105,7 +109,7 @@ export function Sidebar({
 			</div>
 
 			<div className="sidebar-search">
-				<div style={{ display: "flex", gap: "0.5rem" }}>
+				<div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
 					<input
 						className="search-input"
 						placeholder="Search requests…"
@@ -116,24 +120,54 @@ export function Sidebar({
 					<button
 						type="button"
 						onClick={onNewRequest}
+						className="icon-btn"
 						style={{
-							background: "var(--primary-color)",
-							color: "white",
+							background: "transparent",
 							border: "none",
-							borderRadius: "4px",
-							padding: "0 0.5rem",
+							color: "var(--text-color)",
+							opacity: 0.6,
 							cursor: "pointer",
-							fontWeight: "bold",
+							padding: "4px",
+							display: "flex",
+							alignItems: "center",
+							borderRadius: "4px",
 						}}
 						title="New Request"
 					>
-						+
+						<FilePlusIcon />
 					</button>
 				</div>
 			</div>
 
 			<div className="sidebar-body">
-				<div className="section-label">Requests</div>
+				<div
+					className="section-label"
+					style={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "center",
+					}}
+				>
+					<span>REQUESTS</span>
+					<button
+						type="button"
+						onClick={onNewFolder}
+						className="icon-btn"
+						style={{
+							background: "transparent",
+							border: "none",
+							color: "var(--text-color)",
+							opacity: 0.6,
+							cursor: "pointer",
+							padding: 0,
+							display: "flex",
+							alignItems: "center",
+						}}
+						title="New Folder"
+					>
+						<FolderPlusIcon />
+					</button>
+				</div>
 				{versionTree.length === 0 ? (
 					<p className="empty-hint">No requests in this version</p>
 				) : (

@@ -201,6 +201,21 @@ export function deleteRequestFile(): void {
 }
 
 /** Rename an endpoint folder (e.g. "v1/users" → "v1/members"). */
+export function createFolder(
+	fs: FsClient,
+	folderPath: string,
+	cwd: string,
+): { newPath: string } {
+	const root = collectionsRoot(cwd);
+	const targetPath = posixJoin(root, folderPath);
+	if (fs.exists(targetPath)) {
+		throw new Error(`Folder already exists: ${folderPath}`);
+	}
+	fs.mkdir(targetPath);
+	fs.writeFile(posixJoin(targetPath, "requests.yaml"), "methods:\n");
+	return { newPath: folderPath };
+}
+
 export function renameFolder(
 	fs: FsClient,
 	folderPath: string, // relative to collections, e.g. "v1/users"

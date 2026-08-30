@@ -10,6 +10,7 @@ import { persistEnvironmentVariables } from "../sandbox/persist-env.js";
 import { createVmScriptRunner } from "../sandbox/run-script.js";
 import {
 	buildCollectionTree,
+	createFolder,
 	deleteFolder,
 	deleteRequest,
 	listEndpointPaths,
@@ -260,6 +261,20 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 		} catch (err) {
 			const message = errorMessage(err);
 			return c.json({ error: message }, isNotFound(message) ? 404 : 400);
+		}
+	});
+
+	// Folder management: POST /api/folders
+	app.post("/folders", async (c) => {
+		try {
+			const body = await c.req.json<{ folderPath: string }>();
+			if (!body.folderPath?.trim()) {
+				return c.json({ error: "folderPath is required" }, 400);
+			}
+			const result = createFolder(body.folderPath.trim(), cwd);
+			return c.json({ success: true, ...result });
+		} catch (err) {
+			return c.json({ error: errorMessage(err) }, 400);
 		}
 	});
 

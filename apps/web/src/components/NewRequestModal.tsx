@@ -14,12 +14,14 @@ const HTTP_METHODS = [
 
 export interface NewRequestModalProps {
 	activeVersion: string | null;
+	folders?: string[];
 	onClose: () => void;
 	onCreate: (path: string, method: string) => void;
 }
 
 export function NewRequestModal({
 	activeVersion,
+	folders = [],
 	onClose,
 	onCreate,
 }: NewRequestModalProps) {
@@ -132,12 +134,20 @@ export function NewRequestModal({
 						</span>
 						<input
 							type="text"
+							list="folder-list"
 							className="search-input"
 							placeholder={`inside ${version}/`}
 							value={folder}
 							onChange={(e) => setFolder(e.target.value)}
 							style={{ width: "100%", boxSizing: "border-box" }}
 						/>
+						{folders.length > 0 && (
+							<datalist id="folder-list">
+								{folders.map((f) => (
+									<option key={f} value={f} />
+								))}
+							</datalist>
+						)}
 					</label>
 
 					<p

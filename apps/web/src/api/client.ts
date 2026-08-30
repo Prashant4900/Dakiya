@@ -176,3 +176,13 @@ export function moveRequestAPI(
 		body: JSON.stringify({ action: "move", toFolder }),
 	});
 }
+
+export function createFolderAPI(
+	folderPath: string,
+): Promise<{ success: true; newPath: string }> {
+	return request("/folders", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ folderPath }),
+	});
+}

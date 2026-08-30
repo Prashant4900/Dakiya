@@ -1,5 +1,5 @@
-import { SidebarLeftIcon, SidebarRightIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { SidebarLeftIcon } from "./icons/SidebarLeftIcon.js";
+import { SidebarRightIcon } from "./icons/SidebarRightIcon.js";
 
 type TitleBarProps = {
 	projectName: string;
@@ -27,7 +27,7 @@ export function TitleBar({
 					onClick={onToggleSidebar}
 					title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
 				>
-					<HugeiconsIcon icon={SidebarLeftIcon} size={16} />
+					<SidebarLeftIcon size={16} />
 				</button>
 			</div>
 			<div className="titlebar-center">
@@ -48,7 +48,7 @@ export function TitleBar({
 						responseCollapsed ? "Show response panel" : "Hide response panel"
 					}
 				>
-					<HugeiconsIcon icon={SidebarRightIcon} size={16} />
+					<SidebarRightIcon size={16} />
 				</button>
 			</div>
 		</div>

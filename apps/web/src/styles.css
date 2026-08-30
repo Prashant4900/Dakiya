@@ -8,22 +8,22 @@
 	--foreground: #111827;
 	--muted: #6b7280;
 	--muted-foreground: #9ca3af;
-	--subtle: #d1d5db;
+	--subtle: #9ca3af;
 	--accent: #1a7f5a;
 	--accent-hover: #16714f;
 	--accent-fg: #ffffff;
 	--accent-muted: rgba(26, 127, 90, 0.09);
 	--accent-muted-border: rgba(26, 127, 90, 0.18);
-	--get: #1a7f5a;
-	--get-bg: rgba(26, 127, 90, 0.1);
-	--post: #2563eb;
-	--post-bg: rgba(37, 99, 235, 0.1);
-	--put: #d97706;
-	--put-bg: rgba(217, 119, 6, 0.1);
-	--patch: #7c3aed;
-	--patch-bg: rgba(124, 58, 237, 0.1);
-	--del: #dc2626;
-	--del-bg: rgba(220, 38, 38, 0.1);
+	--get: #106042;
+	--get-bg: rgba(16, 96, 66, 0.15);
+	--post: #1d4ed8;
+	--post-bg: rgba(29, 78, 216, 0.15);
+	--put: #b45309;
+	--put-bg: rgba(180, 83, 9, 0.15);
+	--patch: #6d28d9;
+	--patch-bg: rgba(109, 40, 217, 0.15);
+	--del: #b91c1c;
+	--del-bg: rgba(185, 28, 28, 0.15);
 	--syn-key: #1a7f5a;
 	--syn-str: #2563eb;
 	--syn-val: #7c3aed;
@@ -1292,7 +1292,8 @@ body {
 	gap: 4px;
 }
 
-.env-var-highlight {
+.env-var-highlight,
+.cm-env-var-highlight {
 	color: var(--put);
 	cursor: pointer;
 	border-radius: 4px;
@@ -1301,7 +1302,8 @@ body {
 	border: 1px solid rgba(217, 119, 6, 0.2);
 }
 
-.env-var-highlight.unresolved {
+.env-var-highlight.unresolved,
+.cm-env-var-highlight.unresolved {
 	color: var(--del);
 	background: var(--del-bg);
 	border: 1px dashed rgba(220, 38, 38, 0.3);

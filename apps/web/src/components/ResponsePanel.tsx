@@ -1,9 +1,10 @@
-import { PackageIcon, ZapIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
 import { CodeEditor } from "./CodeEditor.js";
+import { CopyIcon } from "./icons/CopyIcon.js";
+import { PackageIcon } from "./icons/PackageIcon.js";
+import { ZapIcon } from "./icons/ZapIcon.js";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
 
@@ -38,6 +39,7 @@ export function ResponsePanel({
 	collapsed,
 }: ResponsePanelProps) {
 	const [tab, setTab] = useState<ResponseTab>("body");
+	const [copied, setCopied] = useState(false);
 	const [width, setWidth] = useState(400);
 	const [resizing, setResizing] = useState(false);
 	const draggingRef = useRef(false);
@@ -108,12 +110,10 @@ export function ResponsePanel({
 								{result.resolved.method} {result.resolved.url}
 							</span>
 							<span className="meta-item">
-								<HugeiconsIcon icon={ZapIcon} size={14} />{" "}
-								{result.response.durationMs}ms
+								<ZapIcon size={14} /> {result.response.durationMs}ms
 							</span>
 							<span className="meta-item">
-								<HugeiconsIcon icon={PackageIcon} size={14} />{" "}
-								{formatBytes(result.response.body)}
+								<PackageIcon size={14} /> {formatBytes(result.response.body)}
 							</span>
 						</>
 					)}
@@ -149,6 +149,7 @@ export function ResponsePanel({
 			{result && !error && tab === "body" && (
 				<div
 					style={{
+						position: "relative",
 						flex: 1,
 						overflow: "auto",
 						border: "1px solid var(--border-color)",
@@ -168,6 +169,45 @@ export function ResponsePanel({
 						readOnly={true}
 						style={{ height: "100%" }}
 					/>
+					<button
+						type="button"
+						onClick={async () => {
+							if (!result?.response.body) return;
+							const text = formatBody(
+								result.response.body,
+								result.response.headers["content-type"],
+							);
+							try {
+								await navigator.clipboard.writeText(text);
+								setCopied(true);
+								setTimeout(() => setCopied(false), 2000);
+							} catch (e) {
+								console.error("Failed to copy", e);
+							}
+						}}
+						style={{
+							position: "absolute",
+							top: "8px",
+							right: "16px",
+							background: "var(--bg-color)",
+							border: "1px solid var(--border-color)",
+							color: "var(--text-color)",
+							padding: "4px 8px",
+							borderRadius: "4px",
+							cursor: "pointer",
+							display: "flex",
+							alignItems: "center",
+							gap: "4px",
+							fontSize: "12px",
+							zIndex: 10,
+							opacity: 0.8,
+						}}
+						onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+						onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.8")}
+					>
+						<CopyIcon />
+						{copied ? "Copied!" : "Copy"}
+					</button>
 				</div>
 			)}
 

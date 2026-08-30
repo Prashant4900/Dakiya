@@ -8,9 +8,10 @@ import { PaneHeader } from "./PaneHeader.js";
 type BodyEditorProps = {
 	body: RequestBody | undefined;
 	onChange: (body: RequestBody | undefined) => void;
+	variables?: Record<string, string>;
 };
 
-export function BodyEditor({ body, onChange }: BodyEditorProps) {
+export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 	const [mode, setMode] = useState<any>(
 		(typeof body === "object" && body?.type) || "none",
 	);
@@ -285,6 +286,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 										? "json"
 										: "text"
 							}
+							variables={variables}
 							style={{ height: "100%" }}
 						/>
 					</div>
@@ -332,6 +334,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 										value={(body as any).graphql?.query || ""}
 										onChange={handleGraphqlQueryChange}
 										language="javascript"
+										variables={variables}
 										style={{ height: "100%" }}
 									/>
 								</div>
@@ -357,6 +360,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 										value={(body as any).graphql?.variables || ""}
 										onChange={handleGraphqlVarsChange}
 										language="json"
+										variables={variables}
 										style={{ height: "100%" }}
 									/>
 								</div>
