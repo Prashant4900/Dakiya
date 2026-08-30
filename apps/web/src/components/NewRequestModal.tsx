@@ -15,6 +15,7 @@ const HTTP_METHODS = [
 
 export interface NewRequestModalProps {
 	activeVersion: string | null;
+	defaultVersionName: string;
 	folders?: string[];
 	onClose: () => void;
 	onCreate: (path: string, method: string) => void;
@@ -22,11 +23,13 @@ export interface NewRequestModalProps {
 
 export function NewRequestModal({
 	activeVersion,
+	defaultVersionName,
 	folders = [],
 	onClose,
 	onCreate,
 }: NewRequestModalProps) {
 	const version = activeVersion ?? "v1";
+	const isVersioned = activeVersion !== defaultVersionName;
 	const [folder, setFolder] = useState("");
 	const [name, setName] = useState("");
 	const [method, setMethod] = useState("GET");
@@ -35,7 +38,11 @@ export function NewRequestModal({
 		e.preventDefault();
 		const trimmedName = name.trim();
 		if (!trimmedName) return;
-		const basePath = folder.trim() ? `${version}/${folder.trim()}` : version;
+		const basePath = isVersioned
+			? folder.trim()
+				? `${version}/${folder.trim()}`
+				: version
+			: folder.trim();
 		onCreate(basePath, `${method.toLowerCase()}-${trimmedName}`);
 	};
 
@@ -127,7 +134,9 @@ export function NewRequestModal({
 							type="text"
 							list="folder-list"
 							className="search-input"
-							placeholder={`inside ${version}/`}
+							placeholder={
+								isVersioned ? `inside ${version}/` : "inside root or folder/"
+							}
 							value={folder}
 							onChange={(e) => setFolder(e.target.value)}
 							style={{ width: "100%", boxSizing: "border-box" }}
@@ -146,7 +155,8 @@ export function NewRequestModal({
 					>
 						Will be created at:{" "}
 						<code style={{ fontSize: "12px" }}>
-							{version}/{folder.trim() ? `${folder.trim()}/` : ""}
+							{isVersioned ? `${version}/` : ""}
+							{folder.trim() ? `${folder.trim()}/` : ""}
 							{method.toLowerCase()}-{name.trim() || "<name>"}
 						</code>
 					</p>

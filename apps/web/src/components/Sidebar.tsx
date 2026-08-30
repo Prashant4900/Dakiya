@@ -75,9 +75,7 @@ export function Sidebar({
 		e.currentTarget.releasePointerCapture(e.pointerId);
 	};
 
-	const versionNode = tree.find((node) => node.name === activeVersion);
-	const versionTree =
-		versionNode?.type === "folder" ? versionNode.children : [];
+	// `tree` is already filtered to the active version by App.tsx
 
 	return (
 		<aside className="sidebar" style={{ width }}>
@@ -144,11 +142,11 @@ export function Sidebar({
 						variant="icon"
 					/>
 				</div>
-				{versionTree.length === 0 ? (
+				{tree.length === 0 ? (
 					<p className="empty-hint">No requests in this version</p>
 				) : (
 					<CollectionTree
-						nodes={versionTree}
+						nodes={tree}
 						requestIndex={requestIndex}
 						selectedPath={selectedPath}
 						onSelect={onSelect}

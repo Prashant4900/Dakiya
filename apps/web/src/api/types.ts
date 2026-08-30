@@ -5,7 +5,8 @@ export type CollectionNode =
 export type WorkspaceManifest = {
 	name: string;
 	description?: string;
-	version: number;
+	versions?: string[];
+	defaultVersionName?: string;
 	defaultEnv?: string;
 };
 

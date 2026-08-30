@@ -139,7 +139,8 @@ export const SendResultSchema = z.object({
 export const WorkspaceManifestSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().optional(),
-	version: z.number().int().positive(),
+	versions: z.array(z.string()).optional(),
+	defaultVersionName: z.string().optional().default("default"),
 	defaultEnv: z.string().optional(),
 });
 

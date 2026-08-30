@@ -4,23 +4,25 @@ import { parseSimpleYaml } from "./yaml.js";
 /** Parse `.dakiya/dakiya.yaml` text into a workspace manifest. */
 export function parseWorkspaceManifest(source: string): WorkspaceManifest {
 	const raw = parseSimpleYaml(source);
-	const name = raw.name?.trim();
+	const name = typeof raw.name === "string" ? raw.name.trim() : "";
 	if (!name) {
 		throw new Error("dakiya.yaml: missing required field `name`");
 	}
 
-	const versionRaw = raw.version?.trim() ?? "1";
-	const version = Number(versionRaw);
-	if (!Number.isFinite(version)) {
-		throw new Error(`dakiya.yaml: invalid version: ${versionRaw}`);
-	}
+	const versions = Array.isArray(raw.versions)
+		? raw.versions
+		: undefined;
+	const defaultVersionName = typeof raw.defaultVersionName === "string" ? raw.defaultVersionName.trim() : "default";
+	const description = typeof raw.description === "string" ? raw.description : undefined;
+	const defaultEnv = typeof raw.defaultEnv === "string" ? raw.defaultEnv : undefined;
 
 	return {
 		name,
-		version,
-		...(raw.description !== undefined ? { description: raw.description } : {}),
-		...(raw.defaultEnv !== undefined && raw.defaultEnv !== ""
-			? { defaultEnv: raw.defaultEnv }
+		versions,
+		defaultVersionName,
+		...(description !== undefined ? { description } : {}),
+		...(defaultEnv !== undefined && defaultEnv !== ""
+			? { defaultEnv }
 			: {}),
 	};
 }

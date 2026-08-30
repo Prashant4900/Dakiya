@@ -132,7 +132,9 @@ export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	const url = `http://localhost:${resolvedPort}`;
 	const manifest = loadManifest();
 	console.log(`[dakiya] Workspace: ${dakiyaDir()}`);
-	console.log(`[dakiya] Default version: v${manifest.version}`);
+	console.log(
+		`[dakiya] Default version: ${manifest.versions?.[0] || manifest.defaultVersionName}`,
+	);
 	if (resolvedPort !== port) {
 		console.log(
 			`[dakiya] Port ${port} was in use, using ${resolvedPort} instead.`,

@@ -81,49 +81,55 @@ export function App() {
 		[workspaceQuery.data?.tree],
 	);
 
-	const versions = useMemo(() => {
-		return tree
-			.filter((node) => node.type === "folder")
-			.map((node) => node.name);
-	}, [tree]);
+	const defaultVersionName =
+		workspaceQuery.data?.manifest?.defaultVersionName || "default";
+
+	const { versions, versionFolders } = useMemo(() => {
+		const manifestVersions = workspaceQuery.data?.manifest?.versions || [];
+		
+		let detectedVersionFolders = new Set<string>();
+
+		if (manifestVersions.length > 0) {
+			for (const v of manifestVersions) {
+				detectedVersionFolders.add(v);
+			}
+		}
+
+		let hasUnversionedItems = false;
+		for (const node of tree) {
+			if (!detectedVersionFolders.has(node.name)) {
+				hasUnversionedItems = true;
+				break;
+			}
+		}
+
+		const finalVersions = Array.from(detectedVersionFolders);
+		if (hasUnversionedItems) {
+			finalVersions.push(defaultVersionName);
+		}
+
+		return { versions: finalVersions, versionFolders: detectedVersionFolders };
+	}, [tree, workspaceQuery.data?.manifest]);
 
 	const versionTree = useMemo(() => {
+		if (activeVersion === defaultVersionName) {
+			return tree.filter((node) => !versionFolders.has(node.name));
+		}
 		const node = tree.find((n) => n.name === activeVersion);
 		return node?.type === "folder" ? node.children : [];
-	}, [tree, activeVersion]);
+	}, [tree, activeVersion, defaultVersionName, versionFolders]);
 
 	const activeVersionFolders = useMemo(() => {
 		return extractFolders(versionTree);
 	}, [versionTree]);
 
-	const manifestVersion = workspaceQuery.data?.manifest?.version?.toString();
-
 	useEffect(() => {
-		if (!activeVersion) {
-			if (versions.length > 0) {
-				let defaultVer = versions[0];
-				if (manifestVersion && versions.includes(manifestVersion)) {
-					defaultVer = manifestVersion;
-				} else if (
-					manifestVersion &&
-					versions.includes(`v${manifestVersion}`)
-				) {
-					defaultVer = `v${manifestVersion}`;
-				} else if (versions.includes("v1")) {
-					defaultVer = "v1";
-				}
-				setActiveVersion(defaultVer);
-			} else if (manifestVersion) {
-				setActiveVersion(
-					manifestVersion.startsWith("v")
-						? manifestVersion
-						: `v${manifestVersion}`,
-				);
-			} else {
-				setActiveVersion("v1");
-			}
+		if (!activeVersion && versions.length > 0) {
+			setActiveVersion(versions[0]);
+		} else if (!activeVersion && versions.length === 0) {
+			setActiveVersion(defaultVersionName);
 		}
-	}, [versions, activeVersion, manifestVersion]);
+	}, [versions, activeVersion, defaultVersionName]);
 
 	const requestIndex = useMemo(() => {
 		const fromApi = workspaceQuery.data?.requestIndex ?? [];
@@ -388,7 +394,7 @@ export function App() {
 				{!sidebarCollapsed && (
 					<Sidebar
 						workspaceName={workspaceName}
-						tree={tree}
+						tree={versionTree}
 						requestIndex={requestIndex}
 						selectedPath={selectedPath}
 						onSelect={handleSelect}
@@ -396,8 +402,8 @@ export function App() {
 						activeEnv={effectiveEnv}
 						onEnvChange={setActiveEnv}
 						onEditEnv={openEnvEditor}
-						versions={versions}
 						activeVersion={activeVersion}
+						versions={versions}
 						onVersionChange={setActiveVersion}
 						onNewRequest={() => setIsNewRequestModalOpen(true)}
 						onNewFolder={() => setIsNewFolderPromptOpen(true)}
@@ -490,6 +496,7 @@ export function App() {
 			{isNewRequestModalOpen && (
 				<NewRequestModal
 					activeVersion={activeVersion}
+					defaultVersionName={defaultVersionName}
 					folders={activeVersionFolders}
 					onClose={() => setIsNewRequestModalOpen(false)}
 					onCreate={handleCreateRequest}

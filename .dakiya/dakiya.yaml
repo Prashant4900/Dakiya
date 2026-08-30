@@ -2,7 +2,9 @@
 name: Dakiya
 description: "A local-first API workspace for Dakiya."
 
-version: 2
+versions:
+  - v1
+  - v2
 
 # Active environment (matches a file under environments/)
 defaultEnv: local
