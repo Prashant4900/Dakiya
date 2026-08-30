@@ -10,6 +10,7 @@ import type {
 	HttpMethodSchema,
 	HttpRequestLineSchema,
 	RequestAssertSchema,
+	RequestBodySchema,
 	RequestDocumentSchema,
 	RequestExampleSchema,
 	RequestMetaSchema,
@@ -17,7 +18,6 @@ import type {
 	ScriptBlockSchema,
 	ScriptLangSchema,
 	SendResultSchema,
-	RequestBodySchema,
 } from "./schemas.js";
 
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;

@@ -15,4 +15,6 @@ export type FsClient = {
 	mkdir(path: string): void;
 	removeFile(path: string): void;
 	readDir(path: string): FsDirEntry[];
+	renameDir(from: string, to: string): void;
+	removeDir(path: string): void;
 };

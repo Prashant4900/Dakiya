@@ -4,8 +4,8 @@ import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
 import { CodeEditor } from "./CodeEditor.js";
-import { Tabs } from "./Tabs.js";
 import { PaneHeader } from "./PaneHeader.js";
+import { Tabs } from "./Tabs.js";
 
 type ResponsePanelProps = {
 	result: SendResponse | null;
@@ -77,8 +77,8 @@ export function ResponsePanel({
 	const headersText =
 		result && Object.entries(result.response.headers).length > 0
 			? Object.entries(result.response.headers)
-				.map(([k, v]) => `${k}: ${v}`)
-				.join("\n")
+					.map(([k, v]) => `${k}: ${v}`)
+					.join("\n")
 			: "(none)";
 
 	return (
@@ -147,13 +147,24 @@ export function ResponsePanel({
 			)}
 
 			{result && !error && tab === "body" && (
-				<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
+				<div
+					style={{
+						flex: 1,
+						overflow: "auto",
+						border: "1px solid var(--border-color)",
+						borderTop: "none",
+					}}
+				>
 					<CodeEditor
 						value={formatBody(
 							result.response.body,
 							result.response.headers["content-type"],
 						)}
-						language={result.response.headers["content-type"]?.includes("json") ? "json" : "javascript"}
+						language={
+							result.response.headers["content-type"]?.includes("json")
+								? "json"
+								: "javascript"
+						}
 						readOnly={true}
 						style={{ height: "100%" }}
 					/>

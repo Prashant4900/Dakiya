@@ -125,13 +125,18 @@ export async function runServe(port = DEFAULT_PORT): Promise<void> {
 	}
 
 	const address = server.httpServer?.address();
-	const resolvedPort = typeof address === "object" && address !== null && "port" in address ? address.port : port;
+	const resolvedPort =
+		typeof address === "object" && address !== null && "port" in address
+			? address.port
+			: port;
 	const url = `http://localhost:${resolvedPort}`;
 	const manifest = loadManifest();
 	console.log(`[dakiya] Workspace: ${dakiyaDir()}`);
 	console.log(`[dakiya] Default version: v${manifest.version}`);
 	if (resolvedPort !== port) {
-		console.log(`[dakiya] Port ${port} was in use, using ${resolvedPort} instead.`);
+		console.log(
+			`[dakiya] Port ${port} was in use, using ${resolvedPort} instead.`,
+		);
 	}
 	console.log(`[dakiya] Serving dashboard at ${url}`);
 	console.log(`[dakiya] API health: ${url}/api/health`);

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Modal } from "./Modal.js";
 import { Button } from "./Button.js";
 import { CodeEditor } from "./CodeEditor.js";
+import { Modal } from "./Modal.js";
 
 type EnvSwitcherProps = {
 	environments: string[];
@@ -97,7 +97,16 @@ export function EnvEditor({
 					Close
 				</Button>
 			</div>
-			<div style={{ flex: 1, borderTop: "1px solid var(--border-color)", borderBottom: "1px solid var(--border-color)", overflow: "auto", display: "flex", flexDirection: "column" }}>
+			<div
+				style={{
+					flex: 1,
+					borderTop: "1px solid var(--border-color)",
+					borderBottom: "1px solid var(--border-color)",
+					overflow: "auto",
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
 				<CodeEditor
 					value={source}
 					onChange={onChange}
@@ -107,11 +116,7 @@ export function EnvEditor({
 			</div>
 			{error && <p className="error-text modal-error">{error}</p>}
 			<div className="modal-actions">
-				<Button
-					variant="primary"
-					onClick={onSave}
-					disabled={saving}
-				>
+				<Button variant="primary" onClick={onSave} disabled={saving}>
 					{saving ? "Saving…" : "Save"}
 				</Button>
 			</div>

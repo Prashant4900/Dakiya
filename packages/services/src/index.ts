@@ -34,11 +34,16 @@ export type { SendRequestOptions, SendRequestResult } from "./request.js";
 export { sendRequest } from "./request.js";
 export {
 	createRequestSource,
+	deleteFolder,
+	deleteRequest,
 	deleteRequestFile,
 	deleteScript,
 	listEndpointPaths,
+	moveRequest,
 	readEndpointRequests,
 	readRequestSource,
+	renameFolder,
+	renameRequest,
 	writeRequestSource,
 	writeScript,
 } from "./request-service.js";

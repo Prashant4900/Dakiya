@@ -1,3 +1,4 @@
+import type { RequestBody } from "@dakiya/domain";
 import { Cancel01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,15 +13,14 @@ import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import { deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
-import type { RequestBody } from "@dakiya/domain";
-import { BodyEditor } from "./BodyEditor.js";
-import { CodeEditor } from "./CodeEditor.js";
-import { ConfirmDialog } from "./ConfirmDialog.js";
-import { Tabs } from "./Tabs.js";
-import { Button } from "./Button.js";
-import { PaneHeader } from "./PaneHeader.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
+import { BodyEditor } from "./BodyEditor.js";
+import { Button } from "./Button.js";
+import { CodeEditor } from "./CodeEditor.js";
+import { ConfirmDialog } from "./ConfirmDialog.js";
+import { PaneHeader } from "./PaneHeader.js";
+import { Tabs } from "./Tabs.js";
 
 const COMMON_HEADERS = [
 	"Accept",
@@ -84,7 +84,7 @@ type RequestPanelProps = {
 	loading: boolean;
 	error: string | null;
 	saveError: string | null;
-	onSave: (updates: any) => Promise<void>;
+	onSave: (updates: Record<string, unknown>) => Promise<void>;
 	onSend: () => void;
 	onDirtyChange: (dirty: boolean) => void;
 	sending: boolean;
@@ -286,7 +286,9 @@ export function RequestPanel({
 		localStorage.setItem("dakiya_requestTab", tab);
 	}, [tab]);
 
-	const [localBody, setLocalBody] = useState<RequestBody | undefined>(undefined);
+	const [localBody, setLocalBody] = useState<RequestBody | undefined>(
+		undefined,
+	);
 	const [dirty, setDirty] = useState(false);
 	const [localHeaders, setLocalHeaders] = useState<
 		{ id: number; key: string; value: string }[]
@@ -296,7 +298,9 @@ export function RequestPanel({
 	const queryClient = useQueryClient();
 	const [draftPreScript, setDraftPreScript] = useState("");
 	const [draftPostScript, setDraftPostScript] = useState("");
-	const [deleteConfirm, setDeleteConfirm] = useState<"pre" | "post" | null>(null);
+	const [deleteConfirm, setDeleteConfirm] = useState<"pre" | "post" | null>(
+		null,
+	);
 
 	const saveScriptMutation = useMutation({
 		mutationFn: ({ type, source }: { type: "pre" | "post"; source: string }) =>
@@ -359,20 +363,26 @@ export function RequestPanel({
 	// Let's refactor the useEffect to only run when tab changes or request ID changes.
 
 	const handleSave = async () => {
-		const headersObj = localHeaders.reduce((acc, h) => {
-			if (h.key) acc[h.key] = h.value;
-			return acc;
-		}, {} as Record<string, string>);
+		const headersObj = localHeaders.reduce(
+			(acc, h) => {
+				if (h.key) acc[h.key] = h.value;
+				return acc;
+			},
+			{} as Record<string, string>,
+		);
 		await onSave({ body: localBody, headers: headersObj });
 		setDirty(false);
 	};
 
 	const handleSend = useCallback(async () => {
 		if (dirty) {
-			const headersObj = localHeaders.reduce((acc, h) => {
-				if (h.key) acc[h.key] = h.value;
-				return acc;
-			}, {} as Record<string, string>);
+			const headersObj = localHeaders.reduce(
+				(acc, h) => {
+					if (h.key) acc[h.key] = h.value;
+					return acc;
+				},
+				{} as Record<string, string>,
+			);
 			await onSave({ body: localBody, headers: headersObj });
 			setDirty(false);
 		}
@@ -392,7 +402,8 @@ export function RequestPanel({
 				if (format === "json") autoContentType = "application/json";
 				else if (format === "xml") autoContentType = "application/xml";
 				else if (format === "html") autoContentType = "text/html";
-				else if (format === "javascript") autoContentType = "application/javascript";
+				else if (format === "javascript")
+					autoContentType = "application/javascript";
 				else autoContentType = "text/plain";
 			} else if (newBody.type === "graphql") {
 				autoContentType = "application/json";
@@ -403,7 +414,9 @@ export function RequestPanel({
 
 		if (autoContentType) {
 			setLocalHeaders((prev) => {
-				const hasContentType = prev.some((h) => h.key.toLowerCase() === "content-type");
+				const hasContentType = prev.some(
+					(h) => h.key.toLowerCase() === "content-type",
+				);
 				if (!hasContentType) {
 					const newHeaders = [...prev];
 					// Remove the trailing empty row if it exists
@@ -414,7 +427,11 @@ export function RequestPanel({
 					) {
 						newHeaders.pop();
 					}
-					newHeaders.push({ id: Date.now(), key: "Content-Type", value: autoContentType });
+					newHeaders.push({
+						id: Date.now(),
+						key: "Content-Type",
+						value: autoContentType,
+					});
 					newHeaders.push({ id: Date.now() + 1, key: "", value: "" }); // Add trailing empty row
 					return newHeaders;
 				}
@@ -489,16 +506,16 @@ export function RequestPanel({
 
 	const tabs: { id: EditorTab; label: string; badge?: number }[] = doc
 		? [
-			{ id: "body", label: "Body" },
-			{
-				id: "headers",
-				label: "Headers",
-				badge: Object.keys(doc.request.headers).length || undefined,
-			},
-			{ id: "docs", label: "Docs" },
-			{ id: "pre-script", label: "Pre-script" },
-			{ id: "post-script", label: "Post-script" },
-		]
+				{ id: "body", label: "Body" },
+				{
+					id: "headers",
+					label: "Headers",
+					badge: Object.keys(doc.request.headers).length || undefined,
+				},
+				{ id: "docs", label: "Docs" },
+				{ id: "pre-script", label: "Pre-script" },
+				{ id: "post-script", label: "Post-script" },
+			]
 		: [];
 
 	if (doc?.examples?.length) {
@@ -689,7 +706,7 @@ export function RequestPanel({
 											color: "var(--danger-text, #d03030)",
 											cursor: "pointer",
 											fontSize: "1.2em",
-											padding: "4px"
+											padding: "4px",
 										}}
 										disabled={deleteScriptMutation.isPending}
 										onClick={() => setDeleteConfirm("pre")}
@@ -699,8 +716,18 @@ export function RequestPanel({
 									</button>
 								)}
 							</PaneHeader>
-							<div style={{ padding: "8px 16px", background: "var(--highlight-bg, #fffbe6)", borderBottom: "1px solid var(--border-color)", fontSize: "0.9em", color: "var(--text-color)" }}>
-								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here currently. Please edit the script file directly in your code editor.
+							<div
+								style={{
+									padding: "8px 16px",
+									background: "var(--highlight-bg, #fffbe6)",
+									borderBottom: "1px solid var(--border-color)",
+									fontSize: "0.9em",
+									color: "var(--text-color)",
+								}}
+							>
+								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here
+								currently. Please edit the script file directly in your code
+								editor.
 							</div>
 							{doc?.pre?.source !== undefined ? (
 								<div
@@ -710,7 +737,14 @@ export function RequestPanel({
 										height: "100%",
 									}}
 								>
-									<div style={{ flex: 1, border: "1px solid var(--border-color)", borderTop: "none", overflow: "auto" }}>
+									<div
+										style={{
+											flex: 1,
+											border: "1px solid var(--border-color)",
+											borderTop: "none",
+											overflow: "auto",
+										}}
+									>
 										<CodeEditor
 											value={draftPreScript}
 											onChange={setDraftPreScript}
@@ -760,7 +794,7 @@ export function RequestPanel({
 											color: "var(--danger-text, #d03030)",
 											cursor: "pointer",
 											fontSize: "1.2em",
-											padding: "4px"
+											padding: "4px",
 										}}
 										disabled={deleteScriptMutation.isPending}
 										onClick={() => setDeleteConfirm("post")}
@@ -770,8 +804,18 @@ export function RequestPanel({
 									</button>
 								)}
 							</PaneHeader>
-							<div style={{ padding: "8px 16px", background: "var(--highlight-bg, #fffbe6)", borderBottom: "1px solid var(--border-color)", fontSize: "0.9em", color: "var(--text-color)" }}>
-								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here currently. Please edit the script file directly in your code editor.
+							<div
+								style={{
+									padding: "8px 16px",
+									background: "var(--highlight-bg, #fffbe6)",
+									borderBottom: "1px solid var(--border-color)",
+									fontSize: "0.9em",
+									color: "var(--text-color)",
+								}}
+							>
+								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here
+								currently. Please edit the script file directly in your code
+								editor.
 							</div>
 							{doc?.post?.source !== undefined ? (
 								<div
@@ -781,7 +825,14 @@ export function RequestPanel({
 										height: "100%",
 									}}
 								>
-									<div style={{ flex: 1, border: "1px solid var(--border-color)", borderTop: "none", overflow: "auto" }}>
+									<div
+										style={{
+											flex: 1,
+											border: "1px solid var(--border-color)",
+											borderTop: "none",
+											overflow: "auto",
+										}}
+									>
 										<CodeEditor
 											value={draftPostScript}
 											onChange={setDraftPostScript}
@@ -853,7 +904,8 @@ export function RequestPanel({
 					message={
 						<p style={{ margin: 0 }}>
 							Are you sure you want to delete this{" "}
-							{deleteConfirm === "pre" ? "pre-request" : "post-response"} script?
+							{deleteConfirm === "pre" ? "pre-request" : "post-response"}{" "}
+							script?
 						</p>
 					}
 					confirmText="Delete"

@@ -1,19 +1,27 @@
-import { parseEnvironment, sendRequest } from "@dakiya/services";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import {
+	createFetchHttpClient,
+	parseEnvironment,
+	sendRequest,
+} from "@dakiya/services";
 import { Hono } from "hono";
-import { readFile } from "fs/promises";
-import { join } from "path";
 import { persistEnvironmentVariables } from "../sandbox/persist-env.js";
 import { createVmScriptRunner } from "../sandbox/run-script.js";
-import { createFetchHttpClient } from "@dakiya/services";
 import {
 	buildCollectionTree,
+	deleteFolder,
+	deleteRequest,
 	listEndpointPaths,
 	listEnvironmentNames,
 	loadEnvironment,
 	loadManifest,
+	moveRequest,
 	readEndpointRequests,
 	readEnvironmentSource,
 	readRequestSource,
+	renameFolder,
+	renameRequest,
 	writeEnvironmentSource,
 } from "../workspace.js";
 
@@ -39,18 +47,18 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 	app.post("/upload", async (c) => {
 		try {
 			const body = await c.req.parseBody();
-			const file = body["file"] as File;
+			const file = body.file as File;
 			if (!file) {
 				return c.json({ error: "No file provided" }, 400);
 			}
 
 			const filesDir = join(cwd, ".dakiya", "files");
-			const { mkdir, writeFile } = await import("fs/promises");
+			const { mkdir, writeFile } = await import("node:fs/promises");
 			await mkdir(filesDir, { recursive: true });
 
 			const fileName = `${Date.now()}-${file.name}`;
 			const filePath = join(filesDir, fileName);
-			
+
 			const arrayBuffer = await file.arrayBuffer();
 			await writeFile(filePath, Buffer.from(arrayBuffer));
 
@@ -135,7 +143,10 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 			const body = await c.req.json();
 			const { writeRequestSource } = await import("../workspace.js");
 			const result = writeRequestSource(fullPath, body, cwd);
-			return c.json({ success: true, relativeToCollections: result.relativeToCollections });
+			return c.json({
+				success: true,
+				relativeToCollections: result.relativeToCollections,
+			});
 		} catch (err) {
 			return c.json({ error: errorMessage(err) }, 400);
 		}
@@ -146,7 +157,10 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 		try {
 			const { createRequestSource } = await import("../workspace.js");
 			const result = createRequestSource(fullPath, cwd);
-			return c.json({ success: true, relativeToCollections: result.relativeToCollections });
+			return c.json({
+				success: true,
+				relativeToCollections: result.relativeToCollections,
+			});
 		} catch (err) {
 			return c.json({ error: errorMessage(err) }, 400);
 		}
@@ -226,8 +240,8 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 						const absPath = join(cwd, filePath);
 						const buffer = await readFile(absPath);
 						return new Blob([buffer]);
-					}
-				})
+					},
+				}),
 			});
 
 			if (Object.keys(result.persistedVariables).length > 0) {
@@ -246,6 +260,58 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 		} catch (err) {
 			const message = errorMessage(err);
 			return c.json({ error: message }, isNotFound(message) ? 404 : 400);
+		}
+	});
+
+	// Folder management: PATCH /api/folders/:path?action=rename|delete
+	app.patch("/folders/*", async (c) => {
+		const folderPath = c.req.path.replace(/^\/folders\//, "");
+		try {
+			const body = await c.req.json<{ action: string; newName?: string }>();
+			if (body.action === "rename") {
+				if (!body.newName?.trim())
+					return c.json({ error: "newName is required" }, 400);
+				const result = renameFolder(folderPath, body.newName.trim(), cwd);
+				return c.json({ success: true, ...result });
+			}
+			if (body.action === "delete") {
+				deleteFolder(folderPath, cwd);
+				return c.json({ success: true });
+			}
+			return c.json({ error: `Unknown action: ${body.action}` }, 400);
+		} catch (err) {
+			return c.json({ error: errorMessage(err) }, 400);
+		}
+	});
+
+	// Request management: PATCH /api/requests/:path (rename, delete, move)
+	app.patch("/requests/*", async (c) => {
+		const requestPath = c.req.path.replace(/^\/requests\//, "");
+		try {
+			const body = await c.req.json<{
+				action: string;
+				newName?: string;
+				toFolder?: string;
+			}>();
+			if (body.action === "rename") {
+				if (!body.newName?.trim())
+					return c.json({ error: "newName is required" }, 400);
+				renameRequest(requestPath, body.newName.trim(), cwd);
+				return c.json({ success: true });
+			}
+			if (body.action === "delete") {
+				deleteRequest(requestPath, cwd);
+				return c.json({ success: true });
+			}
+			if (body.action === "move") {
+				if (!body.toFolder?.trim())
+					return c.json({ error: "toFolder is required" }, 400);
+				const result = moveRequest(requestPath, body.toFolder.trim(), cwd);
+				return c.json({ success: true, newPath: result.newPath });
+			}
+			return c.json({ error: `Unknown action: ${body.action}` }, 400);
+		} catch (err) {
+			return c.json({ error: errorMessage(err) }, 400);
 		}
 	});
 

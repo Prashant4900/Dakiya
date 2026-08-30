@@ -1,8 +1,11 @@
 import {
 	buildCollectionTree,
 	collectionsRoot,
+	createRequestSource as createRequestSourceService,
 	dakiyaRoot,
+	deleteFolder as deleteFolderService,
 	deleteRequestFile as deleteRequestFileService,
+	deleteRequest as deleteRequestService,
 	deleteScript as deleteScriptService,
 	environmentsRoot,
 	hasManifest,
@@ -12,14 +15,16 @@ import {
 	loadActiveEnvironment as loadActiveEnvironmentService,
 	loadEnvironment as loadEnvironmentService,
 	loadManifest as loadManifestService,
+	moveRequest as moveRequestService,
 	normalizeEndpointPath,
 	readEndpointRequests as readEndpointRequestsService,
 	readEnvironmentSource as readEnvironmentSourceService,
 	readRequestSource as readRequestSourceService,
+	renameFolder as renameFolderService,
+	renameRequest as renameRequestService,
 	resolveEndpointPaths,
 	writeEnvironmentSource as writeEnvironmentSourceService,
 	writeRequestSource as writeRequestSourceService,
-	createRequestSource as createRequestSourceService,
 	writeScript as writeScriptService,
 } from "@dakiya/services";
 import { createNodeFsClient } from "./fs/node-fs-client.js";
@@ -107,7 +112,7 @@ export function readRequestSource(arg: string, cwd = process.cwd()) {
 
 export function writeRequestSource(
 	arg: string,
-	updates: any,
+	updates: Record<string, unknown>,
 	cwd = process.cwd(),
 ) {
 	return writeRequestSourceService(fs, arg, updates, cwd);
@@ -136,4 +141,36 @@ export function deleteScript(
 	cwd = process.cwd(),
 ) {
 	return deleteScriptService(fs, arg, type, cwd);
+}
+
+export function renameFolder(
+	folderPath: string,
+	newName: string,
+	cwd = process.cwd(),
+) {
+	return renameFolderService(fs, folderPath, newName, cwd);
+}
+
+export function deleteFolder(folderPath: string, cwd = process.cwd()) {
+	return deleteFolderService(fs, folderPath, cwd);
+}
+
+export function renameRequest(
+	requestPath: string,
+	newName: string,
+	cwd = process.cwd(),
+) {
+	return renameRequestService(fs, requestPath, newName, cwd);
+}
+
+export function deleteRequest(requestPath: string, cwd = process.cwd()) {
+	return deleteRequestService(fs, requestPath, cwd);
+}
+
+export function moveRequest(
+	requestPath: string,
+	toFolder: string,
+	cwd = process.cwd(),
+) {
+	return moveRequestService(fs, requestPath, toFolder, cwd);
 }

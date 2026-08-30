@@ -470,6 +470,113 @@ body {
 	color: var(--foreground);
 }
 
+/* ── Collection management UI ── */
+
+.group-row-wrap {
+	display: flex;
+	align-items: center;
+	position: relative;
+}
+
+.group-row-wrap .group-row {
+	flex: 1;
+}
+
+.request-item-wrap {
+	display: flex;
+	align-items: center;
+	border-radius: var(--radius);
+	position: relative;
+}
+
+.request-item-wrap .request-item {
+	flex: 1;
+}
+
+.request-item-wrap.active {
+	background: transparent;
+}
+
+.item-action-btn {
+	opacity: 0;
+	flex-shrink: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--muted-foreground);
+	font-size: 14px;
+	padding: 2px 5px;
+	border-radius: 4px;
+	line-height: 1;
+	transition:
+		opacity 0.1s,
+		background 0.1s;
+}
+
+.group-row-wrap:hover .item-action-btn,
+.request-item-wrap:hover .item-action-btn {
+	opacity: 1;
+}
+
+.item-action-btn:hover {
+	background: var(--panel);
+	color: var(--foreground);
+}
+
+/* Context menu popover */
+.ctx-menu {
+	position: fixed;
+	z-index: 9999;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+	padding: 4px;
+	min-width: 160px;
+	animation: popover-fade-in 0.1s ease-out;
+}
+
+.ctx-menu-item {
+	display: block;
+	width: 100%;
+	background: none;
+	border: none;
+	text-align: left;
+	padding: 7px 12px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--foreground);
+	cursor: pointer;
+	border-radius: 5px;
+	transition: background 0.1s;
+}
+
+.ctx-menu-item:hover {
+	background: var(--panel);
+}
+
+.ctx-menu-item.danger {
+	color: var(--del);
+}
+
+.ctx-menu-item.danger:hover {
+	background: var(--del-bg);
+}
+
+/* Inline rename */
+.inline-rename-input {
+	flex: 1;
+	background: var(--surface);
+	border: 1px solid var(--primary-color);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font: inherit;
+	font-size: 12px;
+	color: var(--foreground);
+	outline: none;
+	min-width: 0;
+}
+
 .method-badge {
 	font-size: 9px;
 	font-weight: 700;

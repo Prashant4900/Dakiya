@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Modal } from "./Modal.js";
 import { Button } from "./Button.js";
+import { Modal } from "./Modal.js";
 
 export interface ConfirmDialogProps {
 	title: string;
@@ -26,7 +26,13 @@ export function ConfirmDialog({
 			<div className="modal-header">
 				<h2 id="confirm-dialog-title">{title}</h2>
 			</div>
-			<div style={{ color: "var(--text-color)", fontSize: "14px", lineHeight: "1.5" }}>
+			<div
+				style={{
+					color: "var(--text-color)",
+					fontSize: "14px",
+					lineHeight: "1.5",
+				}}
+			>
 				{message}
 			</div>
 			<div className="modal-actions">

@@ -46,6 +46,7 @@ function buildReqApi(request: MutableRequest) {
 		get body() {
 			return request.body;
 		},
+		// biome-ignore lint/suspicious/noExplicitAny: user scripts can set body to any valid shape
 		set body(value: any) {
 			request.body = value;
 		},

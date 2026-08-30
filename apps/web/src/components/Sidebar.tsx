@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { CollectionNode, RequestIndexItem } from "../api/types.js";
+import type { CollectionTreeActions } from "./CollectionTree.js";
 import { CollectionTree } from "./CollectionTree.js";
 import { EnvSwitcher } from "./EnvSwitcher.js";
 import { VersionSwitcher } from "./VersionSwitcher.js";
@@ -21,6 +22,7 @@ type SidebarProps = {
 	versions: string[];
 	activeVersion: string | null;
 	onVersionChange: (name: string) => void;
+	actions?: CollectionTreeActions;
 };
 
 export function Sidebar({
@@ -37,6 +39,7 @@ export function Sidebar({
 	versions,
 	activeVersion,
 	onVersionChange,
+	actions,
 }: SidebarProps) {
 	const [search, setSearch] = useState("");
 	const [width, setWidth] = useState(230);
@@ -111,6 +114,7 @@ export function Sidebar({
 						style={{ flex: 1 }}
 					/>
 					<button
+						type="button"
 						onClick={onNewRequest}
 						style={{
 							background: "var(--primary-color)",
@@ -139,6 +143,8 @@ export function Sidebar({
 						selectedPath={selectedPath}
 						onSelect={onSelect}
 						search={search}
+						versionPrefix={activeVersion ?? ""}
+						actions={actions}
 					/>
 				)}
 			</div>

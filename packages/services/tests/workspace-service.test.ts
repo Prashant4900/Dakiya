@@ -30,5 +30,3 @@ describe("scaffoldWorkspace", () => {
 		expect(second.skipped).toContain("dakiya.yaml");
 	});
 });
-
-

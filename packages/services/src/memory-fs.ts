@@ -112,5 +112,17 @@ export function createMemoryFs(initial: Record<string, string> = {}): FsClient {
 			}
 			return entries;
 		},
+		renameDir(from, to) {
+			const { dir: fromParent, name: fromName } = parentDir(from);
+			const node = fromParent.children.get(fromName);
+			if (!node) throw new Error(`Path not found: ${from}`);
+			const { dir: toParent, name: toName } = parentDir(to);
+			toParent.children.set(toName, node);
+			fromParent.children.delete(fromName);
+		},
+		removeDir(path) {
+			const { dir, name } = parentDir(path);
+			dir.children.delete(name);
+		},
 	};
 }

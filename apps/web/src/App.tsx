@@ -2,15 +2,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
 	createRequestAPI,
+	deleteFolderAPI,
+	deleteRequestAPI,
 	fetchEnvironment,
 	fetchRequest,
 	fetchWorkspace,
+	moveRequestAPI,
+	renameFolderAPI,
+	renameRequestAPI,
 	saveEnvironment,
 	saveRequest,
 	sendRequestApi,
 } from "./api/client.js";
 import type { SendResponse } from "./api/types.js";
 import { Button } from "./components/Button.js";
+import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import { EnvEditor } from "./components/EnvSwitcher.js";
 import { NewRequestModal } from "./components/NewRequestModal.js";
 import { RequestPanel } from "./components/RequestPanel.js";
@@ -18,7 +24,6 @@ import { ResponsePanel } from "./components/ResponsePanel.js";
 import { Sidebar } from "./components/Sidebar.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { TitleBar } from "./components/TitleBar.js";
-import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import {
 	buildRequestIndexFallback,
 	findFirstRequestPath,
@@ -86,7 +91,10 @@ export function App() {
 				let defaultVer = versions[0];
 				if (manifestVersion && versions.includes(manifestVersion)) {
 					defaultVer = manifestVersion;
-				} else if (manifestVersion && versions.includes(`v${manifestVersion}`)) {
+				} else if (
+					manifestVersion &&
+					versions.includes(`v${manifestVersion}`)
+				) {
 					defaultVer = `v${manifestVersion}`;
 				} else if (versions.includes("v1")) {
 					defaultVer = "v1";
@@ -159,8 +167,13 @@ export function App() {
 	});
 
 	const saveMutation = useMutation({
-		mutationFn: ({ path, updates }: { path: string; updates: any }) =>
-			saveRequest(path, updates),
+		mutationFn: ({
+			path,
+			updates,
+		}: {
+			path: string;
+			updates: Record<string, unknown>;
+		}) => saveRequest(path, updates),
 		onSuccess: (_data, { path }) => {
 			setSaveError(null);
 			queryClient.invalidateQueries({ queryKey: ["request", path] });
@@ -198,6 +211,76 @@ export function App() {
 		},
 	});
 
+	const renameFolderMutation = useMutation({
+		mutationFn: ({
+			folderPath,
+			newName,
+		}: {
+			folderPath: string;
+			newName: string;
+		}) => renameFolderAPI(folderPath, newName),
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: ["workspace"] });
+			// Update selectedPath if it was inside the renamed folder
+			if (selectedPath?.startsWith(`${data.oldPath}/`)) {
+				setSelectedPath(data.newPath + selectedPath.slice(data.oldPath.length));
+			}
+		},
+	});
+
+	const deleteFolderMutation = useMutation({
+		mutationFn: (folderPath: string) => deleteFolderAPI(folderPath),
+		onSuccess: (_data, folderPath) => {
+			queryClient.invalidateQueries({ queryKey: ["workspace"] });
+			if (selectedPath?.startsWith(`${folderPath}/`)) {
+				setSelectedPath(null);
+				setSendResult(null);
+			}
+		},
+	});
+
+	const renameRequestMutation = useMutation({
+		mutationFn: ({
+			requestPath,
+			newName,
+		}: {
+			requestPath: string;
+			newName: string;
+		}) => renameRequestAPI(requestPath, newName),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["workspace"] });
+			if (selectedPath)
+				queryClient.invalidateQueries({ queryKey: ["request", selectedPath] });
+		},
+	});
+
+	const deleteRequestMutation = useMutation({
+		mutationFn: (requestPath: string) => deleteRequestAPI(requestPath),
+		onSuccess: (_data, requestPath) => {
+			queryClient.invalidateQueries({ queryKey: ["workspace"] });
+			if (selectedPath === requestPath) {
+				setSelectedPath(null);
+				setSendResult(null);
+			}
+		},
+	});
+
+	const moveRequestMutation = useMutation({
+		mutationFn: ({
+			requestPath,
+			toFolder,
+		}: {
+			requestPath: string;
+			toFolder: string;
+		}) => moveRequestAPI(requestPath, toFolder),
+		onSuccess: (data, { requestPath }) => {
+			queryClient.invalidateQueries({ queryKey: ["workspace"] });
+			if (selectedPath === requestPath) {
+				setSelectedPath(data.newPath);
+			}
+		},
+	});
+
 	const handleSelect = useCallback(
 		(path: string) => {
 			if (requestDirty && selectedPath && path !== selectedPath) {
@@ -213,7 +296,7 @@ export function App() {
 	);
 
 	const handleSave = useCallback(
-		async (updates: any) => {
+		async (updates: Record<string, unknown>) => {
 			if (!selectedPath) return;
 			await saveMutation.mutateAsync({ path: selectedPath, updates });
 		},
@@ -265,9 +348,7 @@ export function App() {
 					Run <code>dakiya serve</code> from a project with a{" "}
 					<code>.dakiya/</code> folder.
 				</p>
-				<Button onClick={() => workspaceQuery.refetch()}>
-					Retry
-				</Button>
+				<Button onClick={() => workspaceQuery.refetch()}>Retry</Button>
 			</div>
 		);
 	}
@@ -299,6 +380,23 @@ export function App() {
 						activeVersion={activeVersion}
 						onVersionChange={setActiveVersion}
 						onNewRequest={() => setIsNewRequestModalOpen(true)}
+						actions={
+							{
+								onFolderRename: (folderPath, newName) =>
+									renameFolderMutation.mutate({ folderPath, newName }),
+								onFolderDelete: (folderPath) =>
+									deleteFolderMutation.mutate(folderPath),
+								onRequestRename: (requestPath, newName) =>
+									renameRequestMutation.mutate({ requestPath, newName }),
+								onRequestDelete: (requestPath) =>
+									deleteRequestMutation.mutate(requestPath),
+								// Used internally by CollectionTree's move dialog
+								_onMoveWithTarget: (requestPath: string, toFolder: string) =>
+									moveRequestMutation.mutate({ requestPath, toFolder }),
+							} as import("./components/CollectionTree.js").CollectionTreeActions & {
+								_onMoveWithTarget?: (path: string, target: string) => void;
+							}
+						}
 					/>
 				)}
 
@@ -363,7 +461,11 @@ export function App() {
 			{pendingPath && (
 				<ConfirmDialog
 					title="Discard Changes?"
-					message={<p style={{ margin: 0 }}>You have unsaved changes. Are you sure you want to discard them?</p>}
+					message={
+						<p style={{ margin: 0 }}>
+							You have unsaved changes. Are you sure you want to discard them?
+						</p>
+					}
 					confirmText="Discard"
 					isDestructive={true}
 					onCancel={() => setPendingPath(null)}

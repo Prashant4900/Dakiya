@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import type { RequestBody } from "@dakiya/domain";
+import { useEffect, useState } from "react";
 import { uploadFile } from "../api/client.js";
 
 import { CodeEditor } from "./CodeEditor.js";
@@ -24,7 +24,9 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 		}
 	}, [body, mode]);
 
-	const handleModeChange = (newMode: "none" | "raw" | "form-data" | "urlencoded" | "binary" | "graphql") => {
+	const handleModeChange = (
+		newMode: "none" | "raw" | "form-data" | "urlencoded" | "binary" | "graphql",
+	) => {
 		setMode(newMode);
 		if (newMode === "none") {
 			onChange(undefined);
@@ -37,19 +39,28 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 		} else if (newMode === "binary") {
 			onChange({ type: "binary", binary: { file: "" } } as any);
 		} else if (newMode === "graphql") {
-			onChange({ type: "graphql", graphql: { query: "", variables: "" } } as any);
+			onChange({
+				type: "graphql",
+				graphql: { query: "", variables: "" },
+			} as any);
 		}
 	};
 
 	const handleRawTypeChange = (format: any) => {
 		if (typeof body === "object" && body?.type === "raw") {
-			onChange({ ...(body as any), raw: { ...(body as any).raw, format } } as any);
+			onChange({
+				...(body as any),
+				raw: { ...(body as any).raw, format },
+			} as any);
 		}
 	};
 
 	const handleRawChange = (content: string) => {
 		if (typeof body === "object" && body?.type === "raw") {
-			onChange({ ...(body as any), raw: { ...(body as any).raw, content } } as any);
+			onChange({
+				...(body as any),
+				raw: { ...(body as any).raw, content },
+			} as any);
 		}
 	};
 
@@ -59,8 +70,11 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 			try {
 				const parsed = JSON.parse(content);
 				const formatted = JSON.stringify(parsed, null, 2);
-				onChange({ ...(body as any), raw: { ...(body as any).raw, content: formatted } } as any);
-			} catch (err) {
+				onChange({
+					...(body as any),
+					raw: { ...(body as any).raw, content: formatted },
+				} as any);
+			} catch (_err) {
 				// Invalid JSON, do nothing or just log
 				console.warn("Could not format: invalid JSON");
 			}
@@ -69,17 +83,26 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 
 	const handleGraphqlQueryChange = (query: string) => {
 		if (typeof body === "object" && body?.type === "graphql") {
-			onChange({ ...(body as any), graphql: { ...(body as any).graphql, query } } as any);
+			onChange({
+				...(body as any),
+				graphql: { ...(body as any).graphql, query },
+			} as any);
 		}
 	};
 
 	const handleGraphqlVarsChange = (variables: string) => {
 		if (typeof body === "object" && body?.type === "graphql") {
-			onChange({ ...(body as any), graphql: { ...(body as any).graphql, variables } } as any);
+			onChange({
+				...(body as any),
+				graphql: { ...(body as any).graphql, variables },
+			} as any);
 		}
 	};
 
-	const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, callback: (path: string) => void) => {
+	const handleFileSelect = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+		callback: (path: string) => void,
+	) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 		try {
@@ -102,7 +125,12 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 		}
 	};
 
-	const updateKvItem = (type: "form-data" | "urlencoded", index: number, field: string, value: string | boolean) => {
+	const updateKvItem = (
+		type: "form-data" | "urlencoded",
+		index: number,
+		field: string,
+		value: string | boolean,
+	) => {
 		if (typeof body === "object" && body?.type === type) {
 			const key = type === "form-data" ? "formData" : "urlencoded";
 			const items = (body as any)[key] || [];
@@ -122,27 +150,97 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 	};
 
 	return (
-		<div className="body-editor" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-			<div className="body-mode-selector" style={{ display: "flex", gap: "10px", padding: "10px", borderBottom: "1px solid var(--border-color)" }}>
-				<label><input type="radio" checked={mode === "none"} onChange={() => handleModeChange("none")} /> none</label>
-				<label><input type="radio" checked={mode === "form-data"} onChange={() => handleModeChange("form-data")} /> form-data</label>
-				<label><input type="radio" checked={mode === "urlencoded"} onChange={() => handleModeChange("urlencoded")} /> x-www-form-urlencoded</label>
-				<label><input type="radio" checked={mode === "raw"} onChange={() => handleModeChange("raw")} /> raw</label>
-				<label><input type="radio" checked={mode === "binary"} onChange={() => handleModeChange("binary")} /> binary</label>
-				<label><input type="radio" checked={mode === "graphql"} onChange={() => handleModeChange("graphql")} /> GraphQL</label>
+		<div
+			className="body-editor"
+			style={{ display: "flex", flexDirection: "column", height: "100%" }}
+		>
+			<div
+				className="body-mode-selector"
+				style={{
+					display: "flex",
+					gap: "10px",
+					padding: "10px",
+					borderBottom: "1px solid var(--border-color)",
+				}}
+			>
+				<label>
+					<input
+						type="radio"
+						checked={mode === "none"}
+						onChange={() => handleModeChange("none")}
+					/>{" "}
+					none
+				</label>
+				<label>
+					<input
+						type="radio"
+						checked={mode === "form-data"}
+						onChange={() => handleModeChange("form-data")}
+					/>{" "}
+					form-data
+				</label>
+				<label>
+					<input
+						type="radio"
+						checked={mode === "urlencoded"}
+						onChange={() => handleModeChange("urlencoded")}
+					/>{" "}
+					x-www-form-urlencoded
+				</label>
+				<label>
+					<input
+						type="radio"
+						checked={mode === "raw"}
+						onChange={() => handleModeChange("raw")}
+					/>{" "}
+					raw
+				</label>
+				<label>
+					<input
+						type="radio"
+						checked={mode === "binary"}
+						onChange={() => handleModeChange("binary")}
+					/>{" "}
+					binary
+				</label>
+				<label>
+					<input
+						type="radio"
+						checked={mode === "graphql"}
+						onChange={() => handleModeChange("graphql")}
+					/>{" "}
+					GraphQL
+				</label>
 
 				{mode === "raw" && typeof body === "object" && body?.type === "raw" && (
-					<div style={{ marginLeft: "auto", display: "flex", gap: "10px", alignItems: "center" }}>
+					<div
+						style={{
+							marginLeft: "auto",
+							display: "flex",
+							gap: "10px",
+							alignItems: "center",
+						}}
+					>
 						{(body as any).raw?.format === "json" && (
-							<button 
-								type="button" 
+							<button
+								type="button"
 								onClick={handleFormatJson}
-								style={{ padding: "2px 8px", fontSize: "0.85em", cursor: "pointer", background: "transparent", border: "1px solid var(--border-color)", borderRadius: "4px" }}
+								style={{
+									padding: "2px 8px",
+									fontSize: "0.85em",
+									cursor: "pointer",
+									background: "transparent",
+									border: "1px solid var(--border-color)",
+									borderRadius: "4px",
+								}}
 							>
 								Beautify
 							</button>
 						)}
-						<select value={(body as any).raw?.format || "json"} onChange={(e) => handleRawTypeChange(e.target.value)}>
+						<select
+							value={(body as any).raw?.format || "json"}
+							onChange={(e) => handleRawTypeChange(e.target.value)}
+						>
 							<option value="text">Text</option>
 							<option value="javascript">JavaScript</option>
 							<option value="json">JSON</option>
@@ -153,13 +251,30 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 				)}
 			</div>
 
-			<div className="body-content" style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}>
+			<div
+				className="body-content"
+				style={{
+					flex: 1,
+					overflow: "auto",
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
 				{mode === "none" && (
-					<div className="pane-empty muted">This request does not have a body</div>
+					<div className="pane-empty muted">
+						This request does not have a body
+					</div>
 				)}
 
 				{mode === "raw" && typeof body === "object" && body?.type === "raw" && (
-					<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
+					<div
+						style={{
+							flex: 1,
+							overflow: "auto",
+							border: "1px solid var(--border-color)",
+							borderTop: "none",
+						}}
+					>
 						<CodeEditor
 							value={(body as any).raw?.content || ""}
 							onChange={handleRawChange}
@@ -175,74 +290,188 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
 					</div>
 				)}
 
-				{mode === "binary" && typeof body === "object" && body?.type === "binary" && (
-					<div style={{ padding: "20px" }}>
-						<p>Selected File: {(body as any).binary?.file || "None"}</p>
-						<input type="file" onChange={(e) => handleFileSelect(e, (path) => onChange({ type: "binary", binary: { file: path } } as any))} />
-					</div>
-				)}
+				{mode === "binary" &&
+					typeof body === "object" &&
+					body?.type === "binary" && (
+						<div style={{ padding: "20px" }}>
+							<p>Selected File: {(body as any).binary?.file || "None"}</p>
+							<input
+								type="file"
+								onChange={(e) =>
+									handleFileSelect(e, (path) =>
+										onChange({ type: "binary", binary: { file: path } } as any),
+									)
+								}
+							/>
+						</div>
+					)}
 
-				{mode === "graphql" && typeof body === "object" && body?.type === "graphql" && (
-					<div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-						<div style={{ flex: 2, display: "flex", flexDirection: "column" }}>
-							<PaneHeader title="Query" />
-							<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
-								<CodeEditor value={(body as any).graphql?.query || ""} onChange={handleGraphqlQueryChange} language="javascript" style={{ height: "100%" }} />
+				{mode === "graphql" &&
+					typeof body === "object" &&
+					body?.type === "graphql" && (
+						<div
+							style={{
+								display: "flex",
+								flexDirection: "column",
+								height: "100%",
+							}}
+						>
+							<div
+								style={{ flex: 2, display: "flex", flexDirection: "column" }}
+							>
+								<PaneHeader title="Query" />
+								<div
+									style={{
+										flex: 1,
+										overflow: "auto",
+										border: "1px solid var(--border-color)",
+										borderTop: "none",
+									}}
+								>
+									<CodeEditor
+										value={(body as any).graphql?.query || ""}
+										onChange={handleGraphqlQueryChange}
+										language="javascript"
+										style={{ height: "100%" }}
+									/>
+								</div>
+							</div>
+							<div
+								style={{
+									flex: 1,
+									display: "flex",
+									flexDirection: "column",
+									borderTop: "1px solid var(--border-color)",
+								}}
+							>
+								<PaneHeader title="Variables" />
+								<div
+									style={{
+										flex: 1,
+										overflow: "auto",
+										border: "1px solid var(--border-color)",
+										borderTop: "none",
+									}}
+								>
+									<CodeEditor
+										value={(body as any).graphql?.variables || ""}
+										onChange={handleGraphqlVarsChange}
+										language="json"
+										style={{ height: "100%" }}
+									/>
+								</div>
 							</div>
 						</div>
-						<div style={{ flex: 1, display: "flex", flexDirection: "column", borderTop: "1px solid var(--border-color)" }}>
-							<PaneHeader title="Variables" />
-							<div style={{ flex: 1, overflow: "auto", border: "1px solid var(--border-color)", borderTop: "none" }}>
-								<CodeEditor value={(body as any).graphql?.variables || ""} onChange={handleGraphqlVarsChange} language="json" style={{ height: "100%" }} />
-							</div>
-						</div>
-					</div>
-				)}
+					)}
 
-				{(mode === "form-data" || mode === "urlencoded") && typeof body === "object" && (body?.type === "form-data" || body?.type === "urlencoded") && (
-					<table className="kv-table editable-kv-table">
-						<thead>
-							<tr>
-								<th>Key</th>
-								<th>Value</th>
-								<th className="kv-actions"></th>
-							</tr>
-						</thead>
-						<tbody>
-							{((body as any)[mode === "form-data" ? "formData" : "urlencoded"] || []).map((item: any, idx: number) => (
-								<tr key={idx}>
-									<td className="kv-key">
-										<input type="text" className="kv-input" value={item.key} onChange={(e) => updateKvItem(mode, idx, "key", e.target.value)} placeholder="Key" />
-										{mode === "form-data" && (
-											<select value={item.type || "text"} onChange={(e) => updateKvItem(mode, idx, "type", e.target.value)} style={{ marginLeft: "5px", fontSize: "0.8em" }}>
-												<option value="text">Text</option>
-												<option value="file">File</option>
-											</select>
-										)}
-									</td>
-									<td className="kv-val">
-										{item.type === "file" ? (
-											<div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-												<span style={{ fontSize: "0.9em", color: "var(--muted)" }}>{item.filePath || "No file selected"}</span>
-												<input type="file" style={{ fontSize: "0.8em" }} onChange={(e) => handleFileSelect(e, (path) => updateKvItem(mode, idx, "filePath", path))} />
-											</div>
-										) : (
-											<input type="text" className="kv-input" value={item.value || ""} onChange={(e) => updateKvItem(mode, idx, "value", e.target.value)} placeholder="Value" />
-										)}
-									</td>
-									<td className="kv-actions">
-										<button type="button" className="kv-remove-btn" onClick={() => removeKvItem(mode, idx)}>✕</button>
+				{(mode === "form-data" || mode === "urlencoded") &&
+					typeof body === "object" &&
+					(body?.type === "form-data" || body?.type === "urlencoded") && (
+						<table className="kv-table editable-kv-table">
+							<thead>
+								<tr>
+									<th>Key</th>
+									<th>Value</th>
+									<th className="kv-actions"></th>
+								</tr>
+							</thead>
+							<tbody>
+								{(
+									(body as any)[
+										mode === "form-data" ? "formData" : "urlencoded"
+									] || []
+								).map((item: any, idx: number) => (
+									<tr key={idx}>
+										<td className="kv-key">
+											<input
+												type="text"
+												className="kv-input"
+												value={item.key}
+												onChange={(e) =>
+													updateKvItem(mode, idx, "key", e.target.value)
+												}
+												placeholder="Key"
+											/>
+											{mode === "form-data" && (
+												<select
+													value={item.type || "text"}
+													onChange={(e) =>
+														updateKvItem(mode, idx, "type", e.target.value)
+													}
+													style={{ marginLeft: "5px", fontSize: "0.8em" }}
+												>
+													<option value="text">Text</option>
+													<option value="file">File</option>
+												</select>
+											)}
+										</td>
+										<td className="kv-val">
+											{item.type === "file" ? (
+												<div
+													style={{
+														display: "flex",
+														alignItems: "center",
+														gap: "5px",
+													}}
+												>
+													<span
+														style={{ fontSize: "0.9em", color: "var(--muted)" }}
+													>
+														{item.filePath || "No file selected"}
+													</span>
+													<input
+														type="file"
+														style={{ fontSize: "0.8em" }}
+														onChange={(e) =>
+															handleFileSelect(e, (path) =>
+																updateKvItem(mode, idx, "filePath", path),
+															)
+														}
+													/>
+												</div>
+											) : (
+												<input
+													type="text"
+													className="kv-input"
+													value={item.value || ""}
+													onChange={(e) =>
+														updateKvItem(mode, idx, "value", e.target.value)
+													}
+													placeholder="Value"
+												/>
+											)}
+										</td>
+										<td className="kv-actions">
+											<button
+												type="button"
+												className="kv-remove-btn"
+												onClick={() => removeKvItem(mode, idx)}
+											>
+												✕
+											</button>
+										</td>
+									</tr>
+								))}
+								<tr>
+									<td colSpan={3} style={{ padding: "8px" }}>
+										<button
+											type="button"
+											onClick={() => addKvItem(mode)}
+											style={{
+												background: "transparent",
+												border: "1px dashed var(--border-color)",
+												padding: "4px 8px",
+												cursor: "pointer",
+												borderRadius: "4px",
+											}}
+										>
+											+ Add Item
+										</button>
 									</td>
 								</tr>
-							))}
-							<tr>
-								<td colSpan={3} style={{ padding: "8px" }}>
-									<button type="button" onClick={() => addKvItem(mode)} style={{ background: "transparent", border: "1px dashed var(--border-color)", padding: "4px 8px", cursor: "pointer", borderRadius: "4px" }}>+ Add Item</button>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				)}
+							</tbody>
+						</table>
+					)}
 			</div>
 		</div>
 	);

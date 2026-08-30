@@ -1,5 +1,13 @@
-import type { RequestDocument, RequestBody } from "@dakiya/domain";
-import { parseEndpoint, updateEndpointMethod, addEndpointMethod } from "@dakiya/format";
+import type { RequestBody, RequestDocument } from "@dakiya/domain";
+import {
+	addEndpointMethod,
+	appendEndpointMethodData,
+	deleteEndpointMethod,
+	extractEndpointMethodData,
+	parseEndpoint,
+	renameEndpointMethod,
+	updateEndpointMethod,
+} from "@dakiya/format";
 import type { FsClient } from "./fs-client.js";
 import { collectionsRoot, posixJoin, resolveEndpointPaths } from "./paths.js";
 
@@ -160,7 +168,9 @@ export function createRequestSource(
 	);
 
 	if (!methodId) {
-		throw new Error(`Expected a specific method request to create, got: ${arg}`);
+		throw new Error(
+			`Expected a specific method request to create, got: ${arg}`,
+		);
 	}
 
 	const yamlPath = posixJoin(parent, "requests.yaml");
@@ -187,9 +197,120 @@ export function createRequestSource(
 }
 
 export function deleteRequestFile(): void {
-	throw new Error(
-		"Deleting is not supported with requests.yaml multi-file structure yet.",
+	throw new Error("Use deleteRequest() instead.");
+}
+
+/** Rename an endpoint folder (e.g. "v1/users" → "v1/members"). */
+export function renameFolder(
+	fs: FsClient,
+	folderPath: string, // relative to collections, e.g. "v1/users"
+	newName: string, // just the new folder name, e.g. "members"
+	cwd: string,
+): { oldPath: string; newPath: string } {
+	const collectionsRootPath = collectionsRoot(cwd);
+	const absOld = posixJoin(collectionsRootPath, folderPath);
+	const parent = absOld.slice(0, absOld.lastIndexOf("/"));
+	const absNew = posixJoin(parent, newName);
+
+	if (!fs.exists(absOld)) throw new Error(`Folder not found: ${folderPath}`);
+
+	const newRelPath = absNew.slice(collectionsRootPath.length + 1);
+	fs.renameDir(absOld, absNew);
+	return { oldPath: folderPath, newPath: newRelPath };
+}
+
+/** Delete an endpoint folder and all its contents. */
+export function deleteFolder(
+	fs: FsClient,
+	folderPath: string, // relative to collections, e.g. "v1/users"
+	cwd: string,
+): void {
+	const collectionsRootPath = collectionsRoot(cwd);
+	const absPath = posixJoin(collectionsRootPath, folderPath);
+	if (!fs.exists(absPath)) throw new Error(`Folder not found: ${folderPath}`);
+	fs.removeDir(absPath);
+}
+
+/** Rename a request's display name (updates `name` field in YAML). */
+export function renameRequest(
+	fs: FsClient,
+	requestPath: string, // e.g. "v1/users/get"
+	newName: string,
+	cwd: string,
+): void {
+	const { endpointPath, methodId } = resolveEndpointAndMethod(
+		fs,
+		requestPath,
+		cwd,
 	);
+	if (!methodId) throw new Error(`Expected a specific method: ${requestPath}`);
+
+	const yamlPath = posixJoin(endpointPath, "requests.yaml");
+	const yamlSource = fs.readFile(yamlPath);
+	const updated = renameEndpointMethod(yamlSource, methodId, newName);
+	fs.writeFile(yamlPath, updated);
+}
+
+/** Delete a request method entry from its YAML file. */
+export function deleteRequest(
+	fs: FsClient,
+	requestPath: string, // e.g. "v1/users/get"
+	cwd: string,
+): void {
+	const { endpointPath, methodId } = resolveEndpointAndMethod(
+		fs,
+		requestPath,
+		cwd,
+	);
+	if (!methodId) throw new Error(`Expected a specific method: ${requestPath}`);
+
+	const yamlPath = posixJoin(endpointPath, "requests.yaml");
+	const yamlSource = fs.readFile(yamlPath);
+	const updated = deleteEndpointMethod(yamlSource, methodId);
+	fs.writeFile(yamlPath, updated);
+}
+
+/**
+ * Move a request method from one endpoint folder to another.
+ * e.g. move "v1/users/get" to folder "v1/members"
+ */
+export function moveRequest(
+	fs: FsClient,
+	requestPath: string, // e.g. "v1/users/get"
+	toFolder: string, // e.g. "v1/members"
+	cwd: string,
+): { newPath: string } {
+	const { endpointPath, methodId } = resolveEndpointAndMethod(
+		fs,
+		requestPath,
+		cwd,
+	);
+	if (!methodId) throw new Error(`Expected a specific method: ${requestPath}`);
+
+	const collectionsRootPath = collectionsRoot(cwd);
+	const srcYamlPath = posixJoin(endpointPath, "requests.yaml");
+	const srcYaml = fs.readFile(srcYamlPath);
+
+	// Extract method data
+	const data = extractEndpointMethodData(srcYaml, methodId);
+	if (!data) throw new Error(`Method ${methodId} not found in ${requestPath}`);
+
+	// Write to destination
+	const destDir = posixJoin(collectionsRootPath, toFolder);
+	if (!fs.exists(destDir)) fs.mkdir(destDir);
+	const destYamlPath = posixJoin(destDir, "requests.yaml");
+	const destYaml = fs.exists(destYamlPath) ? fs.readFile(destYamlPath) : "";
+	const updatedDest = appendEndpointMethodData(destYaml, data);
+	fs.writeFile(destYamlPath, updatedDest);
+
+	// Remove from source
+	const updatedSrc = deleteEndpointMethod(srcYaml, methodId);
+	fs.writeFile(srcYamlPath, updatedSrc);
+
+	let destRel = destDir.slice(collectionsRootPath.length);
+	if (destRel.startsWith("/")) destRel = destRel.slice(1);
+
+	return { newPath: `${destRel}/${methodId}` };
 }
 
 export function writeScript(

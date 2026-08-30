@@ -22,6 +22,7 @@ export type {
 	HttpMethod,
 	HttpRequestLine,
 	RequestAssert,
+	RequestBody,
 	RequestDocument,
 	RequestExample,
 	RequestMeta,
@@ -29,7 +30,6 @@ export type {
 	ScriptBlock,
 	ScriptLang,
 	SendResult,
-	RequestBody,
 } from "./request.js";
 export {
 	EndpointManifestSchema,
@@ -40,6 +40,7 @@ export {
 	HttpMethodSchema,
 	HttpRequestLineSchema,
 	RequestAssertSchema,
+	RequestBodySchema,
 	RequestDocumentSchema,
 	RequestExampleSchema,
 	RequestMetaSchema,
@@ -47,7 +48,6 @@ export {
 	ScriptBlockSchema,
 	ScriptLangSchema,
 	SendResultSchema,
-	RequestBodySchema,
 	WorkspaceManifestSchema,
 } from "./schemas.js";
 export type { WorkspaceManifest } from "./workspace.js";

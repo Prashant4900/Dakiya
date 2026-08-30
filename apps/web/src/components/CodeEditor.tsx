@@ -1,9 +1,9 @@
-import ReactCodeMirror from "@uiw/react-codemirror";
-import { githubLight } from "@uiw/codemirror-theme-github";
-import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { javascript } from "@codemirror/lang-javascript";
+import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { linter, lintKeymap } from "@codemirror/lint";
 import { keymap } from "@codemirror/view";
+import { githubLight } from "@uiw/codemirror-theme-github";
+import ReactCodeMirror from "@uiw/react-codemirror";
 
 export type CodeEditorProps = {
 	value: string;

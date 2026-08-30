@@ -2,7 +2,15 @@ import { useState } from "react";
 import { Button } from "./Button.js";
 import { Modal } from "./Modal.js";
 
-const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
+const HTTP_METHODS = [
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE",
+	"HEAD",
+	"OPTIONS",
+];
 
 export interface NewRequestModalProps {
 	activeVersion: string | null;
@@ -53,7 +61,14 @@ export function NewRequestModal({
 
 			<form onSubmit={handleSubmit}>
 				<div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-					<label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px" }}>
+					<label
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							gap: "6px",
+							fontSize: "13px",
+						}}
+					>
 						<span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
 							Method
 						</span>
@@ -78,7 +93,14 @@ export function NewRequestModal({
 						</select>
 					</label>
 
-					<label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px" }}>
+					<label
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							gap: "6px",
+							fontSize: "13px",
+						}}
+					>
 						<span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
 							Request name <span style={{ color: "var(--del)" }}>*</span>
 						</span>
@@ -94,7 +116,14 @@ export function NewRequestModal({
 						/>
 					</label>
 
-					<label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px" }}>
+					<label
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							gap: "6px",
+							fontSize: "13px",
+						}}
+					>
 						<span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
 							Folder{" "}
 							<span style={{ color: "var(--text-muted)", fontWeight: 400 }}>
@@ -111,7 +140,9 @@ export function NewRequestModal({
 						/>
 					</label>
 
-					<p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
+					<p
+						style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}
+					>
 						Will be created at:{" "}
 						<code style={{ fontSize: "12px" }}>
 							{version}/{folder.trim() ? `${folder.trim()}/` : ""}

@@ -50,7 +50,7 @@ export function fetchRequest(path: string): Promise<RequestResponse> {
 
 export function saveRequest(
 	path: string,
-	updates: any,
+	updates: Record<string, unknown>,
 ): Promise<{ success: true; relativeToCollections: string }> {
 	return request(`/requests/${path}`, {
 		method: "PUT",
@@ -121,5 +121,58 @@ export function sendRequestApi(
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ path, env }),
+	});
+}
+
+export function renameFolderAPI(
+	folderPath: string,
+	newName: string,
+): Promise<{ success: true; oldPath: string; newPath: string }> {
+	return request(`/folders/${folderPath}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ action: "rename", newName }),
+	});
+}
+
+export function deleteFolderAPI(
+	folderPath: string,
+): Promise<{ success: true }> {
+	return request(`/folders/${folderPath}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ action: "delete" }),
+	});
+}
+
+export function renameRequestAPI(
+	requestPath: string,
+	newName: string,
+): Promise<{ success: true }> {
+	return request(`/requests/${requestPath}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ action: "rename", newName }),
+	});
+}
+
+export function deleteRequestAPI(
+	requestPath: string,
+): Promise<{ success: true }> {
+	return request(`/requests/${requestPath}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ action: "delete" }),
+	});
+}
+
+export function moveRequestAPI(
+	requestPath: string,
+	toFolder: string,
+): Promise<{ success: true; newPath: string }> {
+	return request(`/requests/${requestPath}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ action: "move", toFolder }),
 	});
 }

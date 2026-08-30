@@ -49,28 +49,49 @@ export const RequestAssertSchema = z.object({
 export const RequestBodySchema = z.union([
 	z.string(),
 	z.object({
-		type: z.enum(["none", "raw", "form-data", "urlencoded", "binary", "graphql"]),
-		raw: z.object({
-			content: z.string(),
-			format: z.enum(["json", "text", "javascript", "html", "xml"])
-		}).optional(),
-		formData: z.array(z.object({
-			key: z.string(),
-			value: z.string(),
-			type: z.enum(["text", "file"]).default("text")
-		})).optional(),
-		urlencoded: z.array(z.object({
-			key: z.string(),
-			value: z.string()
-		})).optional(),
-		binary: z.object({
-			file: z.string()
-		}).optional(),
-		graphql: z.object({
-			query: z.string(),
-			variables: z.string().optional()
-		}).optional()
-	})
+		type: z.enum([
+			"none",
+			"raw",
+			"form-data",
+			"urlencoded",
+			"binary",
+			"graphql",
+		]),
+		raw: z
+			.object({
+				content: z.string(),
+				format: z.enum(["json", "text", "javascript", "html", "xml"]),
+			})
+			.optional(),
+		formData: z
+			.array(
+				z.object({
+					key: z.string(),
+					value: z.string(),
+					type: z.enum(["text", "file"]).default("text"),
+				}),
+			)
+			.optional(),
+		urlencoded: z
+			.array(
+				z.object({
+					key: z.string(),
+					value: z.string(),
+				}),
+			)
+			.optional(),
+		binary: z
+			.object({
+				file: z.string(),
+			})
+			.optional(),
+		graphql: z
+			.object({
+				query: z.string(),
+				variables: z.string().optional(),
+			})
+			.optional(),
+	}),
 ]);
 
 export const RequestDocumentSchema = z.object({

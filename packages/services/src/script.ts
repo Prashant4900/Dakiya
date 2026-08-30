@@ -6,9 +6,9 @@
 import type {
 	EnvironmentVariables,
 	HttpMethod,
+	RequestBody,
 	ScriptBlock,
 	SendResult,
-	RequestBody,
 } from "@dakiya/domain";
 
 /** Mutable request the pre-script may change before HTTP. */
@@ -49,7 +49,12 @@ export type ScriptRunner = (
 	input: RunScriptInput,
 ) => RunScriptResult | Promise<RunScriptResult>;
 
-export function toMutableRequest(resolved: { method: HttpMethod; url: string; headers: Record<string, string>; body?: RequestBody }): MutableRequest {
+export function toMutableRequest(resolved: {
+	method: HttpMethod;
+	url: string;
+	headers: Record<string, string>;
+	body?: RequestBody;
+}): MutableRequest {
 	return {
 		method: resolved.method,
 		url: resolved.url,

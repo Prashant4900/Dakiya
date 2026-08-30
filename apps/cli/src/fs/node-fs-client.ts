@@ -28,5 +28,11 @@ export function createNodeFsClient(): FsClient {
 				isFile: entry.isFile(),
 			}));
 		},
+		renameDir(from: string, to: string) {
+			fs.renameSync(from, to);
+		},
+		removeDir(dirPath: string) {
+			fs.rmSync(dirPath, { recursive: true, force: true });
+		},
 	};
 }
