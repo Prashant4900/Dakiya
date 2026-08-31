@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"lib": ["ES2022"],
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "dist/cli",
+		"baseUrl": ".",
+		"paths": {
+			"@core/*": ["./src/core/*"],
+			"@core/domain": ["./src/core/domain/index"],
+			"@core/format": ["./src/core/format/index"],
+			"@core/services": ["./src/core/services/index"]
+		}
+	},
+	"include": ["src/cli", "src/core"]
+}

@@ -1,8 +1,0 @@
-# Dakiya workspace core — metadata for this project
-name: example
-description: "A local-first API workspace for example."
-
-version: 1
-
-# Active environment (matches a file under environments/)
-defaultEnv: local

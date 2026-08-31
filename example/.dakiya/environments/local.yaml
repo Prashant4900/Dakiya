@@ -1,2 +1,0 @@
-# Local environment variables — use as {{name}} in requests
-baseUrl: http://localhost:3000
