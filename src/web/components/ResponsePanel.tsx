@@ -1,11 +1,9 @@
 import { useRef, useState } from "react";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
-import { Button } from "./Button.js";
+import { Copy01Icon, PackageIcon, ZapIcon } from "hugeicons-react";
+import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor.js";
-import { CopyIcon } from "./icons/CopyIcon.js";
-import { PackageIcon } from "./icons/PackageIcon.js";
-import { ZapIcon } from "./icons/ZapIcon.js";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
 
@@ -134,7 +132,7 @@ export function ResponsePanel({
 							</span>
 							<Button
 								variant="secondary"
-								icon={<CopyIcon />}
+								size="sm"
 								onClick={async () => {
 									try {
 										await navigator.clipboard.writeText(
@@ -146,14 +144,11 @@ export function ResponsePanel({
 										console.error("Failed to copy cURL", e);
 									}
 								}}
-								style={{
-									marginLeft: "auto",
-									height: "24px",
-									padding: "0 8px",
-									fontSize: "11px",
-								}}
+								title="Copy as cURL"
+								className="ml-auto h-6 text-[11px] gap-1 px-2"
 							>
-								{copiedCurl ? "Copied!" : "cURL"}
+								<Copy01Icon size={12} />
+                                {copiedCurl ? "Copied!" : "cURL"}
 							</Button>
 						</>
 					)}
@@ -225,14 +220,10 @@ export function ResponsePanel({
 							}
 						}}
 						variant="secondary"
-						style={{
-							position: "absolute",
-							top: "8px",
-							right: "16px",
-							zIndex: 10,
-						}}
-						icon={<CopyIcon />}
+                        size="sm"
+                        className="absolute top-2 right-4 z-10 h-7 text-xs gap-1.5"
 					>
+                        <Copy01Icon size={14} />
 						{copied ? "Copied!" : "Copy"}
 					</Button>
 				</div>

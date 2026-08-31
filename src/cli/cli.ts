@@ -4,6 +4,7 @@ import { runList } from "./commands/list.js";
 import { runRun } from "./commands/run.js";
 import { runServe } from "./commands/serve.js";
 import { runHello } from "./hello.js";
+import { DEFAULT_PORT } from "./constants.js";
 
 const [, , cmd, ...args] = process.argv;
 
@@ -14,21 +15,21 @@ Usage:
   dakiya init                 Scaffold .dakiya/ (manifest, env, empty collections)
   dakiya list                 List requests under .dakiya/collections/
   dakiya run <path>           Send a request (e.g. health/health or users/list.drq)
-  dakiya serve [--port N]     Start web dashboard + API at http://localhost:4242
+  dakiya serve [--port N]     Start web dashboard + API at http://localhost:${DEFAULT_PORT}
 
 `);
 	process.exit(exitCode);
 }
 
 function parseServePort(argv: string[]): number {
-	const defaultPort = 4242;
+	const defaultPort = DEFAULT_PORT;
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
 		if (!arg) continue;
 		if (arg === "--port" || arg === "-p") {
 			const value = argv[i + 1];
 			if (!value || !/^\d+$/.test(value)) {
-				console.error(`[dakiya] --port requires a number (e.g. --port 4242)`);
+				console.error(`[dakiya] --port requires a number (e.g. --port ${DEFAULT_PORT})`);
 				process.exit(1);
 			}
 			const port = Number(value);
@@ -41,7 +42,7 @@ function parseServePort(argv: string[]): number {
 		if (arg.startsWith("--port=")) {
 			const value = arg.slice("--port=".length);
 			if (!/^\d+$/.test(value)) {
-				console.error(`[dakiya] --port requires a number (e.g. --port=4242)`);
+				console.error(`[dakiya] --port requires a number (e.g. --port=${DEFAULT_PORT})`);
 				process.exit(1);
 			}
 			const port = Number(value);

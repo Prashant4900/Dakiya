@@ -1,7 +1,15 @@
 import { useState } from "react";
-import { Button } from "./Button.js";
-import { Cancel01Icon } from "./icons/Cancel01Icon.js";
-import { Modal } from "./Modal.js";
+import { Button } from "@/components/ui/button";
+import { Cancel01Icon } from "hugeicons-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const HTTP_METHODS = [
 	"GET",
@@ -47,99 +55,55 @@ export function NewRequestModal({
 	};
 
 	return (
-		<Modal onClose={onClose} titleId="new-request-modal-title" maxWidth="460px">
-			<div className="modal-header">
-				<h2 id="new-request-modal-title">New Request</h2>
-				<Button
-					variant="icon"
-					onClick={onClose}
-					aria-label="Close"
-					icon={<Cancel01Icon size={18} />}
-					style={{ color: "var(--text-muted)" }}
-				/>
-			</div>
-
-			<form onSubmit={handleSubmit}>
-				<div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-					<label
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							gap: "6px",
-							fontSize: "13px",
-						}}
-					>
-						<span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-							Method
-						</span>
+		<Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="sm:max-w-[460px]">
+				<DialogHeader>
+					<DialogTitle>New Request</DialogTitle>
+				</DialogHeader>
+				
+				<form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
+					<div className="flex flex-col gap-2">
+						<Label className="text-muted-foreground font-medium">Method</Label>
 						<select
 							value={method}
 							onChange={(e) => setMethod(e.target.value)}
-							style={{
-								background: "var(--input-bg, var(--surface))",
-								color: "var(--text-color)",
-								border: "1px solid var(--border)",
-								borderRadius: "var(--radius, 6px)",
-								padding: "6px 10px",
-								fontSize: "13px",
-								cursor: "pointer",
-							}}
+							className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
 						>
 							{HTTP_METHODS.map((m) => (
-								<option key={m} value={m}>
+								<option key={m} value={m} className="bg-background text-foreground">
 									{m}
 								</option>
 							))}
 						</select>
-					</label>
+					</div>
 
-					<label
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							gap: "6px",
-							fontSize: "13px",
-						}}
-					>
-						<span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-							Request name <span style={{ color: "var(--del)" }}>*</span>
-						</span>
-						<input
+					<div className="flex flex-col gap-2">
+						<Label className="text-muted-foreground font-medium">
+							Request name <span className="text-destructive">*</span>
+						</Label>
+						<Input
 							// biome-ignore lint/a11y/noAutofocus: intentional focus on open
 							autoFocus
 							type="text"
-							className="search-input"
 							placeholder="e.g. get-user"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
-							style={{ width: "100%", boxSizing: "border-box" }}
 						/>
-					</label>
+					</div>
 
-					<label
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							gap: "6px",
-							fontSize: "13px",
-						}}
-					>
-						<span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-							Folder{" "}
-							<span style={{ color: "var(--text-muted)", fontWeight: 400 }}>
+					<div className="flex flex-col gap-2">
+						<Label className="text-muted-foreground font-medium flex items-baseline gap-1">
+							Folder
+							<span className="text-xs font-normal opacity-70">
 								(optional, e.g. users)
 							</span>
-						</span>
-						<input
+						</Label>
+						<Input
 							type="text"
 							list="folder-list"
-							className="search-input"
-							placeholder={
-								isVersioned ? `inside ${version}/` : "inside root or folder/"
-							}
+							placeholder={isVersioned ? `inside ${version}/` : "inside root or folder/"}
 							value={folder}
 							onChange={(e) => setFolder(e.target.value)}
-							style={{ width: "100%", boxSizing: "border-box" }}
 						/>
 						{folders.length > 0 && (
 							<datalist id="folder-list">
@@ -148,29 +112,27 @@ export function NewRequestModal({
 								))}
 							</datalist>
 						)}
-					</label>
+					</div>
 
-					<p
-						style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}
-					>
+					<p className="text-xs text-muted-foreground mt-2">
 						Will be created at:{" "}
-						<code style={{ fontSize: "12px" }}>
+						<code className="bg-muted px-1 py-0.5 rounded text-foreground font-mono">
 							{isVersioned ? `${version}/` : ""}
 							{folder.trim() ? `${folder.trim()}/` : ""}
 							{method.toLowerCase()}-{name.trim() || "<name>"}
 						</code>
 					</p>
-				</div>
 
-				<div className="modal-actions">
-					<Button type="button" variant="secondary" onClick={onClose}>
-						Cancel
-					</Button>
-					<Button type="submit" variant="primary" disabled={!name.trim()}>
-						Create
-					</Button>
-				</div>
-			</form>
-		</Modal>
+					<DialogFooter className="mt-4">
+						<Button type="button" variant="secondary" onClick={onClose}>
+							Cancel
+						</Button>
+						<Button type="submit" disabled={!name.trim()}>
+							Create
+						</Button>
+					</DialogFooter>
+				</form>
+			</DialogContent>
+		</Dialog>
 	);
 }

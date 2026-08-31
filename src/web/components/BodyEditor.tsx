@@ -2,9 +2,9 @@ import type { RequestBody } from "@core/domain";
 import { useEffect, useState } from "react";
 import { uploadFile } from "../api/client.js";
 
-import { Button } from "./Button.js";
+import { Button } from "@/components/ui/button";
+import { Cancel01Icon } from "hugeicons-react";
 import { CodeEditor } from "./CodeEditor.js";
-import { Cancel01Icon } from "./icons/Cancel01Icon.js";
 import { PaneHeader } from "./PaneHeader.js";
 
 type BodyEditorProps = {
@@ -225,7 +225,7 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 						}}
 					>
 						{(body as any).raw?.format === "json" && (
-							<Button onClick={handleFormatJson} variant="ghost">
+							<Button onClick={handleFormatJson} variant="ghost" size="sm" className="text-xs h-7">
 								Beautify
 							</Button>
 						)}
@@ -438,17 +438,19 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 										</td>
 										<td className="kv-actions">
 											<Button
-												className="kv-remove-btn"
+												variant="ghost"
+												size="icon"
 												onClick={() => removeKvItem(mode, idx)}
-												icon={<Cancel01Icon size={14} />}
-												variant="icon"
-											/>
+												className="h-8 w-8 hover:text-destructive"
+											>
+												<Cancel01Icon size={14} />
+											</Button>
 										</td>
 									</tr>
 								))}
 								<tr>
 									<td colSpan={3} style={{ padding: "8px" }}>
-										<Button onClick={() => addKvItem(mode)} variant="dashed">
+										<Button onClick={() => addKvItem(mode)} variant="outline" size="sm" className="border-dashed w-full">
 											+ Add Item
 										</Button>
 									</td>

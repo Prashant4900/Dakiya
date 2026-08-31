@@ -1,5 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { Button } from "./Button.js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 type EnvSwitcherProps = {
 	environments: string[];
@@ -14,56 +20,35 @@ export function EnvSwitcher({
 	onEnvChange,
 	onManage,
 }: EnvSwitcherProps) {
-	const [open, setOpen] = useState(false);
-	const ref = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		const onDocClick = (e: MouseEvent) => {
-			if (ref.current && !ref.current.contains(e.target as Node)) {
-				setOpen(false);
-			}
-		};
-		document.addEventListener("click", onDocClick);
-		return () => document.removeEventListener("click", onDocClick);
-	}, []);
-
 	return (
-		<div className={`env-switcher${open ? " open" : ""}`} ref={ref}>
-			<Button
-				className="env-switcher-trigger"
-				onClick={() => setOpen((v) => !v)}
-				variant="unstyled"
-			>
-				<span className="env-dot" />
-				<span className="env-name">{activeEnv}</span>
-				<span className="env-arrow">▾</span>
-			</Button>
-			<div className="env-dropdown">
-				{environments.map((name) => (
-					<Button
-						key={name}
-						className={`env-option${name === activeEnv ? " active" : ""}`}
-						onClick={() => {
-							onEnvChange(name);
-							setOpen(false);
-						}}
-						variant="unstyled"
-					>
-						<span className="dot" />
-						{name}
-					</Button>
-				))}
-				<Button
-					className="env-option env-option-edit"
-					onClick={() => {
-						setOpen(false);
-						onManage();
-					}}
-					variant="unstyled"
-				>
-					Manage environments →
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="outline" className="w-full justify-between font-medium h-8 px-2 shadow-sm text-sm">
+					<div className="flex items-center gap-2">
+						<span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(26,127,90,0.6)]" />
+						<span className="truncate">{activeEnv}</span>
+					</div>
+					<ChevronDown className="h-4 w-4 text-muted-foreground opacity-50" />
 				</Button>
-			</div>
-		</div>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent className="w-52" align="start">
+				{environments.map((name) => (
+					<DropdownMenuItem
+						key={name}
+						onClick={() => onEnvChange(name)}
+						className="flex items-center gap-2 cursor-pointer text-sm py-1.5"
+					>
+						<span className={`h-2 w-2 rounded-full ${name === activeEnv ? "bg-primary shadow-[0_0_8px_rgba(26,127,90,0.6)]" : "bg-transparent border border-muted-foreground"}`} />
+						<span className="truncate">{name}</span>
+					</DropdownMenuItem>
+				))}
+				<DropdownMenuItem
+					onClick={onManage}
+					className="text-primary mt-1 border-t rounded-none pt-2 pb-1.5 cursor-pointer font-medium focus:text-primary focus:bg-primary/10 transition-colors"
+				>
+					Manage environments &rarr;
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }

@@ -1,5 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { Button } from "./Button.js";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ArrowDown01Icon } from "hugeicons-react";
 
 type VersionSwitcherProps = {
 	versions: string[];
@@ -12,47 +18,27 @@ export function VersionSwitcher({
 	activeVersion,
 	onVersionChange,
 }: VersionSwitcherProps) {
-	const [open, setOpen] = useState(false);
-	const ref = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		const onDocClick = (e: MouseEvent) => {
-			if (ref.current && !ref.current.contains(e.target as Node)) {
-				setOpen(false);
-			}
-		};
-		document.addEventListener("click", onDocClick);
-		return () => document.removeEventListener("click", onDocClick);
-	}, []);
-
 	if (!activeVersion || versions.length === 0) return null;
 
 	return (
-		<div className={`env-switcher${open ? " open" : ""}`} ref={ref}>
-			<Button
-				className="env-switcher-trigger"
-				onClick={() => setOpen((v) => !v)}
-				variant="unstyled"
-			>
-				<span className="env-name">Version: {activeVersion}</span>
-				<span className="env-arrow">▾</span>
-			</Button>
-			<div className="env-dropdown">
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="outline" size="sm" className="h-8 text-xs font-medium px-2 gap-1.5 shadow-none w-[140px] justify-between">
+					<span className="truncate">Version: {activeVersion}</span>
+					<ArrowDown01Icon size={14} className="text-muted-foreground opacity-50" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="start" className="w-[140px]">
 				{versions.map((name) => (
-					<Button
+					<DropdownMenuItem
 						key={name}
-						className={`env-option${name === activeVersion ? " active" : ""}`}
-						onClick={() => {
-							onVersionChange(name);
-							setOpen(false);
-						}}
-						variant="unstyled"
+						onClick={() => onVersionChange(name)}
+						className={`text-xs ${name === activeVersion ? "font-semibold bg-primary/10 text-primary" : ""}`}
 					>
-						<span className="dot" />
 						{name}
-					</Button>
+					</DropdownMenuItem>
 				))}
-			</div>
-		</div>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }

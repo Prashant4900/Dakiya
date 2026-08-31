@@ -34,7 +34,7 @@
 	},
 	"overrides": [
 		{
-			"includes": ["apps/web/src/components/BodyEditor.tsx"],
+			"includes": ["src/web/components/BodyEditor.tsx"],
 			"linter": {
 				"rules": {
 					"suspicious": {

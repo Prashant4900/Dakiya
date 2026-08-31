@@ -5,8 +5,8 @@ import {
 	fetchEnvironment,
 	saveEnvironment,
 } from "../api/client.js";
-import { Button } from "./Button.js";
-import { Cancel01Icon } from "./icons/Cancel01Icon.js";
+import { Button } from "@/components/ui/button";
+import { Cancel01Icon, ViewIcon, ViewOffSlashIcon } from "hugeicons-react";
 import { PromptDialog } from "./PromptDialog.js";
 
 // Keys whose names suggest secret values
@@ -196,9 +196,8 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 				<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
 					{dirty && <span className="dirty-hint">unsaved</span>}
 					<Button
-						variant="primary"
+						disabled={!dirty || saveMutation.isPending}
 						onClick={handleSave}
-						disabled={saveMutation.isPending || !dirty}
 					>
 						{saveMutation.isPending ? "Saving…" : "Save"}
 					</Button>
@@ -247,14 +246,15 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 											}}
 										/>
 										{showMaskBtn && (
-											<button
-												type="button"
-												className="env-mask-toggle"
-												title={row.masked ? "Reveal value" : "Mask value"}
+											<Button
+												variant="ghost"
+												size="icon"
+												title={row.masked ? "Reveal" : "Mask"}
 												onClick={() => toggleMask(idx)}
+												className="h-8 w-8"
 											>
-												{row.masked ? "👁" : "🙈"}
-											</button>
+												{row.masked ? <ViewIcon className="h-4 w-4" /> : <ViewOffSlashIcon className="h-4 w-4" />}
+											</Button>
 										)}
 									</td>
 									<td className="kv-actions">
@@ -263,9 +263,11 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 												className="kv-remove-btn"
 												onClick={() => handleRemove(idx)}
 												title="Remove variable"
-												icon={<Cancel01Icon size={14} />}
-												variant="icon"
-											/>
+												size="icon"
+												variant="ghost"
+											>
+												<Cancel01Icon size={14} />
+											</Button>
 										)}
 									</td>
 								</tr>
@@ -349,7 +351,7 @@ export function EnvPage({
 				<h2 className="env-page-title">Environments</h2>
 				<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
 					<Button variant="secondary" onClick={() => setNewEnvOpen(true)}>
-						+ New environment
+						+ New
 					</Button>
 					<Button variant="ghost" onClick={onClose} title="Close (Esc)">
 						Close

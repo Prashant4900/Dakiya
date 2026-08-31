@@ -2,7 +2,7 @@ import { greet } from "@core/services";
 
 export function runHello(): string {
 	return [
-		"Dakiya skeleton — hello from apps/cli",
+		"Dakiya skeleton — hello from src/cli",
 		"",
 		greet(),
 		"",

@@ -13,11 +13,12 @@
 		"forceConsistentCasingInFileNames": true,
 		"baseUrl": ".",
 		"paths": {
+			"@/*": ["./src/web/*"],
 			"@core/*": ["./src/core/*"],
 			"@core/domain": ["./src/core/domain/index"],
 			"@core/format": ["./src/core/format/index"],
 			"@core/services": ["./src/core/services/index"]
 		}
 	},
-	"include": ["src/web", "src/core"]
+	"include": ["src/web", "src/core", "src/cli"]
 }

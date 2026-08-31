@@ -15,7 +15,7 @@ import {
 	sendRequestApi,
 } from "./api/client.js";
 import type { SendResponse } from "./api/types.js";
-import { Button } from "./components/Button.js";
+import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import { EnvPage } from "./components/EnvPage.js";
 import { NewRequestModal } from "./components/NewRequestModal.js";

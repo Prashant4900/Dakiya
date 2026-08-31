@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Button } from "./Button.js";
+import { Tabs as ShadcnTabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface TabOption<T extends string> {
 	id: T;
@@ -19,24 +19,25 @@ export function Tabs<T extends string>({
 	tabs,
 	activeTab,
 	onChange,
-	className = "request-tabs",
+	className = "",
 	children,
 }: TabsProps<T>) {
 	return (
-		<div className={className}>
-			{tabs.map((t) => (
-				<Button
-					key={t.id}
-					className={`tab-item${activeTab === t.id ? " active" : ""}`}
-					onClick={() => onChange(t.id)}
-					variant="unstyled"
-				>
-					{t.label}
-					{t.badge !== undefined && t.badge > 0 && (
-						<span className="tab-badge">{t.badge}</span>
-					)}
-				</Button>
-			))}
+		<div className={`flex items-center gap-2 ${className}`}>
+			<ShadcnTabs value={activeTab} onValueChange={(v) => onChange(v as T)}>
+				<TabsList className="bg-muted/50 h-9 p-1">
+					{tabs.map((t) => (
+						<TabsTrigger key={t.id} value={t.id} className="gap-1.5 text-xs h-7 data-[state=active]:shadow-sm px-3">
+							{t.label}
+							{t.badge !== undefined && t.badge > 0 && (
+								<span className="bg-primary/20 text-primary text-[10px] leading-none px-1.5 py-0.5 rounded-full font-semibold min-w-4 text-center">
+									{t.badge}
+								</span>
+							)}
+						</TabsTrigger>
+					))}
+				</TabsList>
+			</ShadcnTabs>
 			{children}
 		</div>
 	);

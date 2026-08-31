@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { createApiApp } from "../api/app.js";
 import { createHonoMiddleware } from "../api/middleware.js";
+import { DEFAULT_PORT, resolveWebRoot } from "../constants.js";
 import {
 	dakiyaDir,
 	hasDakiyaManifest,
@@ -12,8 +13,6 @@ import {
 	loadManifest,
 } from "../workspace.js";
 import { runInit } from "./init.js";
-
-const DEFAULT_PORT = 4242;
 
 function askYesNo(question: string): Promise<boolean> {
 	const rl = readline.createInterface({
@@ -70,21 +69,6 @@ async function ensureDakiyaWorkspace(): Promise<boolean> {
 	}
 
 	return true;
-}
-
-/** Resolve monorepo `apps/web` from this file (`apps/cli/dist/commands/serve.js`). */
-function resolveWebRoot(): string {
-	const here = path.dirname(fileURLToPath(import.meta.url));
-	const candidate = path.resolve(here, "../../../web");
-	const pkg = path.join(candidate, "package.json");
-
-	if (!fs.existsSync(pkg)) {
-		throw new Error(
-			`Could not find @dakiya/web at ${candidate}. Run from the Dakiya monorepo (pnpm link:cli).`,
-		);
-	}
-
-	return candidate;
 }
 
 /** Start the web dashboard + `/api` on localhost (default 4242). */

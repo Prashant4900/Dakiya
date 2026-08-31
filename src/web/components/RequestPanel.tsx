@@ -14,11 +14,10 @@ import type { RequestDocument, RequestResponse } from "../api/types.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
 import { BodyEditor } from "./BodyEditor.js";
-import { Button } from "./Button.js";
+import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
-import { Cancel01Icon } from "./icons/Cancel01Icon.js";
-import { Delete02Icon } from "./icons/Delete02Icon.js";
+import { Cancel01Icon, Delete02Icon } from "hugeicons-react";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
 
@@ -529,7 +528,6 @@ export function RequestPanel({
 					)}
 				</div>
 				<Button
-					variant="primary"
 					onClick={() => void handleSend()}
 					disabled={sending || saving || !request || loading}
 					title="Send (⌘↵)"
@@ -647,12 +645,14 @@ export function RequestPanel({
 														<td className="kv-actions">
 															{i !== localHeaders.length - 1 && (
 																<Button
-																	className="kv-remove-btn"
+																	variant="ghost"
+																	size="icon"
 																	onClick={() => handleHeaderRemove(i)}
 																	title="Remove header"
-																	icon={<Cancel01Icon size={14} />}
-																	variant="icon"
-																/>
+																	className="h-8 w-8 hover:text-destructive"
+																>
+																	<Cancel01Icon size={14} />
+																</Button>
 															)}
 														</td>
 													</tr>
@@ -686,10 +686,12 @@ export function RequestPanel({
 										disabled={deleteScriptMutation.isPending}
 										onClick={() => setDeleteConfirm("pre")}
 										title="Delete Script"
-										icon={<Delete02Icon size={18} />}
-										variant="icon"
-										style={{ color: "var(--danger-text, #d03030)" }}
-									/>
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8 text-destructive hover:text-destructive/90"
+									>
+										<Delete02Icon size={18} />
+									</Button>
 								)}
 							</PaneHeader>
 							<div
@@ -740,8 +742,7 @@ export function RequestPanel({
 										No pre-request script exists for this request.
 									</p>
 									<Button
-										variant="primary"
-										style={{ marginTop: "16px" }}
+										className="mt-4"
 										onClick={() => {
 											setDraftPreScript(
 												"// Enter your pre-request script here\n",
@@ -767,10 +768,12 @@ export function RequestPanel({
 										disabled={deleteScriptMutation.isPending}
 										onClick={() => setDeleteConfirm("post")}
 										title="Delete Script"
-										icon={<Delete02Icon size={18} />}
-										variant="icon"
-										style={{ color: "var(--danger-text, #d03030)" }}
-									/>
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8 text-destructive hover:text-destructive/90"
+									>
+										<Delete02Icon size={18} />
+									</Button>
 								)}
 							</PaneHeader>
 							<div
@@ -821,8 +824,7 @@ export function RequestPanel({
 										No post-response script exists for this request.
 									</p>
 									<Button
-										variant="primary"
-										style={{ marginTop: "16px" }}
+										className="mt-4"
 										onClick={() => {
 											setDraftPostScript(
 												"// Enter your post-response script here\n",

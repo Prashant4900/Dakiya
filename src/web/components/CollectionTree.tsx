@@ -2,7 +2,14 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CollectionNode, RequestIndexItem } from "../api/types.js";
 import { methodBadgeClass } from "../utils/method.js";
-import { Button } from "./Button.js";
+import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 // ── Context menu ────────────────────────────────────────────────────────────
 
@@ -40,12 +47,12 @@ function ContextMenu({
 				<Button
 					key={item.label}
 					role="menuitem"
-					className={`ctx-menu-item${item.danger ? " danger" : ""}`}
+					className={`ctx-menu-item${item.danger ? " danger text-destructive hover:bg-destructive/10" : ""}`}
 					onClick={() => {
 						item.onClick();
 						onClose();
 					}}
-					variant="unstyled"
+					variant="ghost"
 				>
 					{item.label}
 				</Button>
@@ -164,9 +171,9 @@ function FolderGroup({
 			<div className="group-row-wrap">
 				<Button
 					ref={btnRef}
-					className="group-row"
+					className="group-row h-7 px-2 justify-start font-normal hover:bg-muted/50"
 					onClick={() => setOpen((v) => !v)}
-					variant="unstyled"
+					variant="ghost"
 				>
 					<span className={`group-chevron${open ? " open" : ""}`}>▶</span>
 					<span className="group-icon">📁</span>
@@ -187,13 +194,14 @@ function FolderGroup({
 
 				{!renaming && actions && (
 					<Button
-						className="item-action-btn"
+						className="item-action-btn h-6 w-6"
 						title="Folder options"
 						onClick={(e) => {
 							e.stopPropagation();
 							setMenuRect(e.currentTarget.getBoundingClientRect());
 						}}
-						variant="unstyled"
+						variant="ghost"
+                        size="icon"
 					>
 						⋯
 					</Button>
@@ -355,9 +363,9 @@ function RequestItem({
 		<>
 			<div className={`request-item-wrap${active ? " active" : ""}`}>
 				<Button
-					className={`request-item${active ? " active" : ""}`}
+					className={`request-item h-7 px-2 justify-start font-normal hover:bg-muted/50 ${active ? " active bg-muted/80" : ""}`}
 					onClick={() => onSelect(path)}
-					variant="unstyled"
+					variant="ghost"
 				>
 					<span className={`method-badge ${methodBadgeClass(method)}`}>
 						{method === "DELETE" ? "DEL" : method}
@@ -378,13 +386,14 @@ function RequestItem({
 
 				{!renaming && actions && (
 					<Button
-						className="item-action-btn"
+						className="item-action-btn h-6 w-6"
 						title="Request options"
 						onClick={(e) => {
 							e.stopPropagation();
 							setMenuRect(e.currentTarget.getBoundingClientRect());
 						}}
-						variant="unstyled"
+						variant="ghost"
+                        size="icon"
 					>
 						⋯
 					</Button>
@@ -399,82 +408,49 @@ function RequestItem({
 				/>
 			)}
 
-			{showMoveDialog &&
-				createPortal(
-					// biome-ignore lint/a11y/noStaticElementInteractions: this is a modal backdrop
-					<div
-						className="modal-backdrop"
-						role="presentation"
-						onMouseDown={(e) => {
-							if (e.target === e.currentTarget) setShowMoveDialog(false);
-						}}
-					>
-						<div className="modal" role="dialog" style={{ maxWidth: 380 }}>
-							<div className="modal-header">
-								<h2 id="move-dialog-title">Move "{name}"</h2>
-							</div>
-							<label
-								style={{
-									display: "flex",
-									flexDirection: "column",
-									gap: 6,
-									fontSize: 13,
+			{showMoveDialog && (
+				<Dialog open={showMoveDialog} onOpenChange={setShowMoveDialog}>
+					<DialogContent className="sm:max-w-[380px]">
+						<DialogHeader>
+							<DialogTitle>Move "{name}"</DialogTitle>
+						</DialogHeader>
+						<div className="flex flex-col gap-2 py-4">
+							<span className="text-muted-foreground font-medium text-sm">Target folder</span>
+							<select
+								value={moveTarget}
+								onChange={(e) => setMoveTarget(e.target.value)}
+								className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+							>
+								{allFolders.map((f) => (
+									<option key={f} value={f} className="bg-background text-foreground">
+										{f}
+									</option>
+								))}
+							</select>
+						</div>
+						<DialogFooter>
+							<Button variant="secondary" onClick={() => setShowMoveDialog(false)}>
+								Cancel
+							</Button>
+							<Button
+								onClick={() => {
+									if (moveTarget) {
+										actions?.onRequestMove?.(path);
+										(
+											actions as CollectionTreeActions & {
+												_onMoveWithTarget?: (path: string, target: string) => void;
+											}
+										)?._onMoveWithTarget?.(path, moveTarget);
+									}
+									setShowMoveDialog(false);
 								}}
 							>
-								<span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-									Target folder
-								</span>
-								<select
-									value={moveTarget}
-									onChange={(e) => setMoveTarget(e.target.value)}
-									style={{
-										background: "var(--surface)",
-										color: "var(--text-color)",
-										border: "1px solid var(--border)",
-										borderRadius: "var(--radius, 6px)",
-										padding: "6px 10px",
-										fontSize: 13,
-									}}
-								>
-									{allFolders.map((f) => (
-										<option key={f} value={f}>
-											{f}
-										</option>
-									))}
-								</select>
-							</label>
-							<div className="modal-actions">
-								<Button
-									onClick={() => setShowMoveDialog(false)}
-									variant="secondary"
-								>
-									Cancel
-								</Button>
-								<Button
-									onClick={() => {
-										if (moveTarget) {
-											actions?.onRequestMove?.(path);
-											// We need to pass the target — call a custom handler
-											(
-												actions as CollectionTreeActions & {
-													_onMoveWithTarget?: (
-														path: string,
-														target: string,
-													) => void;
-												}
-											)?._onMoveWithTarget?.(path, moveTarget);
-										}
-										setShowMoveDialog(false);
-									}}
-									variant="primary"
-								>
-									Move
-								</Button>
-							</div>
-						</div>
-					</div>,
-					document.body,
-				)}
+								Move
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			)}
 		</>
 	);
 }

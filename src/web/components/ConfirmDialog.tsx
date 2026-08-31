@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
-import { Button } from "./Button.js";
-import { Modal } from "./Modal.js";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export interface ConfirmDialogProps {
 	title: string;
@@ -22,30 +30,22 @@ export function ConfirmDialog({
 	isDestructive = false,
 }: ConfirmDialogProps) {
 	return (
-		<Modal onClose={onCancel} titleId="confirm-dialog-title" maxWidth="420px">
-			<div className="modal-header">
-				<h2 id="confirm-dialog-title">{title}</h2>
-			</div>
-			<div
-				style={{
-					color: "var(--text-color)",
-					fontSize: "14px",
-					lineHeight: "1.5",
-				}}
-			>
-				{message}
-			</div>
-			<div className="modal-actions">
-				<Button variant="secondary" onClick={onCancel}>
-					{cancelText}
-				</Button>
-				<Button
-					variant={isDestructive ? "destructive" : "primary"}
-					onClick={onConfirm}
-				>
-					{confirmText}
-				</Button>
-			</div>
-		</Modal>
+		<AlertDialog open={true} onOpenChange={(open) => !open && onCancel()}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>{title}</AlertDialogTitle>
+					<AlertDialogDescription>{message}</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel onClick={onCancel}>{cancelText}</AlertDialogCancel>
+					<AlertDialogAction
+						onClick={onConfirm}
+						className={isDestructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+					>
+						{confirmText}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
