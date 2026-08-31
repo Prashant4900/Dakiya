@@ -62,11 +62,17 @@
 
 - [x] Sidebar shows folders + requests (collapsible groups, method badges)
 - [x] Select request loads editor
+- [x] Body tab + Headers tab (editable key-value with env-var highlighting)
 - [x] Docs tab renders Markdown
-- [x] Scripts tab shows pre/post (edit via Source tab + Save)
+- [x] Pre-script / Post-script tabs (read-only; Create Script scaffolds file)
 - [x] Examples tab shows samples
 - [x] Send shows status, timing, body, headers
 - [x] Env switch works (+ edit modal saves via API)
+- [x] Version switcher filters sidebar tree by top-level folder
+- [x] Sidebar context menus: create/rename/delete folders and requests
+- [x] Move request between folders
+- [x] File upload to `.dakiya/files/` via `POST /api/upload`
+- [x] Unsaved-change guard (confirm dialog on navigate away)
 - [x] Save persists to disk (verify in editor / git diff)
 - [x] No `localStorage` as source of truth for collections
 

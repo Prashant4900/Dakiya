@@ -138,16 +138,20 @@ Manifest at the root of `.dakiya/`. Holds workspace metadata used by CLI, web, a
 |-------|---------|
 | `name` | Display name of the workspace |
 | `description` | Short purpose / notes |
-| `version` | Manifest schema version (currently `1`) |
 | `defaultEnv` | Active environment key (file under `environments/`) |
+| `versions` | Optional list of top-level version folder names (e.g. `[v1, v2]`). When set, the sidebar shows a version switcher that filters the collection tree. |
+| `defaultVersionName` | Label used for requests that don't belong to any version folder (default: `"default"`). |
 
 Example:
 
 ```yaml
 name: my-api
 description: "A local-first API workspace for my-api."
-version: 1
 defaultEnv: local
+# optional — enables the version switcher in the sidebar
+versions:
+  - v1
+  - v2
 ```
 
 ### `.drq` (Dakiya Request)
@@ -175,6 +179,7 @@ YAML key-value files (`environments/local.yaml`). Variables resolve as `{{name}}
 - **`@pre`** — mutate request / env before send  
 - **`@post`** — mutate response / env after send (Dakiya differentiator)  
 - Scripts run **server-side** on `POST /api/send` (isolated sandbox, no arbitrary fs/`require`)
+- **Web dashboard note:** the Pre-script / Post-script tabs are **read-only** in the browser UI. To edit scripts, open the generated `*.pre.js` / `*.post.js` files in your code editor, or use the **Create Script** button to scaffold an empty file.
 
 Script API (MVP): `req.*`, `res.*`, `env.get` / `env.set`, `console.log`.
 
@@ -202,10 +207,18 @@ User clicks Send
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/api/health` | Health check |
-| GET | `/api/workspace` | Manifest + folder tree |
-| GET/PUT/POST/DELETE | `/api/requests/...` | CRUD `.drq` files |
-| GET/PUT | `/api/environments/:name` | YAML envs |
+| GET | `/api/workspace` | Manifest + folder tree + request index |
+| GET | `/api/requests/*` | Read a `.drq` file |
+| PUT | `/api/requests/*` | Update request fields or save a script (`/scripts/pre`, `/scripts/post`) |
+| POST | `/api/requests/*` | Create a new request |
+| PATCH | `/api/requests/*` | Rename / delete / move a request (`action` in body) |
+| DELETE | `/api/requests/*/scripts/pre\|post` | Delete a script file |
+| GET | `/api/environments/:name` | Read environment YAML |
+| PUT | `/api/environments/:name` | Save environment YAML |
 | POST | `/api/send` | Pre → HTTP → post |
+| POST | `/api/upload` | Upload a binary file to `.dakiya/files/` (returns stored path) |
+| POST | `/api/folders` | Create a new collection folder |
+| PATCH | `/api/folders/*` | Rename or delete a folder (`action` in body) |
 
 ---
 

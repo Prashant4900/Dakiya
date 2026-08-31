@@ -89,7 +89,9 @@ dakiya serve   # http://localhost:4242
 
 The dashboard loads collections from `/api/workspace`, edits `.drq` files via the API, and sends requests with `POST /api/send`. `dakiya serve` runs Vite and the Hono API together on the same port (hot reload included).
 
-**Quick path:** select a request in the sidebar → **Send** (or ⌘↵). Edit the `.drq` source in the Body tab → **Save**. Switch environments from the sidebar dropdown.
+**Quick path:** select a request in the sidebar → **Send** (or ⌘↵). Edit headers and body in their respective tabs → **Save**. Switch environments from the sidebar dropdown. If your workspace has `versions:` in `dakiya.yaml`, a version switcher appears in the sidebar to filter the collection tree.
+
+**Scripts:** Pre-script / Post-script tabs are **read-only** in the browser. Use the **Create Script** button to scaffold an empty script file, then edit it in your code editor (the file lives next to the `.drq` file).
 
 For requests that hit `localhost:3000`, start the dummy API first: `pnpm dev:example`.
 
@@ -100,7 +102,7 @@ For requests that hit `localhost:3000`, start the dummy API first: `pnpm dev:exa
 - **Import** — no Postman/Bruno import yet
 - **History** — no SQLite request history
 - **`@assert`** — parsed but not executed
-- **Dark theme** — light theme only in the web UI
+- **Script editing in browser** — Pre/post-script tabs are read-only; edit script files in your code editor
 
 After pulling code changes, rebuild the CLI: `pnpm link:cli`, then restart `dakiya serve`.
 

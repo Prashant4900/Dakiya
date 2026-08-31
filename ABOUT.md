@@ -93,12 +93,15 @@ Whether you are a solo developer, part of a startup, or working inside a company
 ## What can you do with Dakiya?
 
 - Send HTTP requests — GET, POST, PUT, PATCH, DELETE and more
-- Organize requests into collections, just like folders
-- Write and edit request bodies with a clean built-in editor
+- Organize requests into collections, just like folders — **create, rename, delete, and move** from the sidebar
+- Write and edit request bodies with a clean built-in editor (JSON, form-data, urlencoded, GraphQL, binary)
+- Manage request headers with a key-value editor and environment-variable highlighting
 - View responses with proper formatting — JSON, HTML, plain text
 - Save work locally in `.dakiya/` and pick up where you left off
+- **Version switcher** — add `versions:` to `dakiya.yaml` to filter your collection by API version
 - **`dakiya init`** — scaffold the full `.dakiya` layout in any project
 - **`dakiya serve`** — launch a local web dashboard (no desktop app needed)
+- Pre/post scripts in JS or TS — scaffold from the dashboard, edit in your code editor
 - Use the **desktop app** when you want a native, always-available client
 - Work offline — the CLI, dashboard, and desktop app all run locally
 
@@ -158,7 +161,7 @@ Dakiya is actively in development. **MVP is complete** — Phases 0–5 (shared 
 |---------|--------|
 | **Shared core** (`domain`, `format`, `services`) | Done — Zod types, `.drq` parse/serialize, send pipeline, tests |
 | **CLI** | Done — `init`, `list`, `run`, `serve`, Hono `/api/*`, script sandbox |
-| **Web dashboard** | Done — sidebar tree, request/response panes, env switcher, send/save via API |
+| **Web dashboard** | Done — sidebar tree (with CRUD, move, version switcher), Body/Headers/Docs/Scripts/Examples tabs, env switcher, file upload, send/save via API |
 | **Desktop app** | Reserved stub (Tauri, later) |
 
 All surfaces share the same `.dakiya` file format and core logic. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/phases.md](./docs/phases.md).

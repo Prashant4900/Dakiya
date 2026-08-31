@@ -77,13 +77,18 @@
 
 - [x] Layout: titlebar, sidebar tree, request editor, response panel, status bar
 - [x] Postman-style split panes (request left, response right)
-- [x] Tabs: Source, Docs, Scripts (view), Examples
+- [x] Tabs: Body, Headers, Docs, Pre-script (read-only), Post-script (read-only), Examples
 - [x] TanStack Query API client
 - [x] Send via `POST /api/send`
 - [x] Env switcher + YAML editor modal through API
+- [x] Version switcher — filters collection tree by top-level version folder
+- [x] Sidebar context menus — create/rename/delete folders and requests
+- [x] Move request between folders via sidebar
+- [x] File upload support (`POST /api/upload`) for binary body types
+- [x] Unsaved-change guard (confirm dialog on navigation away)
 - [x] Inter + JetBrains Mono typography; green accent theme
 
-**Exit criteria:** Full click-path without CLI knowledge beyond `dakiya serve`. **Met** (scripts edited via Source tab).
+**Exit criteria:** Full click-path without CLI knowledge beyond `dakiya serve`. **Met** (scripts edited in code editor via Create Script button).
 
 ---
 
