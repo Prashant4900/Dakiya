@@ -11,14 +11,13 @@ import {
 	moveRequestAPI,
 	renameFolderAPI,
 	renameRequestAPI,
-	saveEnvironment,
 	saveRequest,
 	sendRequestApi,
 } from "./api/client.js";
 import type { SendResponse } from "./api/types.js";
 import { Button } from "./components/Button.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
-import { EnvEditor } from "./components/EnvSwitcher.js";
+import { EnvPage } from "./components/EnvPage.js";
 import { NewRequestModal } from "./components/NewRequestModal.js";
 import { PromptDialog } from "./components/PromptDialog.js";
 import { RequestPanel } from "./components/RequestPanel.js";
@@ -46,11 +45,11 @@ export function App() {
 	const [sendResult, setSendResult] = useState<SendResponse | null>(null);
 	const [sendError, setSendError] = useState<string | null>(null);
 	const [saveError, setSaveError] = useState<string | null>(null);
-	const [envSaveError, setEnvSaveError] = useState<string | null>(null);
 	const [requestDirty, setRequestDirty] = useState(false);
-	const [envEditorOpen, setEnvEditorOpen] = useState(false);
+	const [activeView, setActiveView] = useState<"request" | "environments">(
+		"request",
+	);
 	const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
-	const [envDraft, setEnvDraft] = useState("");
 	const [isNewFolderPromptOpen, setIsNewFolderPromptOpen] = useState(false);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [responseCollapsed, setResponseCollapsed] = useState(false);
@@ -201,17 +200,6 @@ export function App() {
 		onError: (err: Error) => setSaveError(err.message),
 	});
 
-	const saveEnvMutation = useMutation({
-		mutationFn: ({ name, source }: { name: string; source: string }) =>
-			saveEnvironment(name, source),
-		onSuccess: (_data, { name }) => {
-			setEnvSaveError(null);
-			queryClient.invalidateQueries({ queryKey: ["environment", name] });
-			setEnvEditorOpen(false);
-		},
-		onError: (err: Error) => setEnvSaveError(err.message),
-	});
-
 	const sendMutation = useMutation({
 		mutationFn: ({ path, env }: { path: string; env: string }) =>
 			sendRequestApi(path, env),
@@ -317,6 +305,7 @@ export function App() {
 			setSendResult(null);
 			setSendError(null);
 			setSaveError(null);
+			setActiveView("request");
 		},
 		[requestDirty, selectedPath],
 	);
@@ -341,11 +330,9 @@ export function App() {
 		setIsNewRequestModalOpen(false);
 	};
 
-	const openEnvEditor = useCallback(() => {
-		setEnvDraft(envQuery.data?.source ?? "");
-		setEnvSaveError(null);
-		setEnvEditorOpen(true);
-	}, [envQuery.data?.source]);
+	const openEnvManager = useCallback(() => {
+		setActiveView("environments");
+	}, []);
 
 	const workspaceError = workspaceQuery.error;
 	const workspaceName = workspaceQuery.data?.manifest.name ?? "Workspace";
@@ -401,7 +388,7 @@ export function App() {
 						environments={environments.length > 0 ? environments : [defaultEnv]}
 						activeEnv={effectiveEnv}
 						onEnvChange={setActiveEnv}
-						onEditEnv={openEnvEditor}
+						onManageEnv={openEnvManager}
 						activeVersion={activeVersion}
 						versions={versions}
 						onVersionChange={setActiveVersion}
@@ -428,29 +415,42 @@ export function App() {
 				)}
 
 				<div className="main-content">
-					<RequestPanel
-						request={requestQuery.data ?? null}
-						loading={requestQuery.isLoading && Boolean(selectedPath)}
-						error={
-							requestQuery.error instanceof Error
-								? requestQuery.error.message
-								: null
-						}
-						saveError={saveError}
-						onSave={handleSave}
-						onSend={handleSend}
-						onDirtyChange={setRequestDirty}
-						sending={sendMutation.isPending}
-						saving={saveMutation.isPending}
-						activeEnvVariables={envQuery.data?.environment.variables ?? {}}
-					>
-						<ResponsePanel
-							result={sendResult}
-							error={sendError}
-							loading={sendMutation.isPending}
-							collapsed={responseCollapsed}
+					{activeView === "environments" ? (
+						<EnvPage
+							environments={
+								environments.length > 0 ? environments : [defaultEnv]
+							}
+							activeEnv={effectiveEnv}
+							onClose={() => setActiveView("request")}
+							onEnvChange={(name) => {
+								setActiveEnv(name);
+							}}
 						/>
-					</RequestPanel>
+					) : (
+						<RequestPanel
+							request={requestQuery.data ?? null}
+							loading={requestQuery.isLoading && Boolean(selectedPath)}
+							error={
+								requestQuery.error instanceof Error
+									? requestQuery.error.message
+									: null
+							}
+							saveError={saveError}
+							onSave={handleSave}
+							onSend={handleSend}
+							onDirtyChange={setRequestDirty}
+							sending={sendMutation.isPending}
+							saving={saveMutation.isPending}
+							activeEnvVariables={envQuery.data?.environment.variables ?? {}}
+						>
+							<ResponsePanel
+								result={sendResult}
+								error={sendError}
+								loading={sendMutation.isPending}
+								collapsed={responseCollapsed}
+							/>
+						</RequestPanel>
+					)}
 
 					<StatusBar
 						workspaceName={workspaceName}
@@ -473,23 +473,6 @@ export function App() {
 						setIsNewFolderPromptOpen(false);
 					}}
 					onCancel={() => setIsNewFolderPromptOpen(false)}
-				/>
-			)}
-
-			{envEditorOpen && (
-				<EnvEditor
-					name={effectiveEnv}
-					source={envDraft}
-					error={envSaveError}
-					onChange={setEnvDraft}
-					onSave={() =>
-						saveEnvMutation.mutate({
-							name: effectiveEnv,
-							source: envDraft,
-						})
-					}
-					onClose={() => setEnvEditorOpen(false)}
-					saving={saveEnvMutation.isPending}
 				/>
 			)}
 

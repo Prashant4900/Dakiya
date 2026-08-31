@@ -92,6 +92,12 @@ export function saveEnvironment(
 	});
 }
 
+export function createEnvironment(name: string): Promise<{ ok: true }> {
+	const skeleton = `# ${name} environment\n# Add key: value pairs below\n`;
+	return saveEnvironment(name, skeleton);
+}
+
+
 export async function saveScript(
 	path: string,
 	type: "pre" | "post",

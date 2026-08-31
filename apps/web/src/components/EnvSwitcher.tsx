@@ -7,14 +7,14 @@ type EnvSwitcherProps = {
 	environments: string[];
 	activeEnv: string;
 	onEnvChange: (name: string) => void;
-	onEdit: () => void;
+	onManage: () => void;
 };
 
 export function EnvSwitcher({
 	environments,
 	activeEnv,
 	onEnvChange,
-	onEdit,
+	onManage,
 }: EnvSwitcherProps) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
@@ -59,16 +59,17 @@ export function EnvSwitcher({
 					className="env-option env-option-edit"
 					onClick={() => {
 						setOpen(false);
-						onEdit();
+						onManage();
 					}}
 					variant="unstyled"
 				>
-					Edit environment…
+					Manage environments →
 				</Button>
 			</div>
 		</div>
 	);
 }
+
 
 type EnvEditorProps = {
 	name: string;

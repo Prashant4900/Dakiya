@@ -20,7 +20,7 @@ type SidebarProps = {
 	environments: string[];
 	activeEnv: string;
 	onEnvChange: (name: string) => void;
-	onEditEnv: () => void;
+	onManageEnv: () => void;
 	onNewRequest: () => void;
 	onNewFolder: () => void;
 	versions: string[];
@@ -38,7 +38,7 @@ export function Sidebar({
 	environments,
 	activeEnv,
 	onEnvChange,
-	onEditEnv,
+	onManageEnv,
 	onNewRequest,
 	onNewFolder,
 	versions,
@@ -75,7 +75,6 @@ export function Sidebar({
 		e.currentTarget.releasePointerCapture(e.pointerId);
 	};
 
-	// `tree` is already filtered to the active version by App.tsx
 
 	return (
 		<aside className="sidebar" style={{ width }}>
@@ -88,7 +87,7 @@ export function Sidebar({
 			/>
 			<div className="sidebar-header">
 				<div className="logo-row">
-					<div className="logo-mark">D</div>
+					<img src="/icon-192.png" alt="Dakiya" className="logo-img" />
 					<span className="logo-name">Dakiya</span>
 					<span className="logo-version">{activeVersion || "v1"}</span>
 				</div>
@@ -97,7 +96,7 @@ export function Sidebar({
 						environments={environments}
 						activeEnv={activeEnv}
 						onEnvChange={onEnvChange}
-						onEdit={onEditEnv}
+						onManage={onManageEnv}
 					/>
 					<VersionSwitcher
 						versions={versions}
