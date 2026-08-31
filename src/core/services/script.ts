@@ -29,6 +29,23 @@ export type MutableResponse = {
 
 export type ScriptPhase = "pre" | "post";
 
+/**
+ * Metadata about the current request run, injected into every script context.
+ * Available as `meta` in both pre- and post-scripts.
+ */
+export type ScriptMeta = {
+	/** Human-readable name of the request (e.g. "login"). */
+	requestName: string;
+	/** Path relative to collections root (e.g. "auth/login/post"). */
+	requestPath: string;
+	/** Whether this is a pre- or post-script run. */
+	phase: ScriptPhase;
+	/** Unique UUID generated per request send. Useful for tracing logs. */
+	traceId: string;
+	/** Elapsed milliseconds from pre-script start to this point. Only present in @post. */
+	durationMs?: number;
+};
+
 export type RunScriptInput = {
 	phase: ScriptPhase;
 	script: ScriptBlock;
@@ -37,6 +54,8 @@ export type RunScriptInput = {
 	response?: MutableResponse;
 	/** Mutable env bag — scripts may read/write. */
 	variables: EnvironmentVariables;
+	/** Request metadata injected into the script context as `meta`. */
+	meta: ScriptMeta;
 };
 
 export type RunScriptResult = {

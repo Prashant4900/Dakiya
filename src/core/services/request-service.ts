@@ -328,6 +328,62 @@ export function moveRequest(
 	return { newPath: `${destRel}/${methodId}` };
 }
 
+const PRE_SCRIPT_TEMPLATE = `import type { PreContext } from "dakiya/scripts";
+
+export default async function ({ req, env, meta }: PreContext) {
+	// Mutate the request before it's sent
+	// Example: inject a header
+	// req.setHeader("X-Request-Id", meta.traceId);
+	//
+	// Example: modify the request body
+	// const body = req.body as Record<string, unknown>;
+	// body.timestamp = Date.now();
+	//
+	// Example: read an env variable
+	// const token = env.get("auth_token");
+}
+`;
+
+const POST_SCRIPT_TEMPLATE = `import type { PostContext } from "dakiya/scripts";
+
+export default async function ({ res, env, meta }: PostContext) {
+	// Inspect the response after it's received
+	// Example: save a token from the response
+	// const data = res.json() as { token?: string };
+	// if (res.status === 200 && data.token) {
+	//   env.set("auth_token", data.token, { persist: true });
+	// }
+	//
+	// Example: log duration
+	// console.log("[", meta.requestName, "] took", meta.durationMs, "ms");
+}
+`;
+
+export function scaffoldScript(
+	fs: FsClient,
+	arg: string,
+	type: "pre" | "post",
+	cwd: string,
+): { path: string } {
+	const { endpointPath, methodId } = resolveEndpointAndMethod(fs, arg, cwd);
+	if (!methodId) {
+		throw new Error(`Expected a specific method request, got endpoint: ${arg}`);
+	}
+
+	const scriptsDir = posixJoin(endpointPath, "scripts");
+	if (!fs.exists(scriptsDir)) {
+		fs.mkdir(scriptsDir);
+	}
+
+	const tsPath = posixJoin(scriptsDir, `${methodId}.${type}.ts`);
+	if (!fs.exists(tsPath)) {
+		const template = type === "pre" ? PRE_SCRIPT_TEMPLATE : POST_SCRIPT_TEMPLATE;
+		fs.writeFile(tsPath, template);
+	}
+
+	return { path: tsPath };
+}
+
 export function writeScript(
 	fs: FsClient,
 	arg: string,
@@ -348,6 +404,7 @@ export function writeScript(
 	const tsPath = posixJoin(scriptsDir, `${methodId}.${type}.ts`);
 	const jsPath = posixJoin(scriptsDir, `${methodId}.${type}.js`);
 
+	// Prefer TS; fall back to JS if a .js file already exists (legacy workspace).
 	if (fs.exists(jsPath)) {
 		fs.writeFile(jsPath, source);
 	} else {

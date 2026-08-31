@@ -1,6 +1,15 @@
 /**
  * Node vm sandbox for `@pre` / `@post` scripts.
- * No require / process / fs — only the MVP script API.
+ *
+ * Supports two script styles:
+ *
+ * 1. Function-based (recommended, TypeScript-first):
+ *    export default async function({ req, res, env, meta }) { ... }
+ *
+ * 2. Legacy top-level (backwards-compatible):
+ *    req.setHeader("X-Foo", "bar");
+ *
+ * No require / process / fs — only the Dakiya script API.
  */
 
 import * as vm from "node:vm";
@@ -20,9 +29,9 @@ type EnvSetOptions = {
 };
 
 function transpile(source: string, lang: "js" | "ts"): string {
-	if (lang === "js") return source;
+	// Always compile via esbuild — converts ESM exports to CJS.
 	const result = transformSync(source, {
-		loader: "ts",
+		loader: lang === "ts" ? "ts" : "js",
 		format: "cjs",
 		target: "es2022",
 	});
@@ -149,26 +158,42 @@ function buildEnvApi(
 
 /** Create a ScriptRunner backed by node:vm. */
 export function createVmScriptRunner(): ScriptRunner {
-	return (input: RunScriptInput): RunScriptResult => {
+	return async (input: RunScriptInput): Promise<RunScriptResult> => {
 		const logs: string[] = [];
 		const persistedKeys = new Set<string>();
 		const code = transpile(input.script.source, input.script.lang);
 
-		const context = vm.createContext({
-			req: buildReqApi(input.request),
-			res: buildResApi(input.response),
-			env: buildEnvApi(input.variables, persistedKeys),
-			console: {
-				log: (...args: unknown[]) => {
-					logs.push(args.map(String).join(" "));
-				},
-				warn: (...args: unknown[]) => {
-					logs.push(args.map(String).join(" "));
-				},
-				error: (...args: unknown[]) => {
-					logs.push(args.map(String).join(" "));
-				},
+		const req = buildReqApi(input.request);
+		const res = buildResApi(input.response);
+		const env = buildEnvApi(input.variables, persistedKeys);
+		const meta = { ...input.meta };
+
+		const consoleMock = {
+			log: (...args: unknown[]) => {
+				logs.push(args.map(String).join(" "));
 			},
+			warn: (...args: unknown[]) => {
+				logs.push(args.map(String).join(" "));
+			},
+			error: (...args: unknown[]) => {
+				logs.push(args.map(String).join(" "));
+			},
+		};
+
+		// CJS shim — esbuild compiles ESM `export default` into `module.exports`.
+		const moduleShim = { exports: {} as Record<string, unknown> };
+
+		const context = vm.createContext({
+			// Script API
+			req,
+			res,
+			env,
+			meta,
+			console: consoleMock,
+			// CJS shim for function-based exports
+			module: moduleShim,
+			exports: moduleShim.exports,
+			// Safe globals only
 			crypto: {
 				randomUUID: () => crypto.randomUUID(),
 			},
@@ -180,6 +205,7 @@ export function createVmScriptRunner(): ScriptRunner {
 			Boolean,
 			Array,
 			Object,
+			Promise,
 			parseInt,
 			parseFloat,
 			isNaN,
@@ -189,6 +215,8 @@ export function createVmScriptRunner(): ScriptRunner {
 			undefined,
 		});
 
+		// Run the compiled CJS code. For legacy top-level scripts, this is where
+		// the mutations happen. For function-based scripts, this populates exports.
 		try {
 			vm.runInContext(code, context, {
 				timeout: SCRIPT_TIMEOUT_MS,
@@ -198,6 +226,20 @@ export function createVmScriptRunner(): ScriptRunner {
 			const message = err instanceof Error ? err.message : String(err);
 			throw new Error(`@${input.phase} script failed: ${message}`);
 		}
+
+		// ── Function-based style: export default async function({ req, env, meta }) ──
+		// esbuild converts `export default fn` to `Object.defineProperty(exports, "default", ...)`
+		// or `exports.default = fn`. We check for it and invoke it with the full context.
+		const defaultExport = moduleShim.exports.default;
+		if (typeof defaultExport === "function") {
+			try {
+				await Promise.resolve(defaultExport({ req, res, env, meta }));
+			} catch (err) {
+				const message = err instanceof Error ? err.message : String(err);
+				throw new Error(`@${input.phase} script failed: ${message}`);
+			}
+		}
+		// ── Legacy style: top-level code already ran above — nothing extra to do ──
 
 		return {
 			logs,

@@ -58,7 +58,7 @@ pnpm unlink:cli
 ### Without global link
 
 ```bash
-pnpm build:cli
+pnpm build
 node dist/cli/cli.js init
 node dist/cli/cli.js list
 node dist/cli/cli.js run health/health
@@ -88,7 +88,7 @@ With the example API running (optional) and a `.dakiya/` workspace in the repo:
 dakiya serve   # http://localhost:4242
 ```
 
-The dashboard loads collections from `/api/workspace`, edits `.drq` files via the API, and sends requests with `POST /api/send`. `dakiya serve` runs Vite and the Hono API together on the same port (hot reload included).
+The dashboard loads collections from `/api/workspace`, edits `.drq` files via the API, and sends requests with `POST /api/send`. `dakiya serve` runs Vite and the Hono API together on the same port (hot reload included). The web UI is built with **React, TailwindCSS, and Shadcn UI**.
 
 **Quick path:** select a request in the sidebar → **Send** (or ⌘↵). Edit headers and body in their respective tabs → **Save**. Switch environments from the sidebar dropdown. If your workspace has `versions:` in `dakiya.yaml`, a version switcher appears in the sidebar to filter the collection tree.
 
@@ -105,7 +105,7 @@ For requests that hit `localhost:3000`, start the dummy API first: `pnpm dev:exa
 - **`@assert`** — parsed but not executed
 - **Script editing in browser** — Pre/post-script tabs are read-only; edit script files in your code editor
 
-After pulling code changes, rebuild the CLI: `pnpm link:cli`, then restart `dakiya serve`.
+After pulling code changes, rebuild everything: `pnpm build` and then `pnpm link:cli`, then restart `dakiya serve`.
 
 ## Layout
 

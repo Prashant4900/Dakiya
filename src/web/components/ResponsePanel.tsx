@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
+import { copyToClipboard } from "../utils/copy.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
@@ -37,8 +38,36 @@ function buildCurl(resolved: SendResponse["resolved"]): string {
 	for (const [key, value] of Object.entries(resolved.headers)) {
 		curl += ` \\\n  -H ${escapeShell(`${key}: ${value}`)}`;
 	}
-	if (resolved.body) {
-		curl += ` \\\n  -d ${escapeShell(resolved.body)}`;
+	
+	if (resolved.body !== undefined) {
+		if (typeof resolved.body === "string") {
+			curl += ` \\\n  -d ${escapeShell(resolved.body)}`;
+		} else {
+			const body = resolved.body;
+			if (body.type === "raw" && body.raw) {
+				curl += ` \\\n  -d ${escapeShell(body.raw.content)}`;
+			} else if (body.type === "urlencoded" && body.urlencoded) {
+				for (const item of body.urlencoded) {
+					curl += ` \\\n  -d ${escapeShell(`${item.key}=${item.value}`)}`;
+				}
+			} else if (body.type === "form-data" && body.formData) {
+				for (const item of body.formData) {
+					if (item.type === "file") {
+						curl += ` \\\n  -F ${escapeShell(`${item.key}=@${item.value}`)}`;
+					} else {
+						curl += ` \\\n  -F ${escapeShell(`${item.key}=${item.value}`)}`;
+					}
+				}
+			} else if (body.type === "graphql" && body.graphql) {
+				const gqlPayload = JSON.stringify({
+					query: body.graphql.query,
+					variables: body.graphql.variables ? JSON.parse(body.graphql.variables) : undefined
+				});
+				curl += ` \\\n  -d ${escapeShell(gqlPayload)}`;
+			} else if (body.type === "binary" && body.binary) {
+				curl += ` \\\n  --data-binary "@${body.binary.file}"`;
+			}
+		}
 	}
 	return curl;
 }
@@ -134,14 +163,10 @@ export function ResponsePanel({
 								variant="secondary"
 								size="sm"
 								onClick={async () => {
-									try {
-										await navigator.clipboard.writeText(
-											buildCurl(result.resolved),
-										);
+									const success = await copyToClipboard(buildCurl(result.resolved));
+									if (success) {
 										setCopiedCurl(true);
 										setTimeout(() => setCopiedCurl(false), 2000);
-									} catch (e) {
-										console.error("Failed to copy cURL", e);
 									}
 								}}
 								title="Copy as cURL"

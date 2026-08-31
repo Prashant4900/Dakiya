@@ -45,6 +45,7 @@ export {
 	readRequestSource,
 	renameFolder,
 	renameRequest,
+	scaffoldScript,
 	writeRequestSource,
 	writeScript,
 } from "./request-service.js";
@@ -60,6 +61,7 @@ export type {
 	MutableResponse,
 	RunScriptInput,
 	RunScriptResult,
+	ScriptMeta,
 	ScriptPhase,
 	ScriptRunner,
 } from "./script.js";

@@ -11,7 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
-import { deleteScript, saveScript } from "../api/client.js";
+import { createScript, deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
@@ -300,6 +300,17 @@ export function RequestPanel({
 	const [deleteConfirm, setDeleteConfirm] = useState<"pre" | "post" | null>(
 		null,
 	);
+
+	const createScriptMutation = useMutation({
+		mutationFn: ({ type }: { type: "pre" | "post" }) =>
+			createScript(request?.relativePath ?? "", type),
+		onSuccess: () => {
+			if (request)
+				queryClient.invalidateQueries({
+					queryKey: ["request", request.relativePath],
+				});
+		},
+	});
 
 	const saveScriptMutation = useMutation({
 		mutationFn: ({ type, source }: { type: "pre" | "post"; source: string }) =>
@@ -743,14 +754,9 @@ export function RequestPanel({
 									</p>
 									<Button
 										className="mt-4"
+										disabled={createScriptMutation.isPending}
 										onClick={() => {
-											setDraftPreScript(
-												"// Enter your pre-request script here\n",
-											);
-											saveScriptMutation.mutate({
-												type: "pre",
-												source: "// Enter your pre-request script here\n",
-											});
+											createScriptMutation.mutate({ type: "pre" });
 										}}
 									>
 										Create Script
@@ -825,14 +831,9 @@ export function RequestPanel({
 									</p>
 									<Button
 										className="mt-4"
+										disabled={createScriptMutation.isPending}
 										onClick={() => {
-											setDraftPostScript(
-												"// Enter your post-response script here\n",
-											);
-											saveScriptMutation.mutate({
-												type: "post",
-												source: "// Enter your post-response script here\n",
-											});
+											createScriptMutation.mutate({ type: "post" });
 										}}
 									>
 										Create Script

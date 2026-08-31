@@ -109,6 +109,16 @@ export async function saveScript(
 	});
 }
 
+/** Create a new script file with the typed function scaffold template. */
+export async function createScript(
+	path: string,
+	type: "pre" | "post",
+): Promise<{ path: string }> {
+	return request<{ path: string }>(`/requests/${path}/scripts/${type}`, {
+		method: "POST",
+	});
+}
+
 export async function deleteScript(
 	path: string,
 	type: "pre" | "post",
@@ -117,6 +127,7 @@ export async function deleteScript(
 		method: "DELETE",
 	});
 }
+
 
 export function sendRequestApi(
 	path: string,

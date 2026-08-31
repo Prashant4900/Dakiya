@@ -24,6 +24,7 @@ import {
 	renameFolder as renameFolderService,
 	renameRequest as renameRequestService,
 	resolveEndpointPaths,
+	scaffoldScript as scaffoldScriptService,
 	writeEnvironmentSource as writeEnvironmentSourceService,
 	writeRequestSource as writeRequestSourceService,
 	writeScript as writeScriptService,
@@ -125,6 +126,14 @@ export function createRequestSource(arg: string, cwd = process.cwd()) {
 
 export function deleteRequestFile() {
 	return deleteRequestFileService();
+}
+
+export function scaffoldScript(
+	arg: string,
+	type: "pre" | "post",
+	cwd = process.cwd(),
+): { path: string } {
+	return scaffoldScriptService(fs, arg, type, cwd);
 }
 
 export function writeScript(

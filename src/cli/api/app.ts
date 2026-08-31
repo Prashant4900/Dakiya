@@ -155,6 +155,23 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 
 	app.post("/requests/*", async (c) => {
 		const fullPath = c.req.path.replace(/^\/requests\//, "");
+
+		// POST .../scripts/pre  or  .../scripts/post → scaffold a new typed script file
+		if (
+			fullPath.endsWith("/scripts/pre") ||
+			fullPath.endsWith("/scripts/post")
+		) {
+			try {
+				const type = fullPath.endsWith("/scripts/pre") ? "pre" : "post";
+				const reqPath = fullPath.replace(/\/scripts\/(pre|post)$/, "");
+				const { scaffoldScript } = await import("../workspace.js");
+				const result = scaffoldScript(reqPath, type, cwd);
+				return c.json({ success: true, path: result.path });
+			} catch (err) {
+				return c.json({ error: errorMessage(err) }, 400);
+			}
+		}
+
 		try {
 			const { createRequestSource } = await import("../workspace.js");
 			const result = createRequestSource(fullPath, cwd);
@@ -166,6 +183,7 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 			return c.json({ error: errorMessage(err) }, 400);
 		}
 	});
+
 
 	app.delete("/requests/*", async (c) => {
 		const fullPath = c.req.path.replace(/^\/requests\//, "");

@@ -1,3 +1,5 @@
+import type { RequestBody } from "@core/domain";
+
 export type CollectionNode =
 	| { name: string; type: "folder"; children: CollectionNode[] }
 	| { name: string; type: "request"; path: string };
@@ -79,7 +81,7 @@ export type SendResponse = {
 		method: string;
 		url: string;
 		headers: Record<string, string>;
-		body?: string;
+		body?: RequestBody;
 	};
 	response: {
 		status: number;
