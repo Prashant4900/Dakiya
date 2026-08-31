@@ -218,18 +218,32 @@ function EnvEditableCell({
 	const [isFocused, setIsFocused] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	// Focus the input automatically whenever this cell becomes active
 	useEffect(() => {
 		if (isFocused && inputRef.current) {
 			inputRef.current.focus();
 		}
 	}, [isFocused]);
 
+	if (isFocused || !value) {
+		return (
+			<input
+				ref={inputRef}
+				type="text"
+				className="kv-input"
+				placeholder={placeholder}
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				onBlur={() => setIsFocused(false)}
+				list={list}
+			/>
+		);
+	}
+
 	return (
-		<div
+		<button
+			type="button"
 			className="kv-editable-cell"
-			tabIndex={0}
-			onFocus={() => setIsFocused(true)}
+			aria-label={placeholder || "Edit value"}
 			onClick={() => setIsFocused(true)}
 			style={{
 				display: "block",
@@ -242,35 +256,11 @@ function EnvEditableCell({
 				color: "inherit",
 				cursor: "text",
 			}}
-			onKeyDown={(e) => {
-				if (e.key === "Enter" || e.key === " ") {
-					e.preventDefault();
-					setIsFocused(true);
-				}
-			}}
-			onBlur={(e) => {
-				// Don't blur if we're clicking inside the same cell
-				if (!e.currentTarget.contains(e.relatedTarget)) {
-					setIsFocused(false);
-				}
-			}}
 		>
-			{isFocused || !value ? (
-				<input
-					ref={inputRef}
-					type="text"
-					className="kv-input"
-					placeholder={placeholder}
-					value={value}
-					onChange={(e) => onChange(e.target.value)}
-					list={list}
-				/>
-			) : (
-				<div className="kv-cell-preview">
-					<EnvHighlight text={value} variables={variables} />
-				</div>
-			)}
-		</div>
+			<div className="kv-cell-preview">
+				<EnvHighlight text={value} variables={variables} />
+			</div>
+		</button>
 	);
 }
 

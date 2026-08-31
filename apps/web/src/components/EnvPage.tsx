@@ -10,7 +10,8 @@ import { Cancel01Icon } from "./icons/Cancel01Icon.js";
 import { PromptDialog } from "./PromptDialog.js";
 
 // Keys whose names suggest secret values
-const SECRET_PATTERNS = /token|secret|key|password|passwd|pwd|auth|api[-_]?key/i;
+const SECRET_PATTERNS =
+	/token|secret|key|password|passwd|pwd|auth|api[-_]?key/i;
 
 function isSensitiveKey(k: string): boolean {
 	return SECRET_PATTERNS.test(k);
@@ -24,7 +25,10 @@ function yamlToVars(source: string): { key: string; value: string }[] {
 		const idx = trimmed.indexOf(":");
 		if (idx === -1) continue;
 		const k = trimmed.slice(0, idx).trim();
-		const v = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
+		const v = trimmed
+			.slice(idx + 1)
+			.trim()
+			.replace(/^["']|["']$/g, "");
 		if (k) vars.push({ key: k, value: v });
 	}
 	return vars;
@@ -44,11 +48,8 @@ function varsToYaml(
 	const dataLines = vars
 		.filter((v) => v.key.trim())
 		.map(({ key, value }) => {
-			const needsQuote =
-				/[:#\[\]{},&*?|<>=!%@`\s]/.test(value) || value === "";
-			const safeValue = needsQuote
-				? `"${value.replace(/"/g, '\\"')}"`
-				: value;
+			const needsQuote = /[:#[\]{},&*?|<>=!%@`\s]/.test(value) || value === "";
+			const safeValue = needsQuote ? `"${value.replace(/"/g, '\\"')}"` : value;
 			return `${key}: ${safeValue}`;
 		});
 	return [...commentLines, ...dataLines, ""].join("\n");
@@ -232,16 +233,11 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 											}
 										/>
 									</td>
-									<td
-										className="kv-val"
-										style={{ position: "relative" }}
-									>
+									<td className="kv-val" style={{ position: "relative" }}>
 										<input
 											className="kv-input"
 											placeholder={isLast ? "value" : ""}
-											type={
-												row.masked && row.value ? "password" : "text"
-											}
+											type={row.masked && row.value ? "password" : "text"}
 											value={row.value}
 											onChange={(e) =>
 												handleRowChange(idx, "value", e.target.value)

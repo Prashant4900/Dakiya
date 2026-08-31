@@ -4,7 +4,9 @@
  * Not a full YAML parser — enough for flat key-value workspaces.
  */
 
-export function parseSimpleYaml(source: string): Record<string, string | string[]> {
+export function parseSimpleYaml(
+	source: string,
+): Record<string, string | string[]> {
 	const out: Record<string, string | string[]> = {};
 	let currentArrayKey: string | null = null;
 

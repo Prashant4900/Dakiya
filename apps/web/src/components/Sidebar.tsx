@@ -75,7 +75,6 @@ export function Sidebar({
 		e.currentTarget.releasePointerCapture(e.pointerId);
 	};
 
-
 	return (
 		<aside className="sidebar" style={{ width }}>
 			<div

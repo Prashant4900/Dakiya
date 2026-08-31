@@ -85,8 +85,8 @@ export function App() {
 
 	const { versions, versionFolders } = useMemo(() => {
 		const manifestVersions = workspaceQuery.data?.manifest?.versions || [];
-		
-		let detectedVersionFolders = new Set<string>();
+
+		const detectedVersionFolders = new Set<string>();
 
 		if (manifestVersions.length > 0) {
 			for (const v of manifestVersions) {
@@ -96,9 +96,10 @@ export function App() {
 
 		let hasUnversionedItems = false;
 		for (const node of tree) {
-			if (!detectedVersionFolders.has(node.name)) {
+			if (node.type === "folder") {
+				detectedVersionFolders.add(node.name);
+			} else if (node.type === "request") {
 				hasUnversionedItems = true;
-				break;
 			}
 		}
 
@@ -107,12 +108,16 @@ export function App() {
 			finalVersions.push(defaultVersionName);
 		}
 
-		return { versions: finalVersions, versionFolders: detectedVersionFolders };
-	}, [tree, workspaceQuery.data?.manifest]);
+		return {
+			versions: finalVersions,
+			versionFolders: Array.from(detectedVersionFolders),
+		};
+	}, [tree, workspaceQuery.data?.manifest, defaultVersionName]);
 
 	const versionTree = useMemo(() => {
+		const folders = new Set(versionFolders);
 		if (activeVersion === defaultVersionName) {
-			return tree.filter((node) => !versionFolders.has(node.name));
+			return tree.filter((node) => !folders.has(node.name));
 		}
 		const node = tree.find((n) => n.name === activeVersion);
 		return node?.type === "folder" ? node.children : [];

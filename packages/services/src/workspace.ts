@@ -9,20 +9,21 @@ export function parseWorkspaceManifest(source: string): WorkspaceManifest {
 		throw new Error("dakiya.yaml: missing required field `name`");
 	}
 
-	const versions = Array.isArray(raw.versions)
-		? raw.versions
-		: undefined;
-	const defaultVersionName = typeof raw.defaultVersionName === "string" ? raw.defaultVersionName.trim() : "default";
-	const description = typeof raw.description === "string" ? raw.description : undefined;
-	const defaultEnv = typeof raw.defaultEnv === "string" ? raw.defaultEnv : undefined;
+	const versions = Array.isArray(raw.versions) ? raw.versions : undefined;
+	const defaultVersionName =
+		typeof raw.defaultVersionName === "string"
+			? raw.defaultVersionName.trim()
+			: "default";
+	const description =
+		typeof raw.description === "string" ? raw.description : undefined;
+	const defaultEnv =
+		typeof raw.defaultEnv === "string" ? raw.defaultEnv : undefined;
 
 	return {
 		name,
 		versions,
 		defaultVersionName,
 		...(description !== undefined ? { description } : {}),
-		...(defaultEnv !== undefined && defaultEnv !== ""
-			? { defaultEnv }
-			: {}),
+		...(defaultEnv !== undefined && defaultEnv !== "" ? { defaultEnv } : {}),
 	};
 }

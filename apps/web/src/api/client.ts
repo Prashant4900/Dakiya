@@ -97,7 +97,6 @@ export function createEnvironment(name: string): Promise<{ ok: true }> {
 	return saveEnvironment(name, skeleton);
 }
 
-
 export async function saveScript(
 	path: string,
 	type: "pre" | "post",

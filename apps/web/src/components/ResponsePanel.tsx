@@ -96,8 +96,8 @@ export function ResponsePanel({
 	const headersText =
 		result && Object.entries(result.response.headers).length > 0
 			? Object.entries(result.response.headers)
-				.map(([k, v]) => `${k}: ${v}`)
-				.join("\n")
+					.map(([k, v]) => `${k}: ${v}`)
+					.join("\n")
 			: "(none)";
 
 	return (
@@ -137,14 +137,21 @@ export function ResponsePanel({
 								icon={<CopyIcon />}
 								onClick={async () => {
 									try {
-										await navigator.clipboard.writeText(buildCurl(result.resolved));
+										await navigator.clipboard.writeText(
+											buildCurl(result.resolved),
+										);
 										setCopiedCurl(true);
 										setTimeout(() => setCopiedCurl(false), 2000);
 									} catch (e) {
 										console.error("Failed to copy cURL", e);
 									}
 								}}
-								style={{ marginLeft: "auto", height: "24px", padding: "0 8px", fontSize: "11px" }}
+								style={{
+									marginLeft: "auto",
+									height: "24px",
+									padding: "0 8px",
+									fontSize: "11px",
+								}}
 							>
 								{copiedCurl ? "Copied!" : "cURL"}
 							</Button>
