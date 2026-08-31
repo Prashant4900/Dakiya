@@ -130,7 +130,12 @@ export function readRequestSource(
 export function writeRequestSource(
 	fs: FsClient,
 	arg: string,
-	updates: { body?: RequestBody; headers?: Record<string, string> },
+	updates: {
+		url?: string;
+		method?: string;
+		body?: RequestBody;
+		headers?: Record<string, string>;
+	},
 	cwd: string,
 ): {
 	relativeToCollections: string;
@@ -331,31 +336,41 @@ export function moveRequest(
 const PRE_SCRIPT_TEMPLATE = `import type { PreContext } from "dakiya/scripts";
 
 export default async function ({ req, env, meta }: PreContext) {
-	// Mutate the request before it's sent
-	// Example: inject a header
+	// Pre-request script runs before the HTTP request is dispatched.
+	//
+	// 1. Headers & Auth:
+	// req.setHeader("Authorization", \`Bearer \${env.get("token")}\`);
 	// req.setHeader("X-Request-Id", meta.traceId);
 	//
-	// Example: modify the request body
+	// 2. Request Body:
 	// const body = req.body as Record<string, unknown>;
 	// body.timestamp = Date.now();
 	//
-	// Example: read an env variable
+	// 3. Environment Variables:
 	// const token = env.get("auth_token");
+	// env.set("tempKey", "value"); // in-memory for this request run
+	// env.set("auth_token", "new_token");
+	// env.commit(); // permanently saves all modified variables to .json env file
 }
 `;
 
 const POST_SCRIPT_TEMPLATE = `import type { PostContext } from "dakiya/scripts";
 
-export default async function ({ res, env, meta }: PostContext) {
-	// Inspect the response after it's received
-	// Example: save a token from the response
-	// const data = res.json() as { token?: string };
-	// if (res.status === 200 && data.token) {
-	//   env.set("auth_token", data.token, { persist: true });
+export default async function ({ req, res, env, meta }: PostContext) {
+	// Post-request script runs after receiving the HTTP response.
+	//
+	// 1. Inspect Response:
+	// const status = res.status; // e.g. 200
+	// const data = res.json() as { token?: string; error?: string };
+	//
+	// 2. Save Variables (e.g. auth tokens from login):
+	// if (status === 200 && data.token) {
+	//   env.set("auth_token", data.token);
+	//   env.commit(); // permanently saves all modified variables to .json env file
 	// }
 	//
-	// Example: log duration
-	// console.log("[", meta.requestName, "] took", meta.durationMs, "ms");
+	// 3. Logging & Performance:
+	// console.log(\`[\${meta.requestName}] completed in \${meta.durationMs}ms with status \${res.status}\`);
 }
 `;
 

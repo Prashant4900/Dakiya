@@ -5,8 +5,8 @@ import { createNodeFsClient } from "../fs/node-fs-client.js";
 const fs = createNodeFsClient();
 
 /**
- * Create / complete `.dakiya/` in the current directory:
- * manifest, empty collections/, and environments/local.yaml.
+ * Create * Scaffold a new `.dakiya/` workspace in the current directory, complete with
+ * manifest, empty collections/, and environments/local.json.
  * Existing files are left unchanged. No sample .drq files.
  */
 export function runInit(): void {

@@ -55,4 +55,7 @@ export default defineConfig({
 		port: 4242,
 		strictPort: true,
 	},
+	build: {
+		emptyOutDir: false,
+	},
 });

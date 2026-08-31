@@ -17,42 +17,29 @@ function isSensitiveKey(k: string): boolean {
 	return SECRET_PATTERNS.test(k);
 }
 
-function yamlToVars(source: string): { key: string; value: string }[] {
-	const vars: { key: string; value: string }[] = [];
-	for (const line of source.split("\n")) {
-		const trimmed = line.trim();
-		if (!trimmed || trimmed.startsWith("#")) continue;
-		const idx = trimmed.indexOf(":");
-		if (idx === -1) continue;
-		const k = trimmed.slice(0, idx).trim();
-		const v = trimmed
-			.slice(idx + 1)
-			.trim()
-			.replace(/^["']|["']$/g, "");
-		if (k) vars.push({ key: k, value: v });
+function jsonToVars(source: string): { key: string; value: string }[] {
+	try {
+		if (!source.trim()) return [];
+		const parsed = JSON.parse(source);
+		if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return [];
+		return Object.entries(parsed).map(([key, val]) => ({
+			key,
+			value: typeof val === "string" ? val : JSON.stringify(val),
+		}));
+	} catch {
+		return [];
 	}
-	return vars;
 }
 
-function varsToYaml(
-	vars: { key: string; value: string }[],
-	existingSource: string,
-): string {
-	// Preserve leading comments
-	const commentLines: string[] = [];
-	for (const line of existingSource.split("\n")) {
-		const t = line.trim();
-		if (t.startsWith("#")) commentLines.push(line);
-		else break;
+function varsToJson(vars: { key: string; value: string }[]): string {
+	const obj: Record<string, string> = {};
+	for (const { key, value } of vars) {
+		const trimmedKey = key.trim();
+		if (trimmedKey) {
+			obj[trimmedKey] = value;
+		}
 	}
-	const dataLines = vars
-		.filter((v) => v.key.trim())
-		.map(({ key, value }) => {
-			const needsQuote = /[:#[\]{},&*?|<>=!%@`\s]/.test(value) || value === "";
-			const safeValue = needsQuote ? `"${value.replace(/"/g, '\\"')}"` : value;
-			return `${key}: ${safeValue}`;
-		});
-	return [...commentLines, ...dataLines, ""].join("\n");
+	return JSON.stringify(obj, null, 2) + "\n";
 }
 
 type EnvRow = { id: number; key: string; value: string; masked: boolean };
@@ -82,7 +69,7 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 	useEffect(() => {
 		if (!data) return;
 		initialized.current = false;
-		const vars = yamlToVars(data.source);
+		const vars = jsonToVars(data.source);
 		const initRows: EnvRow[] = vars.map((v, i) => ({
 			id: i,
 			key: v.key,
@@ -97,16 +84,16 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 		initialized.current = true;
 	}, [data]);
 
-	// Keep raw YAML in sync when table changes
+	// Keep raw JSON in sync when table changes
 	useEffect(() => {
 		if (!initialized.current || !data) return;
 		const nonEmpty = rows.filter((r) => r.key.trim());
-		setRawSource(varsToYaml(nonEmpty, data.source));
+		setRawSource(varsToJson(nonEmpty));
 	}, [rows, data]);
 
 	const syncTableFromRaw = useCallback((source: string) => {
 		setRawSource(source);
-		const vars = yamlToVars(source);
+		const vars = jsonToVars(source);
 		const newRows: EnvRow[] = vars.map((v, i) => ({
 			id: i,
 			key: v.key,
@@ -132,10 +119,7 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 	const handleSave = () => {
 		const source = rawOpen
 			? rawSource
-			: varsToYaml(
-					rows.filter((r) => r.key.trim()),
-					data?.source ?? "",
-				);
+			: varsToJson(rows.filter((r) => r.key.trim()));
 		saveMutation.mutate(source);
 	};
 
@@ -281,7 +265,7 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 				</table>
 			</div>
 
-			{/* Collapsible raw YAML */}
+			{/* Collapsible raw JSON */}
 			<div className="env-raw-section">
 				<button
 					type="button"
@@ -289,7 +273,7 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 					onClick={() => setRawOpen((v) => !v)}
 				>
 					<span className="env-raw-arrow">{rawOpen ? "▾" : "▸"}</span>
-					Raw YAML
+					Raw JSON
 				</button>
 				{rawOpen && (
 					<div className="env-raw-editor">
@@ -429,7 +413,7 @@ export function EnvPage({
 				<PromptDialog
 					title="New Environment"
 					placeholder="e.g. staging"
-					message="Enter a name. A YAML file will be created under .dakiya/environments/."
+					message="Enter a name. A JSON file will be created under .dakiya/environments/."
 					confirmText="Create"
 					onCancel={() => setNewEnvOpen(false)}
 					onConfirm={(name) => {

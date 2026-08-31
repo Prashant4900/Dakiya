@@ -6,9 +6,10 @@ import type {
 } from "@core/domain";
 import type { HttpClient } from "./http.js";
 import { createFetchHttpClient } from "./http.js";
-import { resolveRequest } from "./resolve.js";
+import { resolveBody } from "./resolve.js";
 import type { ScriptMeta, ScriptRunner } from "./script.js";
-import { toMutableRequest, toMutableResponse } from "./script.js";
+import { toMutableResponse, type MutableRequest } from "./script.js";
+import { resolveRecord, resolveVars } from "./vars.js";
 
 export type SendRequestOptions = {
 	document: RequestDocument;
@@ -46,7 +47,12 @@ export async function sendRequest(
 	const traceId = crypto.randomUUID();
 	const startTime = performance.now();
 
-	const mutable = toMutableRequest(resolveRequest(options.document, variables));
+	const mutable: MutableRequest = {
+		method: options.document.request.method,
+		url: options.document.request.url,
+		headers: { ...options.document.request.headers },
+		...(options.document.body !== undefined ? { body: options.document.body } : {}),
+	};
 
 	const baseMeta: Omit<ScriptMeta, "durationMs"> = {
 		requestName: options.document.meta.name ?? options.document.relativePath,
@@ -71,12 +77,12 @@ export async function sendRequest(
 		for (const key of result.persistedKeys) persistedKeys.add(key);
 	}
 
-	// ── HTTP ─────────────────────────────────────────────────────────────────
+	// ── HTTP (resolved with updated variables after pre-script) ──────────────
 	const resolved: ResolvedHttpRequest = {
 		method: mutable.method,
-		url: mutable.url,
-		headers: { ...mutable.headers },
-		...(mutable.body !== undefined ? { body: mutable.body } : {}),
+		url: resolveVars(mutable.url, variables),
+		headers: resolveRecord(mutable.headers, variables),
+		...(mutable.body !== undefined ? { body: resolveBody(mutable.body, variables) } : {}),
 	};
 
 	const http = options.http ?? createFetchHttpClient();

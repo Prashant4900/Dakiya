@@ -25,11 +25,7 @@ export function buildManifestContent(workspaceName: string): string {
 }
 
 export function buildLocalEnvContent(): string {
-	return [
-		`# Local environment variables — use as {{name}} in requests`,
-		`baseUrl: http://localhost:3000`,
-		``,
-	].join("\n");
+	return JSON.stringify({}, null, 2);
 }
 
 /** TypeScript type declarations for Dakiya scripts — enables IDE autocomplete. */
@@ -65,9 +61,11 @@ export function buildScriptTypesContent(): string {
 		`  /** Environment variable bag — read, write, and persist values. */`,
 		`  export interface EnvApi {`,
 		`    get(name: string): string | undefined;`,
-		`    /** @param options.persist — if true, the value is saved back to the .yaml env file. */`,
+		`    /** @param options.persist — if true, the value is saved back to the .json env file. */`,
 		`    set(name: string, value: string, options?: { persist?: boolean }): void;`,
 		`    delete(name: string): void;`,
+		`    /** Permanently commit variable changes to the active .json environment file on disk. */`,
+		`    commit(name?: string): void;`,
 		`  }`,
 		``,
 		`  /** Request metadata available in all scripts. */`,
@@ -131,7 +129,7 @@ export function scaffoldFiles(workspaceName: string): ScaffoldFile[] {
 			content: buildManifestContent(workspaceName),
 		},
 		{
-			relativePath: "environments/local.yaml",
+			relativePath: "environments/local.json",
 			content: buildLocalEnvContent(),
 		},
 		{

@@ -6,7 +6,7 @@ import type {
 } from "@core/domain";
 import { resolveRecord, resolveVars } from "./vars.js";
 
-function resolveBody(
+export function resolveBody(
 	body: RequestBody,
 	variables: EnvironmentVariables,
 ): RequestBody {

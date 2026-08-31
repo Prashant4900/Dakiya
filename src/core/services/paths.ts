@@ -35,7 +35,7 @@ export function manifestPath(cwd: string): string {
 
 export function environmentPath(cwd: string, name: string): string {
 	assertSafeName(name, "environment");
-	return posixJoin(environmentsRoot(cwd), `${name}.yaml`);
+	return posixJoin(environmentsRoot(cwd), `${name}.json`);
 }
 
 export function normalizeEndpointPath(arg: string): {

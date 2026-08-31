@@ -11,7 +11,7 @@ export function loadEnvironment(
 ): Environment {
 	const file = environmentPath(cwd, envName);
 	if (!fs.exists(file)) {
-		throw new Error(`Environment not found: environments/${envName}.yaml`);
+		throw new Error(`Environment not found: environments/${envName}.json`);
 	}
 	return parseEnvironment(envName, fs.readFile(file));
 }
@@ -23,7 +23,7 @@ export function readEnvironmentSource(
 ): string {
 	const file = environmentPath(cwd, envName);
 	if (!fs.exists(file)) {
-		throw new Error(`Environment not found: environments/${envName}.yaml`);
+		throw new Error(`Environment not found: environments/${envName}.json`);
 	}
 	return fs.readFile(file);
 }
@@ -54,7 +54,7 @@ export function listEnvironmentNames(fs: FsClient, cwd: string): string[] {
 	if (!fs.exists(root)) return [];
 	return fs
 		.readDir(root)
-		.filter((entry) => entry.isFile && entry.name.endsWith(".yaml"))
-		.map((entry) => entry.name.replace(/\.yaml$/, ""))
+		.filter((entry) => entry.isFile && entry.name.endsWith(".json"))
+		.map((entry) => entry.name.replace(/\.json$/, ""))
 		.sort();
 }

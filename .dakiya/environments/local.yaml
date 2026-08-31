@@ -1,6 +1,0 @@
-# Local environment — points at `@example/server` (`pnpm dev:example`)
-baseUrl: http://localhost:3000
-requestId: dev-request-1
-userId: "1"
-userName: Linus
-userEmail: linus@example.com

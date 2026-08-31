@@ -28,9 +28,11 @@ declare module "dakiya/scripts" {
   /** Environment variable bag — read, write, and persist values. */
   export interface EnvApi {
     get(name: string): string | undefined;
-    /** @param options.persist — if true, the value is saved back to the .yaml env file. */
+    /** @param options.persist — if true, the value is saved back to the .json env file. */
     set(name: string, value: string, options?: { persist?: boolean }): void;
     delete(name: string): void;
+    /** Permanently commit variable changes to the active .json environment file on disk. */
+    commit(name?: string): void;
   }
 
   /** Request metadata available in all scripts. */

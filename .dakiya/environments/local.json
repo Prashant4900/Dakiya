@@ -1,0 +1,8 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "requestId": "dev-request-1",
+  "userId": "1",
+  "userName": "Linus",
+  "userEmail": "linus@example.com",
+  "message": "Hello, Nigam!"
+}

@@ -1,4 +1,4 @@
-import type { RequestBody } from "@core/domain";
+import type { HttpMethod, RequestBody } from "@core/domain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Cancel01Icon, Delete02Icon } from "hugeicons-react";
 import {
@@ -300,6 +300,10 @@ export function RequestPanel({
 	const [deleteConfirm, setDeleteConfirm] = useState<"pre" | "post" | null>(
 		null,
 	);
+	const [localUrl, setLocalUrl] = useState("");
+	const [localMethod, setLocalMethod] = useState<HttpMethod>("GET");
+	const [isUrlFocused, setIsUrlFocused] = useState(false);
+	const urlInputRef = useRef<HTMLInputElement>(null);
 
 	const createScriptMutation = useMutation({
 		mutationFn: ({ type }: { type: "pre" | "post" }) =>
@@ -339,6 +343,8 @@ export function RequestPanel({
 			setLocalBody(request.document?.body);
 			setDraftPreScript(request.document?.pre?.source ?? "");
 			setDraftPostScript(request.document?.post?.source ?? "");
+			setLocalUrl(request.document?.request.url ?? "");
+			setLocalMethod((request.document?.request.method as HttpMethod) ?? "GET");
 			setDirty(false);
 		}
 	}, [request]);
@@ -363,7 +369,12 @@ export function RequestPanel({
 			},
 			{} as Record<string, string>,
 		);
-		await onSave({ body: localBody, headers: headersObj });
+		await onSave({
+			url: localUrl,
+			method: localMethod,
+			body: localBody,
+			headers: headersObj,
+		});
 		setDirty(false);
 	};
 
@@ -376,11 +387,16 @@ export function RequestPanel({
 				},
 				{} as Record<string, string>,
 			);
-			await onSave({ body: localBody, headers: headersObj });
+			await onSave({
+				url: localUrl,
+				method: localMethod,
+				body: localBody,
+				headers: headersObj,
+			});
 			setDirty(false);
 		}
 		onSend();
-	}, [dirty, localBody, localHeaders, onSave, onSend]);
+	}, [dirty, localBody, localHeaders, localUrl, localMethod, onSave, onSend]);
 
 	const handleBodyChange = (newBody: RequestBody | undefined) => {
 		setLocalBody(newBody);
@@ -525,17 +541,64 @@ export function RequestPanel({
 	return (
 		<>
 			<div className="request-bar">
-				<span
-					className={`method-select mono ${methodBadgeClass(method)}`}
-					style={{ color: methodColorVar(method) }}
+				<select
+					className={`method-select mono ${methodBadgeClass(localMethod)}`}
+					style={{ color: methodColorVar(localMethod) }}
+					value={localMethod}
+					onChange={(e) => {
+						setLocalMethod(e.target.value as HttpMethod);
+						setDirty(true);
+					}}
+					disabled={!request || loading}
 				>
-					{method}
-				</span>
-				<div className="url-input mono">
-					{url ? (
-						<EnvHighlight text={url} variables={activeEnvVariables} />
+					<option value="GET">GET</option>
+					<option value="POST">POST</option>
+					<option value="PUT">PUT</option>
+					<option value="PATCH">PATCH</option>
+					<option value="DELETE">DELETE</option>
+					<option value="HEAD">HEAD</option>
+					<option value="OPTIONS">OPTIONS</option>
+				</select>
+				<div
+					className="url-bar-container"
+					onClick={() => {
+						if (!isUrlFocused && request) {
+							setIsUrlFocused(true);
+							setTimeout(() => urlInputRef.current?.focus(), 0);
+						}
+					}}
+				>
+					{isUrlFocused ? (
+						<input
+							ref={urlInputRef}
+							type="text"
+							className="url-input mono"
+							placeholder="Enter request URL or {{variable}}"
+							value={localUrl}
+							onChange={(e) => {
+								setLocalUrl(e.target.value);
+								setDirty(true);
+							}}
+							onBlur={() => setIsUrlFocused(false)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									void handleSend();
+								} else if (e.key === "Escape") {
+									setIsUrlFocused(false);
+								}
+							}}
+							autoFocus
+						/>
 					) : (
-						"Select a request"
+						<div className="url-input mono url-preview">
+							{localUrl ? (
+								<EnvHighlight text={localUrl} variables={activeEnvVariables} />
+							) : (
+								<span className="url-placeholder">
+									{request ? "Enter request URL or {{variable}}" : "Select a request"}
+								</span>
+							)}
+						</div>
 					)}
 				</div>
 				<Button

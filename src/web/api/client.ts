@@ -93,7 +93,7 @@ export function saveEnvironment(
 }
 
 export function createEnvironment(name: string): Promise<{ ok: true }> {
-	const skeleton = `# ${name} environment\n# Add key: value pairs below\n`;
+	const skeleton = `{\n  \n}\n`;
 	return saveEnvironment(name, skeleton);
 }
 

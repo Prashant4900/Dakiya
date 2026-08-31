@@ -553,12 +553,34 @@ body {
 	font-size: 12px;
 	font-weight: 700;
 	font-family: "JetBrains Mono", monospace;
-	min-width: 76px;
+	min-width: 80px;
 	text-align: center;
+	cursor: pointer;
+	outline: none;
+	transition: border-color 0.15s;
+}
+
+.method-select:focus {
+	border-color: hsl(var(--primary));
+}
+
+.method-select option {
+	background: hsl(var(--card));
+	color: hsl(var(--foreground));
+	font-weight: 600;
+}
+
+.url-bar-container {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	min-width: 0;
+	position: relative;
+	cursor: text;
 }
 
 .url-input {
-	flex: 1;
+	width: 100%;
 	background: hsl(var(--muted));
 	border: 1px solid hsl(var(--border));
 	border-radius: var(--radius);
@@ -566,9 +588,28 @@ body {
 	font-size: 12px;
 	color: hsl(var(--foreground));
 	font-family: "JetBrains Mono", monospace;
+	outline: none;
+	height: 32px;
+	box-sizing: border-box;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.url-input:focus {
+	border-color: hsl(var(--primary));
+	box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
+
+.url-input.url-preview {
+	display: flex;
+	align-items: center;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.url-placeholder {
+	color: hsl(var(--muted-foreground));
+	opacity: 0.6;
 }
 
 .send-button {

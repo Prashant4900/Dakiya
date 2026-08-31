@@ -139,19 +139,37 @@ function buildEnvApi(
 	variables: Record<string, string>,
 	persistedKeys: Set<string>,
 ) {
+	const modifiedKeys = new Set<string>();
+
 	return {
 		get(name: string): string | undefined {
 			return variables[name];
 		},
 		set(name: string, value: string, options?: EnvSetOptions): void {
 			variables[name] = String(value);
+			modifiedKeys.add(name);
 			if (options?.persist) {
 				persistedKeys.add(name);
 			}
 		},
 		delete(name: string): void {
 			delete variables[name];
+			modifiedKeys.delete(name);
 			persistedKeys.delete(name);
+		},
+		commit(key?: string): void {
+			if (key) {
+				if (key in variables) {
+					persistedKeys.add(key);
+				}
+			} else {
+				// If specific keys were set, commit them; otherwise commit all active variables
+				const keysToPersist =
+					modifiedKeys.size > 0 ? modifiedKeys : Object.keys(variables);
+				for (const k of keysToPersist) {
+					persistedKeys.add(k);
+				}
+			}
 		},
 	};
 }

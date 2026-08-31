@@ -5,6 +5,8 @@ export function updateEndpointMethod(
 	yamlSource: string,
 	methodId: string,
 	updates: {
+		url?: string;
+		method?: string;
 		body?: RequestBody;
 		headers?: Record<string, string>;
 	},
@@ -14,6 +16,12 @@ export function updateEndpointMethod(
 	if (methods?.items) {
 		for (const methodNode of methods.items as import("yaml").YAMLMap[]) {
 			if (methodNode.get("id") === methodId) {
+				if (updates.url !== undefined) {
+					methodNode.set("url", updates.url);
+				}
+				if (updates.method !== undefined) {
+					methodNode.set("method", updates.method);
+				}
 				if (updates.body !== undefined) {
 					methodNode.set("body", updates.body);
 				}

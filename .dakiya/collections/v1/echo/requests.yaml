@@ -4,7 +4,7 @@ methods:
   - id: get
     name: Echo GET
     method: GET
-    url: "{{baseUrl}}/api/echo?message=12345"
+    url: "{{baseUrl}}/api/echo?message={{message}}"
     headers:
       X-Request-Id: "{{requestId}}"
   - id: post
