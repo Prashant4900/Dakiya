@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Cancel01Icon, ViewIcon, ViewOffSlashIcon } from "hugeicons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	createEnvironment,
 	fetchEnvironment,
 	saveEnvironment,
 } from "../api/client.js";
-import { Button } from "@/components/ui/button";
-import { Cancel01Icon, ViewIcon, ViewOffSlashIcon } from "hugeicons-react";
 import { PromptDialog } from "./PromptDialog.js";
 
 // Keys whose names suggest secret values
@@ -253,7 +253,11 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 												onClick={() => toggleMask(idx)}
 												className="h-8 w-8"
 											>
-												{row.masked ? <ViewIcon className="h-4 w-4" /> : <ViewOffSlashIcon className="h-4 w-4" />}
+												{row.masked ? (
+													<ViewIcon className="h-4 w-4" />
+												) : (
+													<ViewOffSlashIcon className="h-4 w-4" />
+												)}
 											</Button>
 										)}
 									</td>

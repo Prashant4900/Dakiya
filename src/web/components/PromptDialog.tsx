@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 export interface PromptDialogProps {
@@ -36,11 +36,14 @@ export function PromptDialog({
 
 	return (
 		<Dialog open={true} onOpenChange={(open) => !open && onCancel()}>
-			<DialogContent className="sm:max-w-[425px]" onOpenAutoFocus={(e) => {
-                e.preventDefault();
-                inputRef.current?.focus();
-                if (defaultValue) inputRef.current?.select();
-            }}>
+			<DialogContent
+				className="sm:max-w-[425px]"
+				onOpenAutoFocus={(e) => {
+					e.preventDefault();
+					inputRef.current?.focus();
+					if (defaultValue) inputRef.current?.select();
+				}}
+			>
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					{message && <DialogDescription>{message}</DialogDescription>}

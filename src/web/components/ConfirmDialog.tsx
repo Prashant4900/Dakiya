@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 export interface ConfirmDialogProps {
@@ -40,7 +40,11 @@ export function ConfirmDialog({
 					<AlertDialogCancel onClick={onCancel}>{cancelText}</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={onConfirm}
-						className={isDestructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+						className={
+							isDestructive
+								? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+								: ""
+						}
 					>
 						{confirmText}
 					</AlertDialogAction>

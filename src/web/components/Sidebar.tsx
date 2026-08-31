@@ -1,12 +1,12 @@
+import { FilePlus, FolderPlus } from "lucide-react";
 import { useRef, useState } from "react";
-import type { CollectionNode, RequestIndexItem } from "../api/types.js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { CollectionNode, RequestIndexItem } from "../api/types.js";
 import type { CollectionTreeActions } from "./CollectionTree.js";
 import { CollectionTree } from "./CollectionTree.js";
 import { EnvSwitcher } from "./EnvSwitcher.js";
 import { VersionSwitcher } from "./VersionSwitcher.js";
-import { FilePlus, FolderPlus } from "lucide-react";
 
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 450;
@@ -89,7 +89,11 @@ export function Sidebar({
 			/>
 			<div className="flex flex-col gap-4 p-4 border-b border-border">
 				<div className="flex items-center gap-2">
-					<img src="/icon-192.png" alt="Dakiya" className="w-6 h-6 rounded shadow-sm" />
+					<img
+						src="/icon-192.png"
+						alt="Dakiya"
+						className="w-6 h-6 rounded shadow-sm"
+					/>
 					<span className="font-semibold tracking-tight">Dakiya</span>
 					<span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono uppercase border border-border/50">
 						{activeVersion || "v1"}
@@ -160,15 +164,6 @@ export function Sidebar({
 						actions={actions}
 					/>
 				)}
-			</div>
-
-			<div className="p-3 border-t border-border flex items-center gap-2 bg-muted/20">
-				<div className="w-6 h-6 rounded bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold shadow-sm">
-					{workspaceName.charAt(0).toUpperCase()}
-				</div>
-				<span className="text-sm font-medium truncate flex-1">
-					{workspaceName}
-				</span>
 			</div>
 		</aside>
 	);

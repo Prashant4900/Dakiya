@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Cancel01Icon } from "hugeicons-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,7 +59,7 @@ export function NewRequestModal({
 				<DialogHeader>
 					<DialogTitle>New Request</DialogTitle>
 				</DialogHeader>
-				
+
 				<form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
 					<div className="flex flex-col gap-2">
 						<Label className="text-muted-foreground font-medium">Method</Label>
@@ -70,7 +69,11 @@ export function NewRequestModal({
 							className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
 						>
 							{HTTP_METHODS.map((m) => (
-								<option key={m} value={m} className="bg-background text-foreground">
+								<option
+									key={m}
+									value={m}
+									className="bg-background text-foreground"
+								>
 									{m}
 								</option>
 							))}
@@ -82,7 +85,6 @@ export function NewRequestModal({
 							Request name <span className="text-destructive">*</span>
 						</Label>
 						<Input
-							// biome-ignore lint/a11y/noAutofocus: intentional focus on open
 							autoFocus
 							type="text"
 							placeholder="e.g. get-user"
@@ -101,7 +103,9 @@ export function NewRequestModal({
 						<Input
 							type="text"
 							list="folder-list"
-							placeholder={isVersioned ? `inside ${version}/` : "inside root or folder/"}
+							placeholder={
+								isVersioned ? `inside ${version}/` : "inside root or folder/"
+							}
 							value={folder}
 							onChange={(e) => setFolder(e.target.value)}
 						/>

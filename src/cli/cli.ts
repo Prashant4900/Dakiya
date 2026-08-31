@@ -3,8 +3,8 @@ import { runInit } from "./commands/init.js";
 import { runList } from "./commands/list.js";
 import { runRun } from "./commands/run.js";
 import { runServe } from "./commands/serve.js";
-import { runHello } from "./hello.js";
 import { DEFAULT_PORT } from "./constants.js";
+import { runHello } from "./hello.js";
 
 const [, , cmd, ...args] = process.argv;
 
@@ -29,7 +29,9 @@ function parseServePort(argv: string[]): number {
 		if (arg === "--port" || arg === "-p") {
 			const value = argv[i + 1];
 			if (!value || !/^\d+$/.test(value)) {
-				console.error(`[dakiya] --port requires a number (e.g. --port ${DEFAULT_PORT})`);
+				console.error(
+					`[dakiya] --port requires a number (e.g. --port ${DEFAULT_PORT})`,
+				);
 				process.exit(1);
 			}
 			const port = Number(value);
@@ -42,7 +44,9 @@ function parseServePort(argv: string[]): number {
 		if (arg.startsWith("--port=")) {
 			const value = arg.slice("--port=".length);
 			if (!/^\d+$/.test(value)) {
-				console.error(`[dakiya] --port requires a number (e.g. --port=${DEFAULT_PORT})`);
+				console.error(
+					`[dakiya] --port requires a number (e.g. --port=${DEFAULT_PORT})`,
+				);
 				process.exit(1);
 			}
 			const port = Number(value);

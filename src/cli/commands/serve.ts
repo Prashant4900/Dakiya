@@ -1,7 +1,5 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
 import * as readline from "node:readline";
-import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { createApiApp } from "../api/app.js";
 import { createHonoMiddleware } from "../api/middleware.js";

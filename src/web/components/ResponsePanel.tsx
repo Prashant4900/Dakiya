@@ -1,8 +1,8 @@
+import { Copy01Icon, PackageIcon, ZapIcon } from "hugeicons-react";
 import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import type { SendResponse } from "../api/types.js";
 import { formatBytes } from "../utils/method.js";
-import { Copy01Icon, PackageIcon, ZapIcon } from "hugeicons-react";
-import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor.js";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
@@ -148,7 +148,7 @@ export function ResponsePanel({
 								className="ml-auto h-6 text-[11px] gap-1 px-2"
 							>
 								<Copy01Icon size={12} />
-                                {copiedCurl ? "Copied!" : "cURL"}
+								{copiedCurl ? "Copied!" : "cURL"}
 							</Button>
 						</>
 					)}
@@ -220,10 +220,10 @@ export function ResponsePanel({
 							}
 						}}
 						variant="secondary"
-                        size="sm"
-                        className="absolute top-2 right-4 z-10 h-7 text-xs gap-1.5"
+						size="sm"
+						className="absolute top-2 right-4 z-10 h-7 text-xs gap-1.5"
 					>
-                        <Copy01Icon size={14} />
+						<Copy01Icon size={14} />
 						{copied ? "Copied!" : "Copy"}
 					</Button>
 				</div>

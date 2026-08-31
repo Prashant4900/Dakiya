@@ -1,9 +1,9 @@
 import type { RequestBody } from "@core/domain";
+import { Cancel01Icon } from "hugeicons-react";
 import { useEffect, useState } from "react";
-import { uploadFile } from "../api/client.js";
 
 import { Button } from "@/components/ui/button";
-import { Cancel01Icon } from "hugeicons-react";
+import { uploadFile } from "../api/client.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { PaneHeader } from "./PaneHeader.js";
 
@@ -225,7 +225,12 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 						}}
 					>
 						{(body as any).raw?.format === "json" && (
-							<Button onClick={handleFormatJson} variant="ghost" size="sm" className="text-xs h-7">
+							<Button
+								onClick={handleFormatJson}
+								variant="ghost"
+								size="sm"
+								className="text-xs h-7"
+							>
 								Beautify
 							</Button>
 						)}
@@ -450,7 +455,12 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 								))}
 								<tr>
 									<td colSpan={3} style={{ padding: "8px" }}>
-										<Button onClick={() => addKvItem(mode)} variant="outline" size="sm" className="border-dashed w-full">
+										<Button
+											onClick={() => addKvItem(mode)}
+											variant="outline"
+											size="sm"
+											className="border-dashed w-full"
+										>
 											+ Add Item
 										</Button>
 									</td>

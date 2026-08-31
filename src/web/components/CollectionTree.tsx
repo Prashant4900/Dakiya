@@ -1,15 +1,15 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CollectionNode, RequestIndexItem } from "../api/types.js";
-import { methodBadgeClass } from "../utils/method.js";
 import { Button } from "@/components/ui/button";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import type { CollectionNode, RequestIndexItem } from "../api/types.js";
+import { methodBadgeClass } from "../utils/method.js";
 
 // ── Context menu ────────────────────────────────────────────────────────────
 
@@ -42,12 +42,17 @@ function ContextMenu({
 	const left = Math.min(anchorRect.left, window.innerWidth - 180);
 
 	return createPortal(
-		<div ref={ref} className="ctx-menu" style={{ top, left }} role="menu">
+		<div
+			ref={ref}
+			className="fixed z-[9999] bg-popover border border-border rounded-md shadow-md p-1 min-w-[160px] animate-in fade-in-0 zoom-in-95"
+			style={{ top, left }}
+			role="menu"
+		>
 			{items.map((item) => (
 				<Button
 					key={item.label}
 					role="menuitem"
-					className={`ctx-menu-item${item.danger ? " danger text-destructive hover:bg-destructive/10" : ""}`}
+					className={`w-full justify-start text-xs font-normal h-8 px-2 ${item.danger ? "text-destructive hover:bg-destructive/10 hover:text-destructive" : ""}`}
 					onClick={() => {
 						item.onClick();
 						onClose();
@@ -201,7 +206,7 @@ function FolderGroup({
 							setMenuRect(e.currentTarget.getBoundingClientRect());
 						}}
 						variant="ghost"
-                        size="icon"
+						size="icon"
 					>
 						⋯
 					</Button>
@@ -393,7 +398,7 @@ function RequestItem({
 							setMenuRect(e.currentTarget.getBoundingClientRect());
 						}}
 						variant="ghost"
-                        size="icon"
+						size="icon"
 					>
 						⋯
 					</Button>
@@ -415,21 +420,30 @@ function RequestItem({
 							<DialogTitle>Move "{name}"</DialogTitle>
 						</DialogHeader>
 						<div className="flex flex-col gap-2 py-4">
-							<span className="text-muted-foreground font-medium text-sm">Target folder</span>
+							<span className="text-muted-foreground font-medium text-sm">
+								Target folder
+							</span>
 							<select
 								value={moveTarget}
 								onChange={(e) => setMoveTarget(e.target.value)}
 								className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
 							>
 								{allFolders.map((f) => (
-									<option key={f} value={f} className="bg-background text-foreground">
+									<option
+										key={f}
+										value={f}
+										className="bg-background text-foreground"
+									>
 										{f}
 									</option>
 								))}
 							</select>
 						</div>
 						<DialogFooter>
-							<Button variant="secondary" onClick={() => setShowMoveDialog(false)}>
+							<Button
+								variant="secondary"
+								onClick={() => setShowMoveDialog(false)}
+							>
 								Cancel
 							</Button>
 							<Button
@@ -438,7 +452,10 @@ function RequestItem({
 										actions?.onRequestMove?.(path);
 										(
 											actions as CollectionTreeActions & {
-												_onMoveWithTarget?: (path: string, target: string) => void;
+												_onMoveWithTarget?: (
+													path: string,
+													target: string,
+												) => void;
 											}
 										)?._onMoveWithTarget?.(path, moveTarget);
 									}

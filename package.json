@@ -10,10 +10,11 @@
 	},
 	"scripts": {
 		"dev:web": "vite",
+		"build": "pnpm build:web && pnpm build:cli",
 		"build:web": "tsc --noEmit && vite build",
 		"preview": "vite preview",
 		"build:cli": "esbuild src/cli/cli.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/cli/cli.js && node -e \"require('node:fs').chmodSync('dist/cli/cli.js', 0o755)\"",
-		"dakiya": "pnpm build:cli && node dist/cli/cli.js",
+		"dakiya": "pnpm build && node dist/cli/cli.js",
 		"test": "vitest run",
 		"typecheck": "tsc --noEmit",
 		"lint": "biome check .",

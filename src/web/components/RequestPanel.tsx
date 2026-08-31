@@ -1,5 +1,6 @@
 import type { RequestBody } from "@core/domain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Cancel01Icon, Delete02Icon } from "hugeicons-react";
 import {
 	type ReactNode,
 	useCallback,
@@ -9,15 +10,14 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
+import { Button } from "@/components/ui/button";
 import { deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
 import { BodyEditor } from "./BodyEditor.js";
-import { Button } from "@/components/ui/button";
 import { CodeEditor } from "./CodeEditor.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
-import { Cancel01Icon, Delete02Icon } from "hugeicons-react";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
 

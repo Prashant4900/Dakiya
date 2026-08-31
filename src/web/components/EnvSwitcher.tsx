@@ -1,11 +1,11 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type EnvSwitcherProps = {
 	environments: string[];
@@ -23,7 +23,10 @@ export function EnvSwitcher({
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" className="w-full justify-between font-medium h-8 px-2 shadow-sm text-sm">
+				<Button
+					variant="outline"
+					className="w-full justify-between font-medium h-8 px-2 shadow-sm text-sm"
+				>
 					<div className="flex items-center gap-2">
 						<span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(26,127,90,0.6)]" />
 						<span className="truncate">{activeEnv}</span>
@@ -38,7 +41,9 @@ export function EnvSwitcher({
 						onClick={() => onEnvChange(name)}
 						className="flex items-center gap-2 cursor-pointer text-sm py-1.5"
 					>
-						<span className={`h-2 w-2 rounded-full ${name === activeEnv ? "bg-primary shadow-[0_0_8px_rgba(26,127,90,0.6)]" : "bg-transparent border border-muted-foreground"}`} />
+						<span
+							className={`h-2 w-2 rounded-full ${name === activeEnv ? "bg-primary shadow-[0_0_8px_rgba(26,127,90,0.6)]" : "bg-transparent border border-muted-foreground"}`}
+						/>
 						<span className="truncate">{name}</span>
 					</DropdownMenuItem>
 				))}

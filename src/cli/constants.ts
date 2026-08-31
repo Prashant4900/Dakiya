@@ -17,7 +17,7 @@ export const PACKAGE_ROOT = path.resolve(CLI_DIR, "../../");
 /** Default port for the Dakiya dashboard and API. */
 export const DEFAULT_PORT = 4242;
 
-/** 
+/**
  * Resolve and validate the web root for serving the dashboard.
  * @throws Error if package.json is not found in the resolved root.
  */

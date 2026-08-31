@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { SidebarLeftIcon, SidebarRightIcon } from "hugeicons-react";
+import { Button } from "@/components/ui/button";
 
 type TitleBarProps = {
 	projectName: string;
@@ -23,13 +23,13 @@ export function TitleBar({
 			<div className="titlebar-actions left">
 				<Button
 					variant="ghost"
-                    size="icon"
+					size="icon"
 					className="h-7 w-7 text-muted-foreground"
 					onClick={onToggleSidebar}
 					title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
 				>
-                    <SidebarLeftIcon size={16} />
-                </Button>
+					<SidebarLeftIcon size={16} />
+				</Button>
 			</div>
 			<div className="titlebar-center">
 				<span className="titlebar-project">{projectName}</span>
@@ -43,15 +43,15 @@ export function TitleBar({
 			<div className="titlebar-actions right">
 				<Button
 					variant="ghost"
-                    size="icon"
+					size="icon"
 					className="h-7 w-7 text-muted-foreground"
 					onClick={onToggleResponse}
 					title={
 						responseCollapsed ? "Show response panel" : "Hide response panel"
 					}
 				>
-                    <SidebarRightIcon size={16} />
-                </Button>
+					<SidebarRightIcon size={16} />
+				</Button>
 			</div>
 		</div>
 	);
