@@ -385,7 +385,6 @@ export function App() {
 			<div className="workspace">
 				{!sidebarCollapsed && (
 					<Sidebar
-						workspaceName={workspaceName}
 						tree={versionTree}
 						requestIndex={requestIndex}
 						selectedPath={selectedPath}

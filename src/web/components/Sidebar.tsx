@@ -12,7 +12,6 @@ const MIN_WIDTH = 200;
 const MAX_WIDTH = 450;
 
 type SidebarProps = {
-	workspaceName: string;
 	tree: CollectionNode[];
 	requestIndex: RequestIndexItem[];
 	selectedPath: string | null;
@@ -30,7 +29,6 @@ type SidebarProps = {
 };
 
 export function Sidebar({
-	workspaceName,
 	tree,
 	requestIndex,
 	selectedPath,
