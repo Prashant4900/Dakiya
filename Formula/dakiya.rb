@@ -2,7 +2,7 @@ class Dakiya < Formula
   desc "Local-first API toolkit — CLI + web dashboard"
   homepage "https://github.com/Prashant4900/Dakiya"
   url "https://github.com/Prashant4900/Dakiya/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "PLACEHOLDER_SHA256"
+  sha256 "b3c46502ee6d120434a6823eef656b7a9cdc378db614c4b88ced65eaf47c547d"
   license "MIT"
   head "https://github.com/Prashant4900/Dakiya.git", branch: "main"
 
