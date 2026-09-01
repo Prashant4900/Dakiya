@@ -1,6 +1,20 @@
+<div align="center">
+  <h3>📚 Dakiya Documentation</h3>
+  <p>
+    <a href="./Home.md">Home</a> •
+    <a href="./Getting-Started.md">Getting Started</a> •
+    <a href="./Collections.md">Collections & Requests</a> •
+    <a href="./Environments.md">Environments</a> •
+    <a href="./Scripts.md">Scripts</a> •
+    <b>CLI Reference</b>
+  </p>
+</div>
+
+<hr/>
+
 # CLI Reference
 
-Dakiya features a fast command-line interface powered by `cac`.
+Dakiya features a fast, intuitive command-line interface powered by `cac`.
 
 ```bash
 dakiya <command> [options]
@@ -8,13 +22,13 @@ dakiya <command> [options]
 
 ---
 
-## Commands
+## 💻 Commands
 
 ### `dakiya init`
 Initializes a new `.dakiya/` workspace in the current working directory.
 - Creates `.dakiya/dakiya.yaml`
 - Sets up `.dakiya/environments/local.yaml`
-- Creates empty `.dakiya/collections/`
+- Creates an empty `.dakiya/collections/`
 
 ```bash
 $ dakiya init
@@ -23,7 +37,7 @@ $ dakiya init
 ---
 
 ### `dakiya list`
-Scans `.dakiya/collections/` and lists all discovered endpoints and requests in tree format.
+Scans `.dakiya/collections/` and lists all discovered endpoints and requests in a readable tree format.
 
 ```bash
 $ dakiya list
@@ -58,7 +72,13 @@ $ dakiya serve -p 3000
 
 ---
 
-## Global Options
+## ⚙️ Global Options
 
 - `-h, --help`: Display help and command usage.
 - `-v, --version`: Display the installed Dakiya version.
+
+---
+
+<div align="left">
+  <a href="./Scripts.md">← Previous: Scripts</a>
+</div>

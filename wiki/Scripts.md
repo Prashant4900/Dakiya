@@ -1,10 +1,24 @@
+<div align="center">
+  <h3>📚 Dakiya Documentation</h3>
+  <p>
+    <a href="./Home.md">Home</a> •
+    <a href="./Getting-Started.md">Getting Started</a> •
+    <a href="./Collections.md">Collections & Requests</a> •
+    <a href="./Environments.md">Environments</a> •
+    <b>Scripts</b> •
+    <a href="./CLI.md">CLI Reference</a>
+  </p>
+</div>
+
+<hr/>
+
 # Pre & Post Request Scripts
 
 Dakiya comes with a built-in, secure Node.js sandbox that allows you to execute custom **JavaScript** or **TypeScript** before a request is sent or after a response is received.
 
 ---
 
-## File Placement
+## 📂 File Placement
 
 Scripts live right next to the corresponding `requests.yaml` in your collections folder:
 
@@ -19,12 +33,12 @@ You can scaffold these script files directly from the Web Dashboard using the **
 
 ---
 
-## Script Context & APIs
+## ⚡ Script Context & APIs
 
-Inside `pre.ts` and `post.ts`, Dakiya exposes a global `dakiya` (or `pm`-compatible) runtime helper object:
+Inside `pre.ts` and `post.ts`, Dakiya exposes a global `dakiya` runtime helper object:
 
 ### `dakiya.env`
-Read and write environment variables.
+Read and write environment variables dynamically.
 
 ```typescript
 // Read a variable
@@ -35,7 +49,7 @@ dakiya.env.set("lastUserId", "user_123");
 ```
 
 ### `dakiya.request` (in `pre.ts`)
-Inspect or dynamically mutate the outgoing request headers, URL, or body.
+Inspect or dynamically mutate outgoing request headers, URL, or body.
 
 ```typescript
 // Add a dynamic timestamp or signature header
@@ -56,9 +70,13 @@ if (dakiya.response.status === 200) {
 
 ---
 
-## Safety & Sandboxing
+## 🔒 Safety & Sandboxing
 
 Scripts are executed in an isolated Node.js `vm` sandbox. They do not leak global variables and are safely caught if runtime exceptions occur.
 
 ---
-**Next:** Check the complete [CLI Reference](./CLI.md)!
+
+<div align="space-between">
+  <span><a href="./Environments.md">← Previous: Environments & Variables</a></span>
+  <span style="float: right;"><b>Next:</b> <a href="./CLI.md">CLI Reference →</a></span>
+</div>

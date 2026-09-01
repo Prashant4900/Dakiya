@@ -1,10 +1,26 @@
+<div align="center">
+  <h3>📚 Dakiya Documentation</h3>
+  <p>
+    <a href="./Home.md">Home</a> •
+    <a href="./Getting-Started.md">Getting Started</a> •
+    <b>Collections & Requests</b> •
+    <a href="./Environments.md">Environments</a> •
+    <a href="./Scripts.md">Scripts</a> •
+    <a href="./CLI.md">CLI Reference</a>
+  </p>
+</div>
+
+<hr/>
+
 # Collections & Requests
 
 In Dakiya, your entire API surface is organized inside the `.dakiya/collections/` directory.
 
-## Directory Structure
+---
 
-Collections map directly to your folders on disk:
+## 📁 Directory Structure
+
+Collections map directly to real folders on your filesystem:
 
 ```
 .dakiya/
@@ -27,9 +43,9 @@ Each endpoint is a directory containing a `requests.yaml` file (and optional scr
 
 ---
 
-## `requests.yaml` Format
+## 📄 `requests.yaml` Format
 
-Dakiya uses standard, readable YAML instead of huge JSON bundles. A complete `requests.yaml` looks like this:
+Dakiya uses clean, readable YAML. A complete `requests.yaml` looks like this:
 
 ```yaml
 version: "1.0.0"
@@ -65,20 +81,24 @@ examples:
 
 ### Supported Body Types
 - `none`: No payload sent (common for `GET` or `DELETE`).
-- `json`: JSON payload (supports variable substitution).
+- `json`: JSON payload (supports `{{variable}}` substitution).
 - `raw`: Plaintext or custom formats.
 - `form-data` / `x-www-form-urlencoded`: Key-value pairs for form submissions.
 - `graphql`: GraphQL query and variables.
 
 ---
 
-## Managing Requests
+## 🛠️ Managing Requests
 
 You can manage requests in three ways:
 
 1. **Direct File Editing**: Open and edit `requests.yaml` in your favorite code editor (VSCode, Neovim, Zed).
-2. **Web Dashboard**: Use `dakiya serve` to edit endpoints via a rich GUI.
+2. **Web Dashboard**: Use `dakiya serve` to edit endpoints via the interactive UI.
 3. **CLI**: Run endpoints with `dakiya run <folder>/<endpoint>` directly from the terminal.
 
 ---
-**Next:** Learn how to configure [Environments & Variables](./Environments.md)!
+
+<div align="space-between">
+  <span><a href="./Getting-Started.md">← Previous: Getting Started</a></span>
+  <span style="float: right;"><b>Next:</b> <a href="./Environments.md">Environments →</a></span>
+</div>

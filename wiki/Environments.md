@@ -1,10 +1,24 @@
+<div align="center">
+  <h3>📚 Dakiya Documentation</h3>
+  <p>
+    <a href="./Home.md">Home</a> •
+    <a href="./Getting-Started.md">Getting Started</a> •
+    <a href="./Collections.md">Collections & Requests</a> •
+    <b>Environments</b> •
+    <a href="./Scripts.md">Scripts</a> •
+    <a href="./CLI.md">CLI Reference</a>
+  </p>
+</div>
+
+<hr/>
+
 # Environments & Variables
 
 Environments let you switch between different API targets (e.g. Local, Staging, Production) effortlessly, without modifying your request files.
 
 ---
 
-## Environment Files
+## 🌐 Environment Files
 
 Environments live inside `.dakiya/environments/`:
 
@@ -34,7 +48,7 @@ userEmail: "admin@example.com"
 
 ---
 
-## Using Variables in Requests
+## 🧩 Using Variables in Requests
 
 You can reference environment variables anywhere in your `requests.yaml` using the `{{variableName}}` double curly brace syntax:
 
@@ -45,7 +59,7 @@ You can reference environment variables anywhere in your `requests.yaml` using t
 
 ---
 
-## Switching Environments
+## 🔄 Switching Environments
 
 ### In the Web Dashboard
 1. Open the dashboard via `dakiya serve`.
@@ -56,4 +70,8 @@ You can reference environment variables anywhere in your `requests.yaml` using t
 Sandbox scripts can read and modify environment variables on the fly (for example, saving a login token for subsequent requests).
 
 ---
-**Next:** Learn how to write [Pre & Post Request Scripts](./Scripts.md)!
+
+<div align="space-between">
+  <span><a href="./Collections.md">← Previous: Collections & Requests</a></span>
+  <span style="float: right;"><b>Next:</b> <a href="./Scripts.md">Scripts →</a></span>
+</div>
