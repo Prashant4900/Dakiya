@@ -14,20 +14,35 @@
 
 # Getting Started
 
-Follow these steps to initialize Dakiya in your project and start making API requests.
+Follow these steps to install Dakiya, initialize your project workspace, and start sending requests.
 
 ---
 
 ## 1. Installation
 
-Dakiya is designed to be installed globally or run via `npx`. Currently, you can link it from source:
+### Via Homebrew (Recommended)
+
+Install directly using Homebrew:
 
 ```bash
-pnpm install
-pnpm link:cli
+brew install https://raw.githubusercontent.com/Prashant4900/Dakiya/main/Formula/dakiya.rb
 ```
 
-*(Note: Once published to npm, you'll be able to install it via `npm install -g dakiya` or run it directly via `npx dakiya`)*
+Or via Homebrew Tap:
+
+```bash
+brew tap Prashant4900/dakiya https://github.com/Prashant4900/Dakiya
+brew install dakiya
+```
+
+### From Source (for contributors)
+
+```bash
+git clone https://github.com/Prashant4900/Dakiya.git
+cd Dakiya
+pnpm install
+pnpm build
+```
 
 ---
 
@@ -39,7 +54,7 @@ Navigate to the root of your project directory and run:
 dakiya init
 ```
 
-This will scaffold a `.dakiya/` directory in your project:
+This scaffolds a `.dakiya/` directory in your current workspace:
 ```
 .dakiya/
   ├── dakiya.yaml         # Workspace configuration
