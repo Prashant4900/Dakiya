@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!design.html", "!src/web/styles.css"]
+		"includes": ["**", "!design.html", "!src/web/styles.css", "!.dakiya"]
 	},
 	"formatter": {
 		"enabled": true,

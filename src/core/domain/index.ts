@@ -2,18 +2,6 @@
 
 export const DOMAIN_VERSION = "0.0.0";
 
-export type HelloMessage = {
-	package: "@core/domain";
-	message: string;
-};
-
-export function hello(): HelloMessage {
-	return {
-		package: "@core/domain",
-		message: "Hello from @core/domain",
-	};
-}
-
 export type { Environment, EnvironmentVariables } from "./environment.js";
 export type {
 	EndpointManifest,

@@ -1,104 +1,48 @@
 #!/usr/bin/env node
+import { cac } from "cac";
 import { runInit } from "./commands/init.js";
 import { runList } from "./commands/list.js";
 import { runRun } from "./commands/run.js";
 import { runServe } from "./commands/serve.js";
 import { DEFAULT_PORT } from "./constants.js";
-import { runHello } from "./hello.js";
 
-const [, , cmd, ...args] = process.argv;
+const cli = cac("dakiya");
 
-function usage(exitCode = 0): never {
-	console.log(`dakiya — local-first API toolkit
+cli
+	.command("init", "Scaffold .dakiya/ (manifest, env, empty collections)")
+	.action(() => {
+		runInit();
+	});
 
-Usage:
-  dakiya init                 Scaffold .dakiya/ (manifest, env, empty collections)
-  dakiya list                 List requests under .dakiya/collections/
-  dakiya run <path>           Send a request (e.g. health/health or users/list)
-  dakiya serve [--port N]     Start web dashboard + API at http://localhost:${DEFAULT_PORT}
+cli.command("list", "List requests under .dakiya/collections/").action(() => {
+	runList();
+});
 
-`);
-	process.exit(exitCode);
-}
+cli
+	.command("run <path>", "Send a request (e.g. health/health or users/list)")
+	.action(async (path: string) => {
+		await runRun(path);
+	});
 
-function parseServePort(argv: string[]): number {
-	const defaultPort = DEFAULT_PORT;
-	for (let i = 0; i < argv.length; i++) {
-		const arg = argv[i];
-		if (!arg) continue;
-		if (arg === "--port" || arg === "-p") {
-			const value = argv[i + 1];
-			if (!value || !/^\d+$/.test(value)) {
-				console.error(
-					`[dakiya] --port requires a number (e.g. --port ${DEFAULT_PORT})`,
-				);
-				process.exit(1);
-			}
-			const port = Number(value);
-			if (port < 1 || port > 65535) {
-				console.error(`[dakiya] Port must be between 1 and 65535`);
-				process.exit(1);
-			}
-			return port;
+cli
+	.command("serve", "Start web dashboard + API")
+	.option("-p, --port <number>", "Port to run on", {
+		default: DEFAULT_PORT,
+	})
+	.action(async (options: { port: number | string }) => {
+		const portNum = Number(options.port);
+		if (Number.isNaN(portNum) || portNum < 1 || portNum > 65535) {
+			console.error("[dakiya] Port must be a number between 1 and 65535");
+			process.exit(1);
 		}
-		if (arg.startsWith("--port=")) {
-			const value = arg.slice("--port=".length);
-			if (!/^\d+$/.test(value)) {
-				console.error(
-					`[dakiya] --port requires a number (e.g. --port=${DEFAULT_PORT})`,
-				);
-				process.exit(1);
-			}
-			const port = Number(value);
-			if (port < 1 || port > 65535) {
-				console.error(`[dakiya] Port must be between 1 and 65535`);
-				process.exit(1);
-			}
-			return port;
-		}
-	}
-	return defaultPort;
-}
+		await runServe(portNum);
+	});
 
-async function main(): Promise<void> {
-	if (
-		args.includes("-h") ||
-		args.includes("--help") ||
-		cmd === "-h" ||
-		cmd === "--help"
-	) {
-		usage(0);
-	}
+cli.help();
 
-	switch (cmd) {
-		case "init":
-			runInit();
-			return;
-		case "list":
-			runList();
-			return;
-		case "run":
-			await runRun(args[0]);
-			return;
-		case "serve":
-			await runServe(parseServePort(args));
-			return;
-		case "hello":
-			console.log(runHello());
-			return;
-		case undefined:
-		case "help":
-		case "--help":
-		case "-h":
-			usage(0);
-			break;
-		default:
-			console.error(`Unknown command: ${cmd}\n`);
-			usage(1);
-	}
-}
-
-main().catch((err) => {
+try {
+	cli.parse();
+} catch (err) {
 	console.error(`[dakiya] ${err instanceof Error ? err.message : err}`);
 	process.exit(1);
-});
+}

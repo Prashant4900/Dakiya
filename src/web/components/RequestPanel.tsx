@@ -5,6 +5,7 @@ import {
 	type ReactNode,
 	useCallback,
 	useEffect,
+	useMemo,
 	useRef,
 	useState,
 } from "react";
@@ -127,10 +128,11 @@ function EnvVarToken({
 		<>
 			<button
 				type="button"
-				className={`inline-flex items-center px-1 py-0 border rounded text-[11px] font-medium font-mono leading-snug transition-colors ${isResolved
+				className={`inline-flex items-center px-1 py-0 border rounded text-[11px] font-medium font-mono leading-snug transition-colors ${
+					isResolved
 						? "text-primary bg-primary/10 border-primary/20 hover:bg-primary/20"
 						: "text-destructive bg-destructive/10 border-destructive/20 hover:bg-destructive/20"
-					}`}
+				}`}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				onFocus={handleMouseEnter}
@@ -187,20 +189,25 @@ function EnvHighlight({
 	text: string;
 	variables: Record<string, string>;
 }) {
+	const parts = useMemo(() => {
+		if (!text) return [];
+		return text.split(/(\{\{[^}]+\}\})/g).map((part) => ({
+			id: crypto.randomUUID(),
+			text: part,
+		}));
+	}, [text]);
+
 	if (!text) return null;
 
-	const parts = text.split(/(\{\{[^}]+\}\})/g);
 	return (
 		<>
-			{parts.map((part, i) => {
-				if (part.startsWith("{{") && part.endsWith("}}")) {
-					const varName = part.slice(2, -2).trim();
+			{parts.map((part) => {
+				if (part.text.startsWith("{{") && part.text.endsWith("}}")) {
+					const varName = part.text.slice(2, -2).trim();
 					const val = variables[varName];
-					// biome-ignore lint/suspicious/noArrayIndexKey: parts are static
-					return <EnvVarToken key={varName + i} varName={varName} val={val} />;
+					return <EnvVarToken key={part.id} varName={varName} val={val} />;
 				}
-				// biome-ignore lint/suspicious/noArrayIndexKey: parts are static
-				return <span key={part + i}>{part}</span>;
+				return <span key={part.id}>{part.text}</span>;
 			})}
 		</>
 	);
@@ -451,7 +458,7 @@ export function RequestPanel({
 		}
 	};
 
-	const updateDraftHeaders = () => {
+	const _updateDraftHeaders = () => {
 		setDirty(true);
 	};
 
@@ -495,16 +502,16 @@ export function RequestPanel({
 
 	const tabs: { id: EditorTab; label: string; badge?: number }[] = doc
 		? [
-			{ id: "body", label: "Body" },
-			{
-				id: "headers",
-				label: "Headers",
-				badge: Object.keys(doc.request.headers).length || undefined,
-			},
-			{ id: "docs", label: "Docs" },
-			{ id: "pre-script", label: "Pre-script" },
-			{ id: "post-script", label: "Post-script" },
-		]
+				{ id: "body", label: "Body" },
+				{
+					id: "headers",
+					label: "Headers",
+					badge: Object.keys(doc.request.headers).length || undefined,
+				},
+				{ id: "docs", label: "Docs" },
+				{ id: "pre-script", label: "Pre-script" },
+				{ id: "post-script", label: "Post-script" },
+			]
 		: [];
 
 	if (doc?.examples?.length) {
@@ -539,40 +546,38 @@ export function RequestPanel({
 					<option value="OPTIONS">OPTIONS</option>
 				</select>
 				<div className="flex-1 flex items-center min-w-0 relative cursor-text">
-					<div
-						className={`flex items-center w-full bg-muted border rounded-md px-3 h-8 transition-colors ${isUrlFocused
+					<label
+						className={`flex items-center w-full bg-muted border rounded-md px-3 h-8 transition-colors ${
+							isUrlFocused
 								? "border-primary ring-2 ring-primary/20"
 								: "border-border"
-							}`}
-						onClick={() => {
-							if (!isUrlFocused && request) {
-								setIsUrlFocused(true);
-								setTimeout(() => urlInputRef.current?.focus(), 0);
-							}
-						}}
+						}`}
 					>
-						{isUrlFocused ? (
-							<input
-								ref={urlInputRef}
-								type="text"
-								className="flex-1 bg-transparent border-none outline-none text-xs text-foreground font-mono px-1 h-full min-w-0"
-								placeholder="Enter request URL or {{variable}}"
-								value={localUrl}
-								onChange={(e) => {
-									setLocalUrl(e.target.value);
-									setDirty(true);
-								}}
-								onBlur={() => setIsUrlFocused(false)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
-										void handleSend();
-									} else if (e.key === "Escape") {
-										setIsUrlFocused(false);
-									}
-								}}
-							/>
-						) : (
-							<div className="flex-1 overflow-hidden truncate text-xs font-mono">
+						<input
+							ref={urlInputRef}
+							type="text"
+							className={`flex-1 bg-transparent border-none outline-none text-xs text-foreground font-mono h-full min-w-0 ${
+								isUrlFocused ? "px-1" : "sr-only"
+							}`}
+							placeholder="Enter request URL or {{variable}}"
+							value={localUrl}
+							onChange={(e) => {
+								setLocalUrl(e.target.value);
+								setDirty(true);
+							}}
+							onFocus={() => setIsUrlFocused(true)}
+							onBlur={() => setIsUrlFocused(false)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									void handleSend();
+								} else if (e.key === "Escape") {
+									setIsUrlFocused(false);
+									urlInputRef.current?.blur();
+								}
+							}}
+						/>
+						{!isUrlFocused && (
+							<div className="flex-1 overflow-hidden truncate text-xs font-mono px-1">
 								{localUrl ? (
 									<EnvHighlight
 										text={localUrl}
@@ -587,7 +592,7 @@ export function RequestPanel({
 								)}
 							</div>
 						)}
-					</div>
+					</label>
 				</div>
 				<Button
 					onClick={() => void handleSend()}
@@ -675,7 +680,7 @@ export function RequestPanel({
 												isEditingHeaders.current = false;
 											}
 										}}
-										renderKey={(h, i, update) => (
+										renderKey={(h, _i, update) => (
 											<EnvEditableCell
 												placeholder="Header"
 												value={h.key}
@@ -684,7 +689,7 @@ export function RequestPanel({
 												list="common-headers"
 											/>
 										)}
-										renderValue={(h, i, update) => {
+										renderValue={(h, _i, update) => {
 											const keyLower = h.key.toLowerCase();
 											const valueListId =
 												keyLower === "content-type"

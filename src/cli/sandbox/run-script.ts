@@ -55,9 +55,8 @@ function buildReqApi(request: MutableRequest) {
 		get body() {
 			return request.body;
 		},
-		// biome-ignore lint/suspicious/noExplicitAny: user scripts can set body to any valid shape
-		set body(value: any) {
-			request.body = value;
+		set body(value: unknown) {
+			request.body = value as MutableRequest["body"];
 		},
 		getHeader(name: string): string | undefined {
 			const lower = name.toLowerCase();

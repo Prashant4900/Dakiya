@@ -1,5 +1,4 @@
 import type { RequestBody } from "@core/domain";
-import { Cancel01Icon } from "hugeicons-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -315,7 +314,7 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 							}
 							onChange={handleRowsChange}
 							onAdd={handleRowAdd}
-							renderKey={(item, idx, update) => (
+							renderKey={(item, _idx, update) => (
 								<>
 									<input
 										type="text"
@@ -336,7 +335,7 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 									)}
 								</>
 							)}
-							renderValue={(item, idx, update) => {
+							renderValue={(item, _idx, update) => {
 								if (item.type === "file") {
 									return (
 										<div className="flex items-center gap-1.5 flex-1 px-2">

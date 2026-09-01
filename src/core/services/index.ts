@@ -75,11 +75,3 @@ export {
 	scaffoldWorkspace,
 } from "./workspace-service.js";
 export { parseSimpleYaml } from "./yaml.js";
-
-import { hello as domainHello } from "@core/domain";
-
-/** Skeleton hello — kept for `dakiya hello`. */
-export function greet(): string {
-	const domain = domainHello();
-	return ["Hello from @core/services", `  ← ${domain.message}`].join("\n");
-}

@@ -6,7 +6,7 @@ export type KVRow = {
 	id?: string;
 	key: string;
 	value: string;
-	[key: string]: any;
+	[key: string]: unknown;
 };
 
 export type KeyValueEditorProps<T extends KVRow> = {
