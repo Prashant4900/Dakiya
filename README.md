@@ -1,122 +1,55 @@
-# Dakiya
+<div align="center">
+  <img src="./assets/logo.jpg" alt="Dakiya Logo" width="200" />
+  <h1>Dakiya (डाकिया)</h1>
+  <p><em>The Hindi word for Postman.</em></p>
+  <p><strong>A modern, local-first API toolkit for developers. CLI-native, Git-friendly, and blazing fast.</strong></p>
+</div>
 
-> _Dakiya (डाकिया) — the Hindi word for postman._
+<hr/>
 
-Local-first API toolkit. **CLI + web dashboard first**; desktop optional later.
+Dakiya is a powerful alternative to traditional API testing clients (like Postman or Insomnia). It stores all your requests as simple YAML files locally in your repository, making them instantly version-controllable and readable.
 
-## Status
+With Dakiya, you get the power of a headless **CLI runner** combined with a beautiful **React-based Web Dashboard**.
 
-**Stage 3 — MVP complete.** Phases 0–5 done. **Next:** Phase 6 desktop (optional) or v0.2 features.
+## 🚀 Features
+- **Local-first**: Everything lives in a `.dakiya/` folder in your repo.
+- **Git-friendly**: Requests are saved in a clean `requests.yaml` format. No more massive JSON blobs or workspace sync conflicts.
+- **CLI Native**: Run, test, and manage requests directly from your terminal.
+- **Isomorphic Dashboard**: Run `dakiya serve` to spin up a beautiful web dashboard right from your CLI.
+- **Sandbox Scripts**: Write pre-request and post-response scripts in standard JavaScript/TypeScript.
 
-| Phase                      | Status |
-| -------------------------- | ------ |
-| 0 — Skeleton               | Done   |
-| 1 — Domain + `requests.yaml` format | Done   |
-| 2 — Services               | Done   |
-| 3 — CLI + API              | Done   |
-| 4 — Web dashboard          | Done   |
-| 5 — Ship MVP               | Done   |
+---
 
+## 📖 Wiki & Documentation
 
-| Doc                                            | Purpose                   |
-| ---------------------------------------------- | ------------------------- |
-| [ABOUT.md](./ABOUT.md)                         | Product vision            |
-| [docs/plan.md](./docs/plan.md)                 | MVP plan & decisions      |
-| [docs/phases.md](./docs/phases.md)             | Implementation phases     |
-| [docs/checklist.md](./docs/checklist.md)       | Hand-off / QA checklists  |
-| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical architecture    |
+Dive into the [Wiki](./wiki/Home.md) to master Dakiya:
 
-## Install CLI (run `dakiya` anywhere)
+- [Getting Started](./wiki/Getting-Started.md) — Installation and your first request.
+- [Collections & Requests](./wiki/Collections.md) — How the `.dakiya/` folder works.
+- [Environments](./wiki/Environments.md) — Managing local vs production variables.
+- [Sandbox Scripts](./wiki/Scripts.md) — Writing JS/TS to assert responses and chain requests.
+- [CLI Reference](./wiki/CLI.md) — Full command-line API.
 
-The CLI is not on npm yet. Link it from this repo:
+*(Internal project architecture and MVP planning docs can be found in `docs/internal/`).*
+
+---
+
+## ⚡ Quickstart
+
+Install the CLI globally (currently local via pnpm for dev):
 
 ```bash
 pnpm install
 pnpm link:cli
 ```
 
-Then in any directory:
-
+Initialize a workspace in any project:
 ```bash
-dakiya init              # creates .dakiya/
-dakiya list              # list requests.yaml requests
-dakiya run health/health # send a request (needs API up)
-dakiya serve             # http://localhost:4242 (web dashboard)
-dakiya --help
+dakiya init
 ```
 
-Unlink later:
-
+Launch the web dashboard:
 ```bash
-pnpm unlink:cli
+dakiya serve
 ```
-
-**Note:** After pulling code changes, rebuild + re-link: `pnpm link:cli`.
-
-### Without global link
-
-```bash
-pnpm build
-node dist/cli/cli.js init
-node dist/cli/cli.js list
-node dist/cli/cli.js run health/health
-node dist/cli/cli.js serve
-```
-
-## Dummy API (dev only)
-
-```bash
-pnpm dev:example   # http://localhost:3000 — see example/server/README.md
-```
-
-In this repo, `.dakiya/collections/` already has requests aimed at that server. With the example API running:
-
-```bash
-dakiya list
-dakiya run health/health
-```
-
-Not scaffolded by `dakiya init`. Point `.dakiya/environments/local.yaml` `baseUrl` at it when testing.
-
-## Web dashboard
-
-With the example API running (optional) and a `.dakiya/` workspace in the repo:
-
-```bash
-dakiya serve   # http://localhost:4242
-```
-
-The dashboard loads collections from `/api/workspace`, edits `requests.yaml` files via the API, and sends requests with `POST /api/send`. `dakiya serve` runs Vite and the Hono API together on the same port (hot reload included). The web UI is built with **React, TailwindCSS, and Shadcn UI**.
-
-**Quick path:** select a request in the sidebar → **Send** (or ⌘↵). Edit headers and body in their respective tabs → **Save**. Switch environments from the sidebar dropdown. If your workspace has `versions:` in `dakiya.yaml`, a version switcher appears in the sidebar to filter the collection tree.
-
-**Scripts:** Pre-script / Post-script tabs are **read-only** in the browser. Use the **Create Script** button to scaffold an empty script file, then edit it in your code editor (the file lives next to the `requests.yaml` file).
-
-For requests that hit `localhost:3000`, start the dummy API first: `pnpm dev:example`.
-
-## Known limitations (MVP)
-
-- **Desktop app** — not started (Tauri stub only)
-- **Python scripts** — JS/TS only
-- **Import** — no Postman/Bruno import yet
-- **History** — no SQLite request history
-- **`@assert`** — parsed but not executed
-- **Script editing in browser** — Pre/post-script tabs are read-only; edit script files in your code editor
-
-After pulling code changes, rebuild everything: `pnpm build` and then `pnpm link:cli`, then restart `dakiya serve`.
-
-## Layout
-
-```
-src/
-  core/             — shared types, Zod schemas, requests.yaml format, business logic
-  cli/              — dakiya CLI + Hono API + script sandbox
-  web/              — React dashboard (Postman-style UI, wired to `/api/*`)
-
-example/
-  server            — dummy Express API (`pnpm dev:example`) for local testing
-```
-
-## Next
-
-See [docs/phases.md](./docs/phases.md) — **Phase 6 (optional):** Tauri desktop, or v0.2 (import, history).
+Open `http://localhost:4242` in your browser and start building APIs!
