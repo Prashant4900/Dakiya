@@ -6,24 +6,19 @@ import {
 	createRequestAPI,
 	deleteFolderAPI,
 	deleteRequestAPI,
-	fetchEnvironment,
-	fetchRequest,
 	fetchWorkspace,
 	moveRequestAPI,
 	renameFolderAPI,
 	renameRequestAPI,
-	saveRequest,
-	sendRequestApi,
 } from "./api/client.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
-import { EnvPage } from "./components/EnvPage.js";
 import { NewRequestModal } from "./components/NewRequestModal.js";
 import { PromptDialog } from "./components/PromptDialog.js";
-import { RequestPanel } from "./components/RequestPanel.js";
-import { ResponsePanel } from "./components/ResponsePanel.js";
 import { Sidebar } from "./components/Sidebar.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { TitleBar } from "./components/TitleBar.js";
+import { EnvPage } from "./pages/EnvPage.js";
+import { RequestPage } from "./pages/RequestPage.js";
 import { useStore } from "./store.js";
 import {
 	buildRequestIndexFallback,
@@ -40,11 +35,6 @@ export function App() {
 		setActiveEnv,
 		activeVersion,
 		setActiveVersion,
-		sendResult,
-		setSendResult,
-		sendError,
-		setSendError,
-		setSaveError,
 		activeView,
 		setActiveView,
 		isNewRequestModalOpen,
@@ -52,7 +42,6 @@ export function App() {
 		isNewFolderPromptOpen,
 		setIsNewFolderPromptOpen,
 		sidebarCollapsed,
-		responseCollapsed,
 		pendingPath,
 		setPendingPath,
 	} = useStore();
@@ -167,52 +156,6 @@ export function App() {
 		autoSelected.current = true;
 	}, [workspaceQuery.data, selectedPath, tree, setSelectedPath]);
 
-	const requestQuery = useQuery({
-		queryKey: ["request", selectedPath],
-		queryFn: () => fetchRequest(selectedPath as string),
-		enabled: Boolean(selectedPath),
-	});
-
-	const envQuery = useQuery({
-		queryKey: ["environment", effectiveEnv],
-		queryFn: () => fetchEnvironment(effectiveEnv),
-		enabled: Boolean(effectiveEnv),
-	});
-
-	const saveMutation = useMutation({
-		mutationFn: ({
-			path,
-			updates,
-		}: {
-			path: string;
-			updates: Record<string, unknown>;
-		}) => saveRequest(path, updates),
-		onSuccess: (_data, { path }) => {
-			setSaveError(null);
-			queryClient.invalidateQueries({ queryKey: ["request", path] });
-			queryClient.invalidateQueries({ queryKey: ["workspace"] });
-		},
-		onError: (err: Error) => setSaveError(err.message),
-	});
-
-	const sendMutation = useMutation({
-		mutationFn: ({ path, env }: { path: string; env: string }) =>
-			sendRequestApi(path, env),
-		onSuccess: (data) => {
-			setSendResult(data);
-			setSendError(null);
-			if (Object.keys(data.persistedVariables).length > 0) {
-				queryClient.invalidateQueries({
-					queryKey: ["environment", data.env],
-				});
-			}
-		},
-		onError: (err: Error) => {
-			setSendError(err.message);
-			setSendResult(null);
-		},
-	});
-
 	const renameFolderMutation = useMutation({
 		mutationFn: ({
 			folderPath,
@@ -243,7 +186,6 @@ export function App() {
 			queryClient.invalidateQueries({ queryKey: ["workspace"] });
 			if (selectedPath?.startsWith(`${folderPath}/`)) {
 				setSelectedPath(null);
-				setSendResult(null);
 			}
 		},
 	});
@@ -269,7 +211,6 @@ export function App() {
 			queryClient.invalidateQueries({ queryKey: ["workspace"] });
 			if (selectedPath === requestPath) {
 				setSelectedPath(null);
-				setSendResult(null);
 			}
 		},
 	});
@@ -290,19 +231,6 @@ export function App() {
 		},
 	});
 
-	const handleSave = useCallback(
-		async (updates: Record<string, unknown>) => {
-			if (!selectedPath) return;
-			await saveMutation.mutateAsync({ path: selectedPath, updates });
-		},
-		[selectedPath, saveMutation],
-	);
-
-	const handleSend = useCallback(() => {
-		if (!selectedPath) return;
-		sendMutation.mutate({ path: selectedPath, env: effectiveEnv });
-	}, [selectedPath, effectiveEnv, sendMutation]);
-
 	const handleCreateRequest = async (path: string, method: string) => {
 		const result = await createRequestAPI(`${path}/${method}`);
 		workspaceQuery.refetch();
@@ -317,13 +245,11 @@ export function App() {
 	const workspaceError = workspaceQuery.error;
 	const workspaceName = workspaceQuery.data?.manifest.name ?? "Workspace";
 	const requestName =
-		requestQuery.data?.document.meta.name ??
-		requestIndex.find((r) => r.path === selectedPath)?.name ??
-		null;
+		requestIndex.find((r) => r.path === selectedPath)?.name ?? null;
 
 	if (workspaceQuery.isLoading) {
 		return (
-			<div className="app-loading">
+			<div className="grid place-content-center h-screen p-8 text-center">
 				<p>Loading workspace…</p>
 			</div>
 		);
@@ -331,13 +257,13 @@ export function App() {
 
 	if (workspaceError) {
 		return (
-			<div className="app-loading">
-				<p className="error-text">
+			<div className="grid place-content-center h-screen p-8 text-center">
+				<p className="text-destructive">
 					{workspaceError instanceof Error
 						? workspaceError.message
 						: "Failed to load workspace"}
 				</p>
-				<p className="muted">
+				<p className="text-muted-foreground mt-2 mb-4">
 					Run <code>dakiya serve</code> from a project with a{" "}
 					<code>.dakiya/</code> folder.
 				</p>
@@ -347,10 +273,10 @@ export function App() {
 	}
 
 	return (
-		<div className="app-shell">
+		<div className="flex flex-col h-screen">
 			<TitleBar projectName={workspaceName} requestName={requestName} />
 
-			<div className="workspace">
+			<div className="flex flex-1 overflow-hidden">
 				{!sidebarCollapsed && (
 					<Sidebar
 						tree={versionTree}
@@ -378,7 +304,7 @@ export function App() {
 					/>
 				)}
 
-				<div className="main-content">
+				<div className="flex flex-1 flex-col overflow-hidden min-w-0">
 					{activeView === "environments" ? (
 						<EnvPage
 							environments={
@@ -386,33 +312,10 @@ export function App() {
 							}
 						/>
 					) : (
-						<RequestPanel
-							request={requestQuery.data ?? null}
-							loading={requestQuery.isLoading && Boolean(selectedPath)}
-							error={
-								requestQuery.error instanceof Error
-									? requestQuery.error.message
-									: null
-							}
-							onSave={handleSave}
-							onSend={handleSend}
-							sending={sendMutation.isPending}
-							saving={saveMutation.isPending}
-							activeEnvVariables={envQuery.data?.environment.variables ?? {}}
-						>
-							<ResponsePanel
-								result={sendResult}
-								error={sendError}
-								loading={sendMutation.isPending}
-								collapsed={responseCollapsed}
-							/>
-						</RequestPanel>
+						<RequestPage effectiveEnv={effectiveEnv} />
 					)}
 
-					<StatusBar
-						workspaceName={workspaceName}
-						sending={sendMutation.isPending}
-					/>
+					<StatusBar workspaceName={workspaceName} />
 				</div>
 			</div>
 
@@ -455,9 +358,6 @@ export function App() {
 					onCancel={() => setPendingPath(null)}
 					onConfirm={() => {
 						setSelectedPath(pendingPath);
-						setSendResult(null);
-						setSendError(null);
-						setSaveError(null);
 						setPendingPath(null);
 					}}
 				/>

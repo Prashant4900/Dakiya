@@ -15,8 +15,8 @@ export function TitleBar({ projectName, requestName }: TitleBarProps) {
 		setResponseCollapsed,
 	} = useStore();
 	return (
-		<div className="titlebar">
-			<div className="titlebar-actions left">
+		<div className="flex items-center px-[14px] gap-[10px] shrink-0 h-10 bg-card border-b shadow-sm">
+			<div className="flex items-center gap-1 w-[60px] justify-start">
 				<Button
 					variant="ghost"
 					size="icon"
@@ -27,16 +27,20 @@ export function TitleBar({ projectName, requestName }: TitleBarProps) {
 					<SidebarLeftIcon size={16} />
 				</Button>
 			</div>
-			<div className="titlebar-center">
-				<span className="titlebar-project">{projectName}</span>
+			<div className="flex flex-1 items-center justify-center gap-2">
+				<span className="text-xs font-medium text-muted-foreground">
+					{projectName}
+				</span>
 				{requestName && (
 					<>
-						<span className="titlebar-sep">/</span>
-						<span className="titlebar-request">{requestName}</span>
+						<span className="text-xs text-muted-foreground">/</span>
+						<span className="text-xs font-medium text-foreground">
+							{requestName}
+						</span>
 					</>
 				)}
 			</div>
-			<div className="titlebar-actions right">
+			<div className="flex items-center gap-1 w-[60px] justify-end">
 				<Button
 					variant="ghost"
 					size="icon"

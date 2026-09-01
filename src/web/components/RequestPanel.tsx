@@ -1,6 +1,6 @@
 import type { HttpMethod, RequestBody } from "@core/domain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Cancel01Icon, Delete02Icon } from "hugeicons-react";
+import { Delete02Icon } from "hugeicons-react";
 import {
 	type ReactNode,
 	useCallback,
@@ -15,10 +15,11 @@ import { createScript, deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
 import { useStore } from "../store.js";
 import { formatExamples } from "../utils/format.js";
-import { methodBadgeClass, methodColorVar } from "../utils/method.js";
+import { methodColorVar } from "../utils/method.js";
 import { BodyEditor } from "./BodyEditor.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
+import { KeyValueEditor, type KVRow } from "./KeyValueEditor.js";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
 
@@ -126,7 +127,10 @@ function EnvVarToken({
 		<>
 			<button
 				type="button"
-				className={`env-var-highlight ${isResolved ? "" : "unresolved"}`}
+				className={`inline-flex items-center px-1 py-0 border rounded text-[11px] font-medium font-mono leading-snug transition-colors ${isResolved
+						? "text-primary bg-primary/10 border-primary/20 hover:bg-primary/20"
+						: "text-destructive bg-destructive/10 border-destructive/20 hover:bg-destructive/20"
+					}`}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				onFocus={handleMouseEnter}
@@ -143,7 +147,7 @@ function EnvVarToken({
 				createPortal(
 					<div
 						role="tooltip"
-						className="env-var-popover"
+						className="fixed z-[1000] bg-popover text-popover-foreground border border-border rounded-md shadow-md w-[280px] text-xs overflow-hidden animate-in fade-in zoom-in-95"
 						style={{
 							top: rect.bottom + 6,
 							left: Math.min(rect.left, window.innerWidth - 340),
@@ -153,16 +157,18 @@ function EnvVarToken({
 						onFocus={handlePopoverEnter}
 						onBlur={handleMouseLeave}
 					>
-						<div className="env-var-popover-value">
+						<div className="p-2.5 bg-card">
 							<input
 								readOnly
 								value={isResolved ? val : "Unresolved Variable"}
-								className={!isResolved ? "unresolved-input" : ""}
+								className={`w-full bg-transparent border-none outline-none font-mono text-xs ${!isResolved ? "text-destructive" : "text-foreground"}`}
 							/>
 						</div>
-						<div className="env-var-popover-footer">
-							<div className="env-var-popover-scope">
-								<span className="env-var-popover-scope-icon">E</span>{" "}
+						<div className="px-3 py-2 bg-muted border-t border-border text-[11px] text-muted-foreground flex items-center gap-1.5">
+							<div className="flex items-center gap-1.5">
+								<span className="w-[18px] h-[18px] rounded flex items-center justify-center text-[10px] font-bold bg-primary/10 text-primary">
+									E
+								</span>{" "}
 								Environment
 							</div>
 						</div>
@@ -287,9 +293,7 @@ export function RequestPanel({
 		undefined,
 	);
 	const [dirty, setDirty] = useState(false);
-	const [localHeaders, setLocalHeaders] = useState<
-		{ id: number; key: string; value: string }[]
-	>([]);
+	const [localHeaders, setLocalHeaders] = useState<KVRow[]>([]);
 	const [parseError, setParseError] = useState<string | null>(null);
 
 	const queryClient = useQueryClient();
@@ -435,11 +439,11 @@ export function RequestPanel({
 						newHeaders.pop();
 					}
 					newHeaders.push({
-						id: Date.now(),
+						id: String(Date.now()),
 						key: "Content-Type",
 						value: autoContentType,
 					});
-					newHeaders.push({ id: Date.now() + 1, key: "", value: "" }); // Add trailing empty row
+					newHeaders.push({ id: String(Date.now() + 1), key: "", value: "" }); // Add trailing empty row
 					return newHeaders;
 				}
 				return prev;
@@ -451,49 +455,26 @@ export function RequestPanel({
 		setDirty(true);
 	};
 
-	const handleHeaderChange = (
-		index: number,
-		field: "key" | "value",
-		val: string,
-	) => {
-		const newHeaders = [...localHeaders];
-		newHeaders[index][field] = val;
-
-		// Add empty row if last row was modified
-		if (
-			index === newHeaders.length - 1 &&
-			(newHeaders[index].key || newHeaders[index].value)
-		) {
-			newHeaders.push({ id: Date.now(), key: "", value: "" });
+	const handleHeadersChange = (newHeaders: KVRow[]) => {
+		const next = [...newHeaders];
+		const lastRow = next[next.length - 1];
+		if (lastRow && (lastRow.key || lastRow.value)) {
+			next.push({ id: String(Date.now()), key: "", value: "" });
 		}
-
-		setLocalHeaders(newHeaders);
-		updateDraftHeaders();
-	};
-
-	const handleHeaderRemove = (index: number) => {
-		const newHeaders = localHeaders.filter((_, i) => i !== index);
-		if (
-			newHeaders.length === 0 ||
-			newHeaders[newHeaders.length - 1].key ||
-			newHeaders[newHeaders.length - 1].value
-		) {
-			newHeaders.push({ id: Date.now(), key: "", value: "" });
-		}
-		setLocalHeaders(newHeaders);
-		updateDraftHeaders();
+		setLocalHeaders(next);
+		setDirty(true);
 	};
 
 	const isEditingHeaders = useRef(false);
 	useEffect(() => {
 		if (tab === "headers" && !isEditingHeaders.current && doc) {
 			const h = Object.entries(doc.request.headers || {}).map(([k, v], i) => ({
-				id: i,
+				id: String(i),
 				key: k,
 				value: String(v),
 			}));
 			// ALWAYS add a trailing empty row so users can start typing new headers
-			h.push({ id: Date.now(), key: "", value: "" });
+			h.push({ id: String(Date.now()), key: "", value: "" });
 			setLocalHeaders(h);
 			setParseError(null);
 		}
@@ -514,16 +495,16 @@ export function RequestPanel({
 
 	const tabs: { id: EditorTab; label: string; badge?: number }[] = doc
 		? [
-				{ id: "body", label: "Body" },
-				{
-					id: "headers",
-					label: "Headers",
-					badge: Object.keys(doc.request.headers).length || undefined,
-				},
-				{ id: "docs", label: "Docs" },
-				{ id: "pre-script", label: "Pre-script" },
-				{ id: "post-script", label: "Post-script" },
-			]
+			{ id: "body", label: "Body" },
+			{
+				id: "headers",
+				label: "Headers",
+				badge: Object.keys(doc.request.headers).length || undefined,
+			},
+			{ id: "docs", label: "Docs" },
+			{ id: "pre-script", label: "Pre-script" },
+			{ id: "post-script", label: "Post-script" },
+		]
 		: [];
 
 	if (doc?.examples?.length) {
@@ -538,9 +519,9 @@ export function RequestPanel({
 
 	return (
 		<>
-			<div className="request-bar">
+			<div className="flex items-center px-4 py-2 border-b bg-card gap-2 shrink-0">
 				<select
-					className={`method-select mono ${methodBadgeClass(localMethod)}`}
+					className="bg-muted border border-border rounded-md px-2.5 py-1.5 text-xs font-bold font-mono min-w-[80px] text-center cursor-pointer outline-none focus:border-primary transition-colors text-foreground"
 					style={{ color: methodColorVar(localMethod) }}
 					value={localMethod}
 					onChange={(e) => {
@@ -557,48 +538,56 @@ export function RequestPanel({
 					<option value="HEAD">HEAD</option>
 					<option value="OPTIONS">OPTIONS</option>
 				</select>
-				<div
-					className="url-bar-container"
-					onClick={() => {
-						if (!isUrlFocused && request) {
-							setIsUrlFocused(true);
-							setTimeout(() => urlInputRef.current?.focus(), 0);
-						}
-					}}
-				>
-					{isUrlFocused ? (
-						<input
-							ref={urlInputRef}
-							type="text"
-							className="url-input mono"
-							placeholder="Enter request URL or {{variable}}"
-							value={localUrl}
-							onChange={(e) => {
-								setLocalUrl(e.target.value);
-								setDirty(true);
-							}}
-							onBlur={() => setIsUrlFocused(false)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									void handleSend();
-								} else if (e.key === "Escape") {
-									setIsUrlFocused(false);
-								}
-							}}
-						/>
-					) : (
-						<div className="url-input mono url-preview">
-							{localUrl ? (
-								<EnvHighlight text={localUrl} variables={activeEnvVariables} />
-							) : (
-								<span className="url-placeholder">
-									{request
-										? "Enter request URL or {{variable}}"
-										: "Select a request"}
-								</span>
-							)}
-						</div>
-					)}
+				<div className="flex-1 flex items-center min-w-0 relative cursor-text">
+					<div
+						className={`flex items-center w-full bg-muted border rounded-md px-3 h-8 transition-colors ${isUrlFocused
+								? "border-primary ring-2 ring-primary/20"
+								: "border-border"
+							}`}
+						onClick={() => {
+							if (!isUrlFocused && request) {
+								setIsUrlFocused(true);
+								setTimeout(() => urlInputRef.current?.focus(), 0);
+							}
+						}}
+					>
+						{isUrlFocused ? (
+							<input
+								ref={urlInputRef}
+								type="text"
+								className="flex-1 bg-transparent border-none outline-none text-xs text-foreground font-mono px-1 h-full min-w-0"
+								placeholder="Enter request URL or {{variable}}"
+								value={localUrl}
+								onChange={(e) => {
+									setLocalUrl(e.target.value);
+									setDirty(true);
+								}}
+								onBlur={() => setIsUrlFocused(false)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") {
+										void handleSend();
+									} else if (e.key === "Escape") {
+										setIsUrlFocused(false);
+									}
+								}}
+							/>
+						) : (
+							<div className="flex-1 overflow-hidden truncate text-xs font-mono">
+								{localUrl ? (
+									<EnvHighlight
+										text={localUrl}
+										variables={activeEnvVariables}
+									/>
+								) : (
+									<span className="text-muted-foreground">
+										{request
+											? "Enter request URL or {{variable}}"
+											: "Select a request"}
+									</span>
+								)}
+							</div>
+						)}
+					</div>
 				</div>
 				<Button
 					onClick={() => void handleSend()}
@@ -617,9 +606,9 @@ export function RequestPanel({
 			</div>
 
 			{(saveError || error) && (
-				<div className="request-errors">
-					{saveError && <p className="error-text">{saveError}</p>}
-					{error && !loading && <p className="error-text">{error}</p>}
+				<div className="p-4 text-xs text-destructive border-b">
+					{saveError && <p>{saveError}</p>}
+					{error && !loading && <p>{error}</p>}
 				</div>
 			)}
 
@@ -629,22 +618,32 @@ export function RequestPanel({
 					activeTab={tab}
 					onChange={setTab as (id: string) => void}
 				>
-					{dirty && <span className="dirty-hint">unsaved</span>}
+					{dirty && (
+						<span className="text-[10px] text-amber-500 uppercase font-bold tracking-wider">
+							unsaved
+						</span>
+					)}
 				</Tabs>
 			)}
 
-			<div className="content-split">
-				<div className="request-pane">
-					{loading && <div className="pane-empty muted">Loading request…</div>}
+			<div className="flex flex-1 min-h-0 overflow-hidden">
+				<div className="flex flex-col h-full bg-background flex-1 min-w-0 border-r border-border">
+					{loading && (
+						<div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
+							Loading request…
+						</div>
+					)}
 
 					{!request && !loading && (
-						<div className="pane-empty muted">
+						<div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
 							Select a request from the sidebar
 						</div>
 					)}
 
 					{error && !loading && request === null && (
-						<div className="pane-empty error-text">{error}</div>
+						<div className="flex-1 flex items-center justify-center text-destructive text-xs">
+							{error}
+						</div>
 					)}
 
 					{showEditor && tab === "body" && (
@@ -660,79 +659,50 @@ export function RequestPanel({
 							<PaneHeader title="Request headers" tag="KV" />
 
 							{parseError ? (
-								<div className="pane-empty error-text">{parseError}</div>
+								<div className="p-4 text-destructive text-xs">{parseError}</div>
 							) : (
-								<div className="code-editor code-editor-table">
-									<table className="kv-table editable-kv-table">
-										<thead>
-											<tr>
-												<th>Key</th>
-												<th>Value</th>
-												<th className="kv-actions"></th>
-											</tr>
-										</thead>
-										<tbody
-											onFocus={() => {
-												isEditingHeaders.current = true;
-											}}
-											onBlur={(e) => {
-												// if focus completely leaves the tbody
-												if (!e.currentTarget.contains(e.relatedTarget)) {
-													isEditingHeaders.current = false;
-												}
-											}}
-										>
-											{localHeaders.map((h, i) => {
-												const keyLower = h.key.toLowerCase();
-												const valueListId =
-													keyLower === "content-type"
-														? "content-types"
-														: keyLower === "accept"
-															? "accept-types"
-															: undefined;
-
-												return (
-													<tr key={h.id}>
-														<td className="kv-key">
-															<EnvEditableCell
-																placeholder="Header"
-																value={h.key}
-																onChange={(val) =>
-																	handleHeaderChange(i, "key", val)
-																}
-																variables={activeEnvVariables}
-																list="common-headers"
-															/>
-														</td>
-														<td className="kv-val">
-															<EnvEditableCell
-																placeholder="Value"
-																value={h.value}
-																onChange={(val) =>
-																	handleHeaderChange(i, "value", val)
-																}
-																variables={activeEnvVariables}
-																list={valueListId}
-															/>
-														</td>
-														<td className="kv-actions">
-															{i !== localHeaders.length - 1 && (
-																<Button
-																	variant="ghost"
-																	size="icon"
-																	onClick={() => handleHeaderRemove(i)}
-																	title="Remove header"
-																	className="h-8 w-8 hover:text-destructive"
-																>
-																	<Cancel01Icon size={14} />
-																</Button>
-															)}
-														</td>
-													</tr>
-												);
-											})}
-										</tbody>
-									</table>
+								<div className="flex-1 flex flex-col h-full border border-border border-t-0 overflow-hidden">
+									<KeyValueEditor
+										rows={localHeaders}
+										onChange={handleHeadersChange}
+										autoAppend={true}
+										keyPlaceholder="Header"
+										onFocus={() => {
+											isEditingHeaders.current = true;
+										}}
+										onBlur={(e) => {
+											if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+												isEditingHeaders.current = false;
+											}
+										}}
+										renderKey={(h, i, update) => (
+											<EnvEditableCell
+												placeholder="Header"
+												value={h.key}
+												onChange={(val) => update("key", val)}
+												variables={activeEnvVariables}
+												list="common-headers"
+											/>
+										)}
+										renderValue={(h, i, update) => {
+											const keyLower = h.key.toLowerCase();
+											const valueListId =
+												keyLower === "content-type"
+													? "content-types"
+													: keyLower === "accept"
+														? "accept-types"
+														: undefined;
+											return (
+												<EnvEditableCell
+													placeholder="Value"
+													value={h.value}
+													onChange={(val) => update("value", val)}
+													variables={activeEnvVariables}
+													list={valueListId}
+												/>
+											);
+										}}
+									/>
 								</div>
 							)}
 						</>
@@ -767,35 +737,14 @@ export function RequestPanel({
 									</Button>
 								)}
 							</PaneHeader>
-							<div
-								style={{
-									padding: "8px 16px",
-									background: "var(--highlight-bg, #fffbe6)",
-									borderBottom: "1px solid var(--border-color)",
-									fontSize: "0.9em",
-									color: "var(--text-color)",
-								}}
-							>
+							<div className="px-4 py-2 bg-[var(--highlight-bg,#fffbe6)] border-b text-[0.9em] text-foreground">
 								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here
 								currently. Please edit the script file directly in your code
 								editor.
 							</div>
 							{doc?.pre?.source !== undefined ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-										height: "100%",
-									}}
-								>
-									<div
-										style={{
-											flex: 1,
-											border: "1px solid var(--border-color)",
-											borderTop: "none",
-											overflow: "auto",
-										}}
-									>
+								<div className="flex flex-col h-full">
+									<div className="flex-1 border border-border border-t-0 overflow-auto">
 										<CodeEditor
 											value={draftPreScript}
 											onChange={setDraftPreScript}
@@ -807,11 +756,8 @@ export function RequestPanel({
 									</div>
 								</div>
 							) : (
-								<div
-									className="empty-state"
-									style={{ padding: "24px", textAlign: "center" }}
-								>
-									<p className="muted">
+								<div className="flex flex-col items-center justify-center p-6 text-center">
+									<p className="text-muted-foreground">
 										No pre-request script exists for this request.
 									</p>
 									<Button
@@ -844,35 +790,14 @@ export function RequestPanel({
 									</Button>
 								)}
 							</PaneHeader>
-							<div
-								style={{
-									padding: "8px 16px",
-									background: "var(--highlight-bg, #fffbe6)",
-									borderBottom: "1px solid var(--border-color)",
-									fontSize: "0.9em",
-									color: "var(--text-color)",
-								}}
-							>
+							<div className="px-4 py-2 bg-[var(--highlight-bg,#fffbe6)] border-b text-[0.9em] text-foreground">
 								ℹ️ <strong>Read-only mode:</strong> Scripts cannot be edited here
 								currently. Please edit the script file directly in your code
 								editor.
 							</div>
 							{doc?.post?.source !== undefined ? (
-								<div
-									style={{
-										display: "flex",
-										flexDirection: "column",
-										height: "100%",
-									}}
-								>
-									<div
-										style={{
-											flex: 1,
-											border: "1px solid var(--border-color)",
-											borderTop: "none",
-											overflow: "auto",
-										}}
-									>
+								<div className="flex flex-col h-full">
+									<div className="flex-1 border border-border border-t-0 overflow-auto">
 										<CodeEditor
 											value={draftPostScript}
 											onChange={setDraftPostScript}
@@ -884,11 +809,8 @@ export function RequestPanel({
 									</div>
 								</div>
 							) : (
-								<div
-									className="empty-state"
-									style={{ padding: "24px", textAlign: "center" }}
-								>
-									<p className="muted">
+								<div className="flex flex-col items-center justify-center p-6 text-center">
+									<p className="text-muted-foreground">
 										No post-response script exists for this request.
 									</p>
 									<Button

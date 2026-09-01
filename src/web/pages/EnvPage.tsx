@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cancel01Icon, ViewIcon, ViewOffSlashIcon } from "hugeicons-react";
+import { ViewIcon, ViewOffSlashIcon } from "hugeicons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,8 +7,9 @@ import {
 	fetchEnvironment,
 	saveEnvironment,
 } from "../api/client.js";
+import { KeyValueEditor, type KVRow } from "../components/KeyValueEditor.js";
+import { PromptDialog } from "../components/PromptDialog.js";
 import { useStore } from "../store.js";
-import { PromptDialog } from "./PromptDialog.js";
 
 // Keys whose names suggest secret values
 const SECRET_PATTERNS =
@@ -44,7 +45,7 @@ function varsToJson(vars: { key: string; value: string }[]): string {
 	return `${JSON.stringify(obj, null, 2)}\n`;
 }
 
-type EnvRow = { id: number; key: string; value: string; masked: boolean };
+type EnvRow = KVRow & { masked?: boolean };
 
 type EnvEditorPanelProps = {
 	name: string;
@@ -73,12 +74,17 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 		initialized.current = false;
 		const vars = jsonToVars(data.source);
 		const initRows: EnvRow[] = vars.map((v, i) => ({
-			id: i,
+			id: String(i),
 			key: v.key,
 			value: v.value,
 			masked: isSensitiveKey(v.key),
 		}));
-		initRows.push({ id: Date.now(), key: "", value: "", masked: false });
+		initRows.push({
+			id: String(Date.now()),
+			key: "",
+			value: "",
+			masked: false,
+		});
 		setRows(initRows);
 		setRawSource(data.source);
 		setDirty(false);
@@ -97,12 +103,12 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 		setRawSource(source);
 		const vars = jsonToVars(source);
 		const newRows: EnvRow[] = vars.map((v, i) => ({
-			id: i,
+			id: String(i),
 			key: v.key,
 			value: v.value,
 			masked: isSensitiveKey(v.key),
 		}));
-		newRows.push({ id: Date.now(), key: "", value: "", masked: false });
+		newRows.push({ id: String(Date.now()), key: "", value: "", masked: false });
 		setRows(newRows);
 		setDirty(true);
 	}, []);
@@ -125,38 +131,20 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 		saveMutation.mutate(source);
 	};
 
-	const handleRowChange = (
-		idx: number,
-		field: "key" | "value",
-		val: string,
-	) => {
-		const next = [...rows];
-		next[idx] = { ...next[idx], [field]: val };
-		if (field === "key") next[idx].masked = isSensitiveKey(val);
-		if (idx === next.length - 1 && (next[idx].key || next[idx].value)) {
-			next.push({ id: Date.now(), key: "", value: "", masked: false });
+	const handleRowsChange = (newRows: KVRow[]) => {
+		const next = [...newRows];
+		const lastRow = next[next.length - 1];
+		if (lastRow && (lastRow.key || lastRow.value)) {
+			next.push({ id: String(Date.now()), key: "", value: "", masked: false });
 		}
+		// Also update masked for any row whose key changed (this is a bit tricky if we just get newRows, but let's re-evaluate all rows)
+		next.forEach((row) => {
+			if (row.key && isSensitiveKey(row.key) && row.masked === undefined) {
+				row.masked = true;
+			}
+		});
 		setRows(next);
 		setDirty(true);
-	};
-
-	const handleRemove = (idx: number) => {
-		const next = rows.filter((_, i) => i !== idx);
-		if (
-			next.length === 0 ||
-			next[next.length - 1].key ||
-			next[next.length - 1].value
-		) {
-			next.push({ id: Date.now(), key: "", value: "", masked: false });
-		}
-		setRows(next);
-		setDirty(true);
-	};
-
-	const toggleMask = (idx: number) => {
-		const next = [...rows];
-		next[idx] = { ...next[idx], masked: !next[idx].masked };
-		setRows(next);
 	};
 
 	if (isLoading) {
@@ -164,23 +152,29 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 	}
 	if (error) {
 		return (
-			<div className="env-editor-loading error-text">
+			<div className="flex-1 flex items-center justify-center text-destructive">
 				{error instanceof Error ? error.message : "Failed to load"}
 			</div>
 		);
 	}
 
 	return (
-		<div className="env-editor-panel">
-			<div className="env-editor-panel-header">
-				<div className="env-editor-panel-title">
-					<span className="env-page-env-name">{name}</span>
+		<div className="flex flex-col h-full bg-background min-w-0">
+			<div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card shrink-0">
+				<div className="flex items-center gap-3">
+					<span className="text-lg font-semibold tracking-tight">{name}</span>
 					{name === activeEnv && (
-						<span className="env-active-badge">● active</span>
+						<span className="text-[10px] font-bold tracking-widest uppercase bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm">
+							● active
+						</span>
 					)}
 				</div>
 				<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-					{dirty && <span className="dirty-hint">unsaved</span>}
+					{dirty && (
+						<span className="text-[10px] text-amber-500 uppercase font-bold tracking-wider">
+							unsaved
+						</span>
+					)}
 					<Button
 						disabled={!dirty || saveMutation.isPending}
 						onClick={handleSave}
@@ -190,97 +184,68 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 				</div>
 			</div>
 
-			{saveError && <p className="error-text env-editor-error">{saveError}</p>}
+			{saveError && (
+				<p className="text-destructive text-sm px-6 py-4 bg-destructive/10 border-b border-destructive/20">
+					{saveError}
+				</p>
+			)}
 
-			<div className="env-var-table-wrap">
-				<table className="kv-table editable-kv-table env-var-table">
-					<thead>
-						<tr>
-							<th style={{ width: "38%" }}>Variable</th>
-							<th>Value</th>
-							<th className="kv-actions" />
-						</tr>
-					</thead>
-					<tbody>
-						{rows.map((row, idx) => {
-							const isLast = idx === rows.length - 1;
-							const showMaskBtn =
-								!isLast && row.key && isSensitiveKey(row.key) && row.value;
-							return (
-								<tr key={row.id}>
-									<td className="kv-key">
-										<input
-											className="kv-input"
-											placeholder="variable_name"
-											value={row.key}
-											onChange={(e) =>
-												handleRowChange(idx, "key", e.target.value)
-											}
-										/>
-									</td>
-									<td className="kv-val" style={{ position: "relative" }}>
-										<input
-											className="kv-input"
-											placeholder={isLast ? "value" : ""}
-											type={row.masked && row.value ? "password" : "text"}
-											value={row.value}
-											onChange={(e) =>
-												handleRowChange(idx, "value", e.target.value)
-											}
-											style={{
-												paddingRight: showMaskBtn ? "36px" : undefined,
-											}}
-										/>
-										{showMaskBtn && (
-											<Button
-												variant="ghost"
-												size="icon"
-												title={row.masked ? "Reveal" : "Mask"}
-												onClick={() => toggleMask(idx)}
-												className="h-8 w-8"
-											>
-												{row.masked ? (
-													<ViewIcon className="h-4 w-4" />
-												) : (
-													<ViewOffSlashIcon className="h-4 w-4" />
-												)}
-											</Button>
+			<div className="flex-1 overflow-auto">
+				<KeyValueEditor
+					rows={rows}
+					onChange={handleRowsChange}
+					autoAppend={true}
+					keyPlaceholder="variable_name"
+					renderValue={(row, idx, update) => {
+						const isLast = idx === rows.length - 1;
+						const showMaskBtn =
+							!isLast && row.key && isSensitiveKey(row.key) && row.value;
+						return (
+							<>
+								<input
+									className="kv-input"
+									placeholder={isLast ? "value" : ""}
+									type={row.masked && row.value ? "password" : "text"}
+									value={row.value}
+									onChange={(e) => update("value", e.target.value)}
+									style={{ paddingRight: showMaskBtn ? "36px" : undefined }}
+								/>
+								{showMaskBtn && (
+									<Button
+										variant="ghost"
+										size="icon"
+										title={row.masked ? "Reveal" : "Mask"}
+										onClick={() => update("masked", !row.masked)}
+										className="h-8 w-8"
+										style={{ position: "absolute", right: 0, top: 0 }}
+									>
+										{row.masked ? (
+											<ViewIcon className="h-4 w-4" />
+										) : (
+											<ViewOffSlashIcon className="h-4 w-4" />
 										)}
-									</td>
-									<td className="kv-actions">
-										{!isLast && (
-											<Button
-												className="kv-remove-btn"
-												onClick={() => handleRemove(idx)}
-												title="Remove variable"
-												size="icon"
-												variant="ghost"
-											>
-												<Cancel01Icon size={14} />
-											</Button>
-										)}
-									</td>
-								</tr>
-							);
-						})}
-					</tbody>
-				</table>
+									</Button>
+								)}
+							</>
+						);
+					}}
+				/>
 			</div>
 
 			{/* Collapsible raw JSON */}
-			<div className="env-raw-section">
+			<div className="shrink-0 border-t border-border bg-card flex flex-col">
 				<button
 					type="button"
-					className="env-raw-toggle"
+					className="flex items-center gap-2 px-4 py-3 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors w-full text-left"
 					onClick={() => setRawOpen((v) => !v)}
 				>
-					<span className="env-raw-arrow">{rawOpen ? "▾" : "▸"}</span>
+					<span className="text-[10px] w-4">{rawOpen ? "▾" : "▸"}</span>
 					Raw JSON
 				</button>
 				{rawOpen && (
-					<div className="env-raw-editor">
+					<div className="w-full border-t border-border">
 						<textarea
-							className="env-raw-textarea mono"
+							className="w-full min-h-[160px] max-h-[320px] p-4 bg-muted border-none outline-none resize-y text-xs leading-relaxed text-foreground font-mono focus:bg-background transition-colors block"
 							value={rawSource}
 							onChange={(e) => syncTableFromRaw(e.target.value)}
 							spellCheck={false}
@@ -330,9 +295,9 @@ export function EnvPage({ environments }: EnvPageProps) {
 	});
 
 	return (
-		<div className="env-page">
-			<div className="env-page-header">
-				<h2 className="env-page-title">Environments</h2>
+		<div className="flex flex-col h-full bg-background min-w-0">
+			<div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card shrink-0">
+				<h2 className="text-xl font-bold tracking-tight">Environments</h2>
 				<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
 					<Button variant="secondary" onClick={() => setNewEnvOpen(true)}>
 						+ New
@@ -343,11 +308,16 @@ export function EnvPage({ environments }: EnvPageProps) {
 				</div>
 			</div>
 
-			<div className="env-page-body">
-				<aside className="env-list">
-					<div className="env-list-label">ENVIRONMENTS</div>
+			<div className="flex flex-1 min-h-0 overflow-hidden">
+				<aside className="w-[240px] border-r border-border bg-muted/30 flex flex-col shrink-0">
+					<div className="text-[10px] font-semibold text-muted-foreground tracking-widest uppercase px-4 py-3 border-b border-border bg-card/50">
+						ENVIRONMENTS
+					</div>
 					{allEnvs.length === 0 && (
-						<p className="empty-hint" style={{ padding: "8px 12px" }}>
+						<p
+							className="text-[11px] text-muted-foreground px-4 py-2 text-center"
+							style={{ padding: "8px 12px" }}
+						>
 							No environments yet.
 						</p>
 					)}
@@ -355,20 +325,20 @@ export function EnvPage({ environments }: EnvPageProps) {
 						<button
 							key={name}
 							type="button"
-							className={`env-list-item${name === selectedEnv ? " active" : ""}`}
+							className={`flex items-center gap-2 px-4 py-2.5 border-b border-border/50 text-sm font-medium hover:bg-card transition-colors cursor-pointer text-muted-foreground border-l-[3px] group ${name === selectedEnv ? "bg-card text-foreground border-l-primary" : "border-l-transparent"}`}
 							onClick={() => setSelectedEnv(name)}
 						>
 							<span
-								className="env-list-dot"
+								className="text-[8px] text-primary"
 								style={{ opacity: name === activeEnv ? 1 : 0 }}
 							>
 								●
 							</span>
-							<span className="env-list-name">{name}</span>
+							<span className="flex-1 text-left truncate">{name}</span>
 							{name !== activeEnv && (
 								<button
 									type="button"
-									className="env-list-use-btn"
+									className="opacity-0 group-hover:opacity-100 text-[10px] bg-muted hover:bg-muted-foreground/20 px-2 py-1 rounded transition-all"
 									title={`Switch to ${name}`}
 									onClick={(e) => {
 										e.stopPropagation();
@@ -379,13 +349,15 @@ export function EnvPage({ environments }: EnvPageProps) {
 								</button>
 							)}
 							{name === activeEnv && (
-								<span className="env-list-use-badge">active</span>
+								<span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+									active
+								</span>
 							)}
 						</button>
 					))}
 				</aside>
 
-				<div className="env-editor-area">
+				<div className="flex-1 flex flex-col min-w-0 bg-background">
 					{selectedEnv ? (
 						<EnvEditorPanel
 							key={selectedEnv}
@@ -398,7 +370,7 @@ export function EnvPage({ environments }: EnvPageProps) {
 							}
 						/>
 					) : (
-						<div className="env-editor-empty">
+						<div className="flex-1 flex items-center justify-center text-muted-foreground">
 							Select or create an environment to get started.
 						</div>
 					)}
@@ -412,7 +384,7 @@ export function EnvPage({ environments }: EnvPageProps) {
 					message="Enter a name. A JSON file will be created under .dakiya/environments/."
 					confirmText="Create"
 					onCancel={() => setNewEnvOpen(false)}
-					onConfirm={(name) => {
+					onConfirm={(name: string) => {
 						const safe = name.trim().replace(/[^a-zA-Z0-9_-]/g, "-");
 						if (safe) createMutation.mutate(safe);
 					}}

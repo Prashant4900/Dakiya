@@ -88,7 +88,7 @@ function InlineRename({
 	return (
 		<input
 			ref={ref}
-			className="inline-rename-input"
+			className="flex-1 bg-card border border-primary rounded-sm px-1.5 py-[1px] text-xs text-foreground outline-none"
 			value={value}
 			onChange={(e) => setValue(e.target.value)}
 			onKeyDown={(e) => {
@@ -172,16 +172,20 @@ function FolderGroup({
 	];
 
 	return (
-		<div className="collection-group">
-			<div className="group-row-wrap">
+		<div className="mb-0.5">
+			<div className="flex items-center relative group">
 				<Button
 					ref={btnRef}
-					className="group-row h-7 px-2 justify-start font-normal hover:bg-muted/50"
+					className="flex-1 h-7 px-2 justify-start font-normal text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors gap-1.5"
 					onClick={() => setOpen((v) => !v)}
 					variant="ghost"
 				>
-					<span className={`group-chevron${open ? " open" : ""}`}>▶</span>
-					<span className="group-icon">📁</span>
+					<span
+						className={`text-[10px] transition-transform duration-150 ${open ? "rotate-90" : ""}`}
+					>
+						▶
+					</span>
+					<span className="text-[13px]">📁</span>
 					{renaming ? (
 						<InlineRename
 							initial={name}
@@ -192,14 +196,14 @@ function FolderGroup({
 							onCancel={() => setRenaming(false)}
 						/>
 					) : (
-						<span className="group-name">{name}</span>
+						<span className="text-xs font-medium">{name}</span>
 					)}
-					<span className="group-count">{count}</span>
+					<span className="text-[10px] ml-auto">{count}</span>
 				</Button>
 
 				{!renaming && actions && (
 					<Button
-						className="item-action-btn h-6 w-6"
+						className="opacity-0 group-hover:opacity-100 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted h-6 w-6 ml-auto"
 						title="Folder options"
 						onClick={(e) => {
 							e.stopPropagation();
@@ -366,9 +370,11 @@ function RequestItem({
 
 	return (
 		<>
-			<div className={`request-item-wrap${active ? " active" : ""}`}>
+			<div
+				className={`flex items-center relative group rounded-md ${active ? "bg-transparent" : ""}`}
+			>
 				<Button
-					className={`request-item h-7 px-2 justify-start font-normal hover:bg-muted/50 ${active ? " active bg-muted/80" : ""}`}
+					className={`flex-1 h-7 px-2 justify-start font-normal hover:bg-muted/50 gap-1.5 text-left text-muted-foreground ${active ? "bg-muted/80 text-foreground" : ""}`}
 					onClick={() => onSelect(path)}
 					variant="ghost"
 				>
@@ -385,13 +391,17 @@ function RequestItem({
 							onCancel={() => setRenaming(false)}
 						/>
 					) : (
-						<span className="req-name">{name}</span>
+						<span
+							className={`text-[11px] whitespace-nowrap overflow-hidden text-ellipsis ${active ? "text-foreground" : "text-muted-foreground"}`}
+						>
+							{name}
+						</span>
 					)}
 				</Button>
 
 				{!renaming && actions && (
 					<Button
-						className="item-action-btn h-6 w-6"
+						className="opacity-0 group-hover:opacity-100 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted h-6 w-6 ml-auto absolute right-1 bg-background/80 backdrop-blur-sm"
 						title="Request options"
 						onClick={(e) => {
 							e.stopPropagation();

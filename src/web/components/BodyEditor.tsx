@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { uploadFile } from "../api/client.js";
 import { CodeEditor } from "./CodeEditor.js";
+import { KeyValueEditor } from "./KeyValueEditor.js";
 import { PaneHeader } from "./PaneHeader.js";
 
 type BodyEditorProps = {
@@ -117,9 +118,22 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 		}
 	};
 
-	const addKvItem = (type: "form-data" | "urlencoded") => {
-		if (typeof body === "object" && body?.type === type) {
-			const key = type === "form-data" ? "formData" : "urlencoded";
+	const handleRowsChange = (newRows: any[]) => {
+		if (
+			typeof body === "object" &&
+			(body?.type === "form-data" || body?.type === "urlencoded")
+		) {
+			const key = body.type === "form-data" ? "formData" : "urlencoded";
+			onChange({ ...(body as any), [key]: newRows } as any);
+		}
+	};
+
+	const handleRowAdd = () => {
+		if (
+			typeof body === "object" &&
+			(body?.type === "form-data" || body?.type === "urlencoded")
+		) {
+			const key = body.type === "form-data" ? "formData" : "urlencoded";
 			const items = (body as any)[key] || [];
 			onChange({
 				...(body as any),
@@ -128,87 +142,58 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 		}
 	};
 
-	const updateKvItem = (
-		type: "form-data" | "urlencoded",
-		index: number,
-		field: string,
-		value: string | boolean,
-	) => {
-		if (typeof body === "object" && body?.type === type) {
-			const key = type === "form-data" ? "formData" : "urlencoded";
-			const items = (body as any)[key] || [];
-			const newItems = [...items] as any;
-			newItems[index] = { ...newItems[index], [field]: value };
-			onChange({ ...(body as any), [key]: newItems } as any);
-		}
-	};
-
-	const removeKvItem = (type: "form-data" | "urlencoded", index: number) => {
-		if (typeof body === "object" && body?.type === type) {
-			const key = type === "form-data" ? "formData" : "urlencoded";
-			const items = (body as any)[key] || [];
-			const newItems = items.filter((_: any, i: number) => i !== index);
-			onChange({ ...(body as any), [key]: newItems } as any);
-		}
-	};
-
 	return (
-		<div
-			className="body-editor"
-			style={{ display: "flex", flexDirection: "column", height: "100%" }}
-		>
-			<div
-				className="body-mode-selector"
-				style={{
-					display: "flex",
-					gap: "10px",
-					padding: "10px",
-					borderBottom: "1px solid var(--border-color)",
-				}}
-			>
-				<label>
+		<div className="flex flex-col h-full bg-background min-w-0">
+			<div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 border-b bg-card shrink-0 text-sm">
+				<label className="flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground">
 					<input
 						type="radio"
+						className="accent-primary"
 						checked={mode === "none"}
 						onChange={() => handleModeChange("none")}
 					/>{" "}
 					none
 				</label>
-				<label>
+				<label className="flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground">
 					<input
 						type="radio"
+						className="accent-primary"
 						checked={mode === "form-data"}
 						onChange={() => handleModeChange("form-data")}
 					/>{" "}
 					form-data
 				</label>
-				<label>
+				<label className="flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground">
 					<input
 						type="radio"
+						className="accent-primary"
 						checked={mode === "urlencoded"}
 						onChange={() => handleModeChange("urlencoded")}
 					/>{" "}
 					x-www-form-urlencoded
 				</label>
-				<label>
+				<label className="flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground">
 					<input
 						type="radio"
+						className="accent-primary"
 						checked={mode === "raw"}
 						onChange={() => handleModeChange("raw")}
 					/>{" "}
 					raw
 				</label>
-				<label>
+				<label className="flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground">
 					<input
 						type="radio"
+						className="accent-primary"
 						checked={mode === "binary"}
 						onChange={() => handleModeChange("binary")}
 					/>{" "}
 					binary
 				</label>
-				<label>
+				<label className="flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground">
 					<input
 						type="radio"
+						className="accent-primary"
 						checked={mode === "graphql"}
 						onChange={() => handleModeChange("graphql")}
 					/>{" "}
@@ -216,14 +201,7 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 				</label>
 
 				{mode === "raw" && typeof body === "object" && body?.type === "raw" && (
-					<div
-						style={{
-							marginLeft: "auto",
-							display: "flex",
-							gap: "10px",
-							alignItems: "center",
-						}}
-					>
+					<div className="ml-auto flex items-center gap-2.5">
 						{(body as any).raw?.format === "json" && (
 							<Button
 								onClick={handleFormatJson}
@@ -235,6 +213,7 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 							</Button>
 						)}
 						<select
+							className="bg-muted border border-border rounded-md px-2 py-1 text-xs font-mono text-foreground cursor-pointer outline-none focus:border-primary transition-colors"
 							value={(body as any).raw?.format || "json"}
 							onChange={(e) => handleRawTypeChange(e.target.value)}
 						>
@@ -248,30 +227,15 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 				)}
 			</div>
 
-			<div
-				className="body-content"
-				style={{
-					flex: 1,
-					overflow: "auto",
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
+			<div className="flex-1 overflow-auto flex flex-col">
 				{mode === "none" && (
-					<div className="pane-empty muted">
+					<div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
 						This request does not have a body
 					</div>
 				)}
 
 				{mode === "raw" && typeof body === "object" && body?.type === "raw" && (
-					<div
-						style={{
-							flex: 1,
-							overflow: "auto",
-							border: "1px solid var(--border-color)",
-							borderTop: "none",
-						}}
-					>
+					<div className="flex-1 overflow-auto border-t-0">
 						<CodeEditor
 							value={(body as any).raw?.content || ""}
 							onChange={handleRawChange}
@@ -291,8 +255,13 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 				{mode === "binary" &&
 					typeof body === "object" &&
 					body?.type === "binary" && (
-						<div style={{ padding: "20px" }}>
-							<p>Selected File: {(body as any).binary?.file || "None"}</p>
+						<div className="p-5">
+							<p className="text-sm mb-2 text-foreground">
+								Selected File:{" "}
+								<span className="font-mono text-muted-foreground">
+									{(body as any).binary?.file || "None"}
+								</span>
+							</p>
 							<input
 								type="file"
 								onChange={(e) =>
@@ -307,25 +276,10 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 				{mode === "graphql" &&
 					typeof body === "object" &&
 					body?.type === "graphql" && (
-						<div
-							style={{
-								display: "flex",
-								flexDirection: "column",
-								height: "100%",
-							}}
-						>
-							<div
-								style={{ flex: 2, display: "flex", flexDirection: "column" }}
-							>
+						<div className="flex flex-col h-full">
+							<div className="flex-[2] flex flex-col">
 								<PaneHeader title="Query" />
-								<div
-									style={{
-										flex: 1,
-										overflow: "auto",
-										border: "1px solid var(--border-color)",
-										borderTop: "none",
-									}}
-								>
+								<div className="flex-1 overflow-auto border-t-0">
 									<CodeEditor
 										value={(body as any).graphql?.query || ""}
 										onChange={handleGraphqlQueryChange}
@@ -335,23 +289,9 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 									/>
 								</div>
 							</div>
-							<div
-								style={{
-									flex: 1,
-									display: "flex",
-									flexDirection: "column",
-									borderTop: "1px solid var(--border-color)",
-								}}
-							>
+							<div className="flex-1 flex flex-col border-t border-border">
 								<PaneHeader title="Variables" />
-								<div
-									style={{
-										flex: 1,
-										overflow: "auto",
-										border: "1px solid var(--border-color)",
-										borderTop: "none",
-									}}
-								>
+								<div className="flex-1 overflow-auto border-t-0">
 									<CodeEditor
 										value={(body as any).graphql?.variables || ""}
 										onChange={handleGraphqlVarsChange}
@@ -367,106 +307,65 @@ export function BodyEditor({ body, onChange, variables }: BodyEditorProps) {
 				{(mode === "form-data" || mode === "urlencoded") &&
 					typeof body === "object" &&
 					(body?.type === "form-data" || body?.type === "urlencoded") && (
-						<table className="kv-table editable-kv-table">
-							<thead>
-								<tr>
-									<th>Key</th>
-									<th>Value</th>
-									<th className="kv-actions"></th>
-								</tr>
-							</thead>
-							<tbody>
-								{(
-									(body as any)[
-										mode === "form-data" ? "formData" : "urlencoded"
-									] || []
-								).map((item: any, idx: number) => (
-									<tr key={idx}>
-										<td className="kv-key">
-											<input
-												type="text"
-												className="kv-input"
-												value={item.key}
-												onChange={(e) =>
-													updateKvItem(mode, idx, "key", e.target.value)
-												}
-												placeholder="Key"
-											/>
-											{mode === "form-data" && (
-												<select
-													value={item.type || "text"}
-													onChange={(e) =>
-														updateKvItem(mode, idx, "type", e.target.value)
-													}
-													style={{ marginLeft: "5px", fontSize: "0.8em" }}
-												>
-													<option value="text">Text</option>
-													<option value="file">File</option>
-												</select>
-											)}
-										</td>
-										<td className="kv-val">
-											{item.type === "file" ? (
-												<div
-													style={{
-														display: "flex",
-														alignItems: "center",
-														gap: "5px",
-													}}
-												>
-													<span
-														style={{ fontSize: "0.9em", color: "var(--muted)" }}
-													>
-														{item.filePath || "No file selected"}
-													</span>
-													<input
-														type="file"
-														style={{ fontSize: "0.8em" }}
-														onChange={(e) =>
-															handleFileSelect(e, (path) =>
-																updateKvItem(mode, idx, "filePath", path),
-															)
-														}
-													/>
-												</div>
-											) : (
-												<input
-													type="text"
-													className="kv-input"
-													value={item.value || ""}
-													onChange={(e) =>
-														updateKvItem(mode, idx, "value", e.target.value)
-													}
-													placeholder="Value"
-												/>
-											)}
-										</td>
-										<td className="kv-actions">
-											<Button
-												variant="ghost"
-												size="icon"
-												onClick={() => removeKvItem(mode, idx)}
-												className="h-8 w-8 hover:text-destructive"
-											>
-												<Cancel01Icon size={14} />
-											</Button>
-										</td>
-									</tr>
-								))}
-								<tr>
-									<td colSpan={3} style={{ padding: "8px" }}>
-										<Button
-											onClick={() => addKvItem(mode)}
-											variant="outline"
-											size="sm"
-											className="border-dashed w-full"
+						<KeyValueEditor
+							rows={
+								(body as any)[
+									mode === "form-data" ? "formData" : "urlencoded"
+								] || []
+							}
+							onChange={handleRowsChange}
+							onAdd={handleRowAdd}
+							renderKey={(item, idx, update) => (
+								<>
+									<input
+										type="text"
+										className="flex-1 bg-transparent border-none outline-none text-xs px-2 py-1 text-foreground"
+										value={item.key}
+										onChange={(e) => update("key", e.target.value)}
+										placeholder="Key"
+									/>
+									{mode === "form-data" && (
+										<select
+											className="bg-muted border border-border rounded px-1 py-0.5 text-[10px] ml-1 focus:outline-none"
+											value={item.type || "text"}
+											onChange={(e) => update("type", e.target.value)}
 										>
-											+ Add Item
-										</Button>
-									</td>
-								</tr>
-							</tbody>
-						</table>
+											<option value="text">Text</option>
+											<option value="file">File</option>
+										</select>
+									)}
+								</>
+							)}
+							renderValue={(item, idx, update) => {
+								if (item.type === "file") {
+									return (
+										<div className="flex items-center gap-1.5 flex-1 px-2">
+											<span className="text-[11px] text-muted-foreground truncate max-w-[120px]">
+												{item.filePath || "No file selected"}
+											</span>
+											<input
+												type="file"
+												className="text-[10px] w-full"
+												onChange={(e) =>
+													handleFileSelect(e, (path) =>
+														update("filePath", path),
+													)
+												}
+											/>
+										</div>
+									);
+								}
+								return (
+									<input
+										type="text"
+										className="flex-1 bg-transparent border-none outline-none text-xs px-2 py-1 text-foreground"
+										value={item.value || ""}
+										onChange={(e) => update("value", e.target.value)}
+										placeholder="Value"
+									/>
+								);
+							}}
+						/>
 					)}
 			</div>
 		</div>

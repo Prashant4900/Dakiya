@@ -1,12 +1,15 @@
+import { useIsMutating } from "@tanstack/react-query";
 import { useStore } from "../store.js";
 
 type StatusBarProps = {
 	workspaceName: string;
-	sending: boolean;
 };
 
-export function StatusBar({ workspaceName, sending }: StatusBarProps) {
+export function StatusBar({ workspaceName }: StatusBarProps) {
 	const activeEnv = useStore((s) => s.activeEnv);
+	const sendingCount = useIsMutating({ mutationKey: ["sendRequest"] });
+	const sending = sendingCount > 0;
+
 	return (
 		<div className="status-bar">
 			<div className="status-item">
