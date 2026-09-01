@@ -829,7 +829,7 @@ export function RequestPanel({
 
 					{showEditor && tab === "examples" && doc && (
 						<>
-							<PaneHeader title="Examples" tag=".drq" />
+							<PaneHeader title="Examples" tag="yaml" />
 							<pre className="code-editor mono">{formatExamples(doc)}</pre>
 						</>
 					)}

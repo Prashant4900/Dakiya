@@ -22,17 +22,16 @@
 
 ---
 
-## Phase 1 — Domain + `.drq` format ✅
+## Phase 1 — Domain + `requests.yaml` format ✅
 
 **Goal:** Canonical on-disk contract and a trustworthy parser.
 
 - [x] `@dakiya/domain` — Zod models for Workspace, Request, Environment, Example, Script
-- [x] `@dakiya/format` — parse / serialize `.drq` (all v1 blocks)
+- [x] `@dakiya/format` — parse / serialize `requests.yaml` (all v1 blocks)
 - [x] Round-trip Vitest fixtures (lossless save)
-- [x] Format cheat sheet under `docs/` ([drq-format.md](./drq-format.md))
-- [x] Fixture `.drq` files in `packages/format/src/__fixtures__/`
+- [x] Fixture `requests.yaml` files in `packages/format/src/__fixtures__/`
 
-**Exit criteria:** Fixture `.drq` → parse → serialize → equal. **Met** — run `pnpm --filter @dakiya/format test`.
+**Exit criteria:** Fixture `requests.yaml` → parse → serialize → equal. **Met** — run `pnpm --filter @dakiya/format test`.
 
 **Notes:** `@file(...)` refs are stored in the model; loading file contents at parse time is deferred. `@assert` blocks are parsed but not executed.
 

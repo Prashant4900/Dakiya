@@ -19,7 +19,7 @@ function formatBody(body: string, contentType: string | undefined): string {
 	return body;
 }
 
-/** Load a `.drq`, resolve env vars, run scripts, send HTTP, print the response. */
+/** Load a `requests.yaml`, resolve env vars, run scripts, send HTTP, print the response. */
 export async function runRun(requestArg: string | undefined): Promise<void> {
 	if (!requestArg) {
 		console.error(`[dakiya] Usage: dakiya run <path>`);

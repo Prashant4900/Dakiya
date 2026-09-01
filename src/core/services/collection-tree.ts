@@ -2,7 +2,7 @@ export type CollectionNode =
 	| { name: string; type: "folder"; children: CollectionNode[] }
 	| { name: string; type: "request"; path: string };
 
-/** Build a nested folder tree from flat collection-relative `.drq` paths. */
+/** Build a nested folder tree from flat collection-relative paths. */
 export function buildCollectionTree(paths: string[]): CollectionNode[] {
 	type MutableNode = {
 		name: string;
@@ -21,7 +21,7 @@ export function buildCollectionTree(paths: string[]): CollectionNode[] {
 			if (!part) continue;
 			const isLeaf = i === parts.length - 1;
 			if (isLeaf) {
-				const name = part.replace(/\.drq$/, "");
+				const name = part;
 				cursor.set(part, {
 					name,
 					type: "request",

@@ -14,7 +14,7 @@ function usage(exitCode = 0): never {
 Usage:
   dakiya init                 Scaffold .dakiya/ (manifest, env, empty collections)
   dakiya list                 List requests under .dakiya/collections/
-  dakiya run <path>           Send a request (e.g. health/health or users/list.drq)
+  dakiya run <path>           Send a request (e.g. health/health or users/list)
   dakiya serve [--port N]     Start web dashboard + API at http://localhost:${DEFAULT_PORT}
 
 `);

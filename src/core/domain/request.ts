@@ -1,5 +1,5 @@
 /**
- * Parsed HTTP request — maps to a single `.drq` file under `.dakiya/collections/`.
+ * Parsed HTTP request — maps to an endpoint in `requests.yaml` under `.dakiya/collections/`.
  */
 
 import type { z } from "zod";

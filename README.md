@@ -11,13 +11,12 @@ Local-first API toolkit. **CLI + web dashboard first**; desktop optional later.
 | Phase                      | Status |
 | -------------------------- | ------ |
 | 0 — Skeleton               | Done   |
-| 1 — Domain + `.drq` format | Done   |
+| 1 — Domain + `requests.yaml` format | Done   |
 | 2 — Services               | Done   |
 | 3 — CLI + API              | Done   |
 | 4 — Web dashboard          | Done   |
 | 5 — Ship MVP               | Done   |
 
-Run tests: `pnpm test` · Format reference: [docs/drq-format.md](./docs/drq-format.md)
 
 | Doc                                            | Purpose                   |
 | ---------------------------------------------- | ------------------------- |
@@ -25,7 +24,6 @@ Run tests: `pnpm test` · Format reference: [docs/drq-format.md](./docs/drq-form
 | [docs/plan.md](./docs/plan.md)                 | MVP plan & decisions      |
 | [docs/phases.md](./docs/phases.md)             | Implementation phases     |
 | [docs/checklist.md](./docs/checklist.md)       | Hand-off / QA checklists  |
-| [docs/drq-format.md](./docs/drq-format.md)     | `.drq` format cheat sheet |
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical architecture    |
 
 ## Install CLI (run `dakiya` anywhere)
@@ -41,7 +39,7 @@ Then in any directory:
 
 ```bash
 dakiya init              # creates .dakiya/
-dakiya list              # list .drq requests
+dakiya list              # list requests.yaml requests
 dakiya run health/health # send a request (needs API up)
 dakiya serve             # http://localhost:4242 (web dashboard)
 dakiya --help
@@ -88,11 +86,11 @@ With the example API running (optional) and a `.dakiya/` workspace in the repo:
 dakiya serve   # http://localhost:4242
 ```
 
-The dashboard loads collections from `/api/workspace`, edits `.drq` files via the API, and sends requests with `POST /api/send`. `dakiya serve` runs Vite and the Hono API together on the same port (hot reload included). The web UI is built with **React, TailwindCSS, and Shadcn UI**.
+The dashboard loads collections from `/api/workspace`, edits `requests.yaml` files via the API, and sends requests with `POST /api/send`. `dakiya serve` runs Vite and the Hono API together on the same port (hot reload included). The web UI is built with **React, TailwindCSS, and Shadcn UI**.
 
 **Quick path:** select a request in the sidebar → **Send** (or ⌘↵). Edit headers and body in their respective tabs → **Save**. Switch environments from the sidebar dropdown. If your workspace has `versions:` in `dakiya.yaml`, a version switcher appears in the sidebar to filter the collection tree.
 
-**Scripts:** Pre-script / Post-script tabs are **read-only** in the browser. Use the **Create Script** button to scaffold an empty script file, then edit it in your code editor (the file lives next to the `.drq` file).
+**Scripts:** Pre-script / Post-script tabs are **read-only** in the browser. Use the **Create Script** button to scaffold an empty script file, then edit it in your code editor (the file lives next to the `requests.yaml` file).
 
 For requests that hit `localhost:3000`, start the dummy API first: `pnpm dev:example`.
 
@@ -111,7 +109,7 @@ After pulling code changes, rebuild everything: `pnpm build` and then `pnpm link
 
 ```
 src/
-  core/             — shared types, Zod schemas, .drq format, business logic
+  core/             — shared types, Zod schemas, requests.yaml format, business logic
   cli/              — dakiya CLI + Hono API + script sandbox
   web/              — React dashboard (Postman-style UI, wired to `/api/*`)
 

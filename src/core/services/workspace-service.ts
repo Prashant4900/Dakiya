@@ -28,7 +28,7 @@ export function loadManifest(fs: FsClient, cwd: string): WorkspaceManifest {
 
 /**
  * Create / complete `.dakiya/` in cwd.
- * Existing files are left unchanged. No sample .drq files.
+ * Existing files are left unchanged. No sample requests.yaml files.
  */
 export function scaffoldWorkspace(
 	fs: FsClient,

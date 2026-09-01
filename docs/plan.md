@@ -18,7 +18,7 @@ Validate in market with **core functionality only**:
 1. `dakiya init` — scaffold `.dakiya/` in a project  
 2. `dakiya list` / `dakiya run` — discover and send requests from the terminal (no dashboard required)  
 3. `dakiya serve` — local dashboard on `localhost`  
-4. Edit / send HTTP requests stored as `.drq`  
+4. Edit / send HTTP requests stored as `requests.yaml`  
 5. Environments (YAML) + `{{var}}` substitution  
 6. Docs, examples, pre/post scripts (JS/TS) on send  
 
@@ -38,21 +38,21 @@ Validate in market with **core functionality only**:
 
 ## Why not JSON for collections?
 
-Large nested bodies, scripts, and docs make JSON painful to read and review in Git. Dakiya uses **`.drq`** (custom block format) with a curl-like `@request` block.
+Large nested bodies, scripts, and docs make JSON painful to read and review in Git. Dakiya uses **`requests.yaml`** (custom block format) with a curl-like `@request` block.
 
 | Option | Decision |
 |--------|----------|
 | JSON files | Rejected for authoring |
 | Bruno `.bru` | Useful reference; not adopted (less control) |
-| **Custom `.drq`** | **Chosen** — full control; refine syntax later if needed |
+| **Custom `requests.yaml`** | **Chosen** — full control; refine syntax later if needed |
 
 Environments use **YAML** (human-readable key-value).
 
 ---
 
-## `.drq` example (v1 — locked for MVP authoring)
+## `requests.yaml` example (v1 — locked for MVP authoring)
 
-```drq
+```yaml
 @meta
 name: Login
 type: http
@@ -94,7 +94,7 @@ response: @file(examples/auth/login-200.json)
 
 ```
 packages/domain     — types + Zod          (shared)
-packages/format     — .drq parse/serialize (shared)
+packages/format     — requests.yaml parse/serialize (shared)
 packages/services   — business logic       (shared)
 
 apps/cli            — dakiya CLI + local Hono server  (surface)
@@ -110,13 +110,13 @@ apps/desktop        — Tauri stub                      (surface, later)
 |-------|---------|
 | **0** | Docs only (`ABOUT.md`) |
 | **1** | Docs + hello-world monorepo skeleton |
-| **2** | Domain, `.drq` format, services — **done** |
+| **2** | Domain, `requests.yaml` format, services — **done** |
 | **3** | CLI + local API + web dashboard — **done** |
 | **4** | Ship MVP (polish, docs, manual QA) — **done** |
 
 **Delivered so far:**
 
-- Zod schemas + `.drq` parse/serialize with Vitest round-trip fixtures
+- Zod schemas + `requests.yaml` parse/serialize with Vitest round-trip fixtures
 - Platform-agnostic services (`FsClient`, workspace/request/env, send pipeline)
 - CLI commands: `init`, `list`, `run`, `serve`
 - Local Hono API: workspace, CRUD, environments, `POST /api/send`
@@ -131,7 +131,7 @@ apps/desktop        — Tauri stub                      (surface, later)
 ## Success criteria (full MVP — later)
 
 1. `dakiya init && dakiya serve` works in &lt; 30s  
-2. `.drq` files are editable by hand and round-trip through the UI  
+2. `requests.yaml` files are editable by hand and round-trip through the UI  
 3. Pre/post JS/TS scripts run on send; post can mutate response / env  
 4. Teammate clones repo → `dakiya serve` → tests APIs (no desktop)  
 5. Desktop can be added without rewriting core  
@@ -156,7 +156,7 @@ apps/desktop        — Tauri stub                      (surface, later)
 | Package manager | pnpm workspaces |
 | CLI / server | Node + Hono |
 | Web | Vite + React |
-| Request format | `.drq` (custom) |
+| Request format | `requests.yaml` (custom) |
 | Env format | YAML |
 | Scripts | JS + TS; Python later |
 | Desktop | Optional, same monorepo |

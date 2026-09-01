@@ -8,7 +8,7 @@
 ## Principles
 
 1. **Local-first** — All user data stays on disk. No accounts, no cloud sync.
-2. **Files as source of truth** — Collections live in `.dakiya/` as plain, Git-friendly files (`.drq`, YAML).
+2. **Files as source of truth** — Collections live in `.dakiya/` as plain, Git-friendly files (`requests.yaml`, YAML).
 3. **Four fixed layers** — UI, State, Services, Infrastructure stay separate; do not merge or skip layers.
 4. **One core, many surfaces** — Domain and services are shared; CLI, web, and desktop differ only in Layer 4 adapters and shell.
 5. **Testable core** — Services are pure TypeScript; infrastructure is swappable behind interfaces.
@@ -94,7 +94,7 @@ Dakiya/
     checklist.md
   packages/                 # shared core libraries
     domain/                 # Zod types / parsed models
-    format/                 # .drq parse + serialize
+    format/                 # requests.yaml parse + serialize
     services/               # Layer 3
   apps/                     # delivery surfaces (same kind of thing)
     cli/                    # Layer 4 Node — CLI bin, Hono, fs, sandbox
@@ -105,7 +105,7 @@ Dakiya/
 | Package / app | Path | Responsibility |
 |---------------|------|----------------|
 | `@dakiya/domain` | `packages/domain` | Shared types and Zod schemas |
-| `@dakiya/format` | `packages/format` | `.drq` lexer/parser/serializer |
+| `@dakiya/format` | `packages/format` | `requests.yaml` lexer/parser/serializer |
 | `@dakiya/services` | `packages/services` | Workspace, Request, Environment, Script orchestration |
 | `@dakiya/cli` | `apps/cli` | `dakiya` bin, Hono routes, Node fs, script sandbox |
 | `@dakiya/web` | `apps/web` | React dashboard |
@@ -119,9 +119,9 @@ Dakiya/
 project/
   .dakiya/
     dakiya.yaml               # workspace core / manifest
-    collections/              # empty after init — add your .drq files
+    collections/              # empty after init — add your requests.yaml files
       auth/
-        login.drq
+        loginrequests.yaml
     environments/
       local.yaml
     examples/                 # optional large payloads
@@ -154,7 +154,7 @@ versions:
   - v2
 ```
 
-### `.drq` (Dakiya Request)
+### `requests.yaml` (Dakiya Request)
 
 Human-readable, block-based, one request per file. Curl-like `@request` section. Spec v1 is locked for MVP; refine later as needed.
 
@@ -208,7 +208,7 @@ User clicks Send
 |--------|------|---------|
 | GET | `/api/health` | Health check |
 | GET | `/api/workspace` | Manifest + folder tree + request index |
-| GET | `/api/requests/*` | Read a `.drq` file |
+| GET | `/api/requests/*` | Read a `requests.yaml` file |
 | PUT | `/api/requests/*` | Update request fields or save a script (`/scripts/pre`, `/scripts/post`) |
 | POST | `/api/requests/*` | Create a new request |
 | PATCH | `/api/requests/*` | Rename / delete / move a request (`action` in body) |

@@ -27,7 +27,6 @@
 - [x] `@file(...)` example refs preserved in model (resolution deferred)
 - [x] `lang=js` / `lang=ts` on script blocks stored in model
 - [x] Workspace + environment types in `@dakiya/domain` (Zod schemas)
-- [x] Format cheat sheet committed under `docs/` ([drq-format.md](./drq-format.md))
 
 ---
 
@@ -51,7 +50,7 @@
 - [x] `dakiya run <path>` sends request with env vars and prints response
 - [x] `dakiya serve --port 4242`
 - [x] `GET /api/health` → `{ status: "ok" }`
-- [x] CRUD request via API updates `.drq` on disk
+- [x] CRUD request via API updates `requests.yaml` on disk
 - [x] `POST /api/send` runs pre → HTTP → post
 - [x] Missing `.dakiya` returns clear error
 - [x] Port-in-use message is actionable
@@ -109,7 +108,7 @@ dakiya run health/health
 pnpm dev:example   # optional — dummy API on :3000 for sample requests
 dakiya serve       # http://localhost:4242
 # browser: select request → Send (⌘↵) → check response panel
-# edit .drq in Body tab → Save → Send again
+# edit requests.yaml in Body tab → Save → Send again
 # switch env, Edit environment… → save → Send
 ```
 

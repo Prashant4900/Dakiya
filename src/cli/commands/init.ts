@@ -7,7 +7,7 @@ const fs = createNodeFsClient();
 /**
  * Create * Scaffold a new `.dakiya/` workspace in the current directory, complete with
  * manifest, empty collections/, and environments/local.json.
- * Existing files are left unchanged. No sample .drq files.
+ * Existing files are left unchanged. No sample requests.yaml files.
  */
 export function runInit(): void {
 	const cwd = process.cwd();

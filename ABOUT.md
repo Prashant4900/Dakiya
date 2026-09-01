@@ -159,7 +159,7 @@ Dakiya is actively in development. **MVP is complete** — Phases 0–5 (shared 
 
 | Surface | Status |
 |---------|--------|
-| **Shared core** (`domain`, `format`, `services`) | Done — Zod types, `.drq` parse/serialize, send pipeline, tests |
+| **Shared core** (`domain`, `format`, `services`) | Done — Zod types, `requests.yaml` parse/serialize, send pipeline, tests |
 | **CLI** | Done — `init`, `list`, `run`, `serve`, Hono `/api/*`, script sandbox |
 | **Web dashboard** | Done — sidebar tree (with CRUD, move, version switcher), Body/Headers/Docs/Scripts/Examples tabs, env switcher, file upload, send/save via API |
 | **Desktop app** | Reserved stub (Tauri, later) |
@@ -174,7 +174,6 @@ All surfaces share the same `.dakiya` file format and core logic. See [docs/ARCH
 - [docs/plan.md](./docs/plan.md) — MVP plan and product decisions
 - [docs/phases.md](./docs/phases.md) — Implementation phases
 - [docs/checklist.md](./docs/checklist.md) — Hand-off and QA checklists
-- [docs/drq-format.md](./docs/drq-format.md) — `.drq` format cheat sheet
 
 ---
 
