@@ -1,14 +1,12 @@
+import { useStore } from "../store.js";
+
 type StatusBarProps = {
 	workspaceName: string;
-	activeEnv: string;
 	sending: boolean;
 };
 
-export function StatusBar({
-	workspaceName,
-	activeEnv,
-	sending,
-}: StatusBarProps) {
+export function StatusBar({ workspaceName, sending }: StatusBarProps) {
+	const activeEnv = useStore((s) => s.activeEnv);
 	return (
 		<div className="status-bar">
 			<div className="status-item">

@@ -2,8 +2,8 @@ import { Copy01Icon, PackageIcon, ZapIcon } from "hugeicons-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { SendResponse } from "../api/types.js";
-import { formatBytes } from "../utils/method.js";
 import { copyToClipboard } from "../utils/copy.js";
+import { formatBytes } from "../utils/method.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { PaneHeader } from "./PaneHeader.js";
 import { Tabs } from "./Tabs.js";
@@ -38,7 +38,7 @@ function buildCurl(resolved: SendResponse["resolved"]): string {
 	for (const [key, value] of Object.entries(resolved.headers)) {
 		curl += ` \\\n  -H ${escapeShell(`${key}: ${value}`)}`;
 	}
-	
+
 	if (resolved.body !== undefined) {
 		if (typeof resolved.body === "string") {
 			curl += ` \\\n  -d ${escapeShell(resolved.body)}`;
@@ -61,7 +61,9 @@ function buildCurl(resolved: SendResponse["resolved"]): string {
 			} else if (body.type === "graphql" && body.graphql) {
 				const gqlPayload = JSON.stringify({
 					query: body.graphql.query,
-					variables: body.graphql.variables ? JSON.parse(body.graphql.variables) : undefined
+					variables: body.graphql.variables
+						? JSON.parse(body.graphql.variables)
+						: undefined,
 				});
 				curl += ` \\\n  -d ${escapeShell(gqlPayload)}`;
 			} else if (body.type === "binary" && body.binary) {
@@ -163,7 +165,9 @@ export function ResponsePanel({
 								variant="secondary"
 								size="sm"
 								onClick={async () => {
-									const success = await copyToClipboard(buildCurl(result.resolved));
+									const success = await copyToClipboard(
+										buildCurl(result.resolved),
+									);
 									if (success) {
 										setCopiedCurl(true);
 										setTimeout(() => setCopiedCurl(false), 2000);

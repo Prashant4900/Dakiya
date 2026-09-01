@@ -1,19 +1,13 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "paths": {
-      "dakiya/scripts": [
-        "./dakiya-env.d.ts"
-      ]
-    }
-  },
-  "include": [
-    "collections/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"paths": {
+			"dakiya/scripts": ["./dakiya-env.d.ts"]
+		}
+	},
+	"include": ["collections/**/*.ts"],
+	"exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	createFolderAPI,
@@ -15,7 +15,6 @@ import {
 	saveRequest,
 	sendRequestApi,
 } from "./api/client.js";
-import type { SendResponse } from "./api/types.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import { EnvPage } from "./components/EnvPage.js";
 import { NewRequestModal } from "./components/NewRequestModal.js";
@@ -25,6 +24,7 @@ import { ResponsePanel } from "./components/ResponsePanel.js";
 import { Sidebar } from "./components/Sidebar.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { TitleBar } from "./components/TitleBar.js";
+import { useStore } from "./store.js";
 import {
 	buildRequestIndexFallback,
 	extractFolders,
@@ -33,42 +33,32 @@ import {
 
 export function App() {
 	const queryClient = useQueryClient();
-	const [selectedPath, setSelectedPath] = useState<string | null>(() =>
-		localStorage.getItem("dakiya_selectedPath"),
-	);
-	const [activeEnv, setActiveEnv] = useState<string>(
-		() => localStorage.getItem("dakiya_activeEnv") || "local",
-	);
-	const [activeVersion, setActiveVersion] = useState<string | null>(() =>
-		localStorage.getItem("dakiya_activeVersion"),
-	);
-	const [sendResult, setSendResult] = useState<SendResponse | null>(null);
-	const [sendError, setSendError] = useState<string | null>(null);
-	const [saveError, setSaveError] = useState<string | null>(null);
-	const [requestDirty, setRequestDirty] = useState(false);
-	const [activeView, setActiveView] = useState<"request" | "environments">(
-		"request",
-	);
-	const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
-	const [isNewFolderPromptOpen, setIsNewFolderPromptOpen] = useState(false);
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-	const [responseCollapsed, setResponseCollapsed] = useState(false);
-	const [pendingPath, setPendingPath] = useState<string | null>(null);
+	const {
+		selectedPath,
+		setSelectedPath,
+		activeEnv,
+		setActiveEnv,
+		activeVersion,
+		setActiveVersion,
+		sendResult,
+		setSendResult,
+		sendError,
+		setSendError,
+		setSaveError,
+		activeView,
+		setActiveView,
+		isNewRequestModalOpen,
+		setIsNewRequestModalOpen,
+		isNewFolderPromptOpen,
+		setIsNewFolderPromptOpen,
+		sidebarCollapsed,
+		responseCollapsed,
+		pendingPath,
+		setPendingPath,
+	} = useStore();
+
 	const envInitialized = useRef(false);
 	const autoSelected = useRef(false);
-
-	useEffect(() => {
-		if (selectedPath) localStorage.setItem("dakiya_selectedPath", selectedPath);
-	}, [selectedPath]);
-
-	useEffect(() => {
-		if (activeEnv) localStorage.setItem("dakiya_activeEnv", activeEnv);
-	}, [activeEnv]);
-
-	useEffect(() => {
-		if (activeVersion)
-			localStorage.setItem("dakiya_activeVersion", activeVersion);
-	}, [activeVersion]);
 
 	const workspaceQuery = useQuery({
 		queryKey: ["workspace"],
@@ -133,7 +123,7 @@ export function App() {
 		} else if (!activeVersion && versions.length === 0) {
 			setActiveVersion(defaultVersionName);
 		}
-	}, [versions, activeVersion, defaultVersionName]);
+	}, [versions, activeVersion, defaultVersionName, setActiveVersion]);
 
 	const requestIndex = useMemo(() => {
 		const fromApi = workspaceQuery.data?.requestIndex ?? [];
@@ -154,7 +144,7 @@ export function App() {
 			setActiveEnv(defaultEnv);
 		}
 		envInitialized.current = true;
-	}, [workspaceQuery.data, defaultEnv]);
+	}, [workspaceQuery.data, defaultEnv, setActiveEnv]);
 
 	useEffect(() => {
 		if (autoSelected.current || !workspaceQuery.data) return;
@@ -175,7 +165,7 @@ export function App() {
 			}
 		}
 		autoSelected.current = true;
-	}, [workspaceQuery.data, selectedPath, tree]);
+	}, [workspaceQuery.data, selectedPath, tree, setSelectedPath]);
 
 	const requestQuery = useQuery({
 		queryKey: ["request", selectedPath],
@@ -300,21 +290,6 @@ export function App() {
 		},
 	});
 
-	const handleSelect = useCallback(
-		(path: string) => {
-			if (requestDirty && selectedPath && path !== selectedPath) {
-				setPendingPath(path);
-				return;
-			}
-			setSelectedPath(path);
-			setSendResult(null);
-			setSendError(null);
-			setSaveError(null);
-			setActiveView("request");
-		},
-		[requestDirty, selectedPath],
-	);
-
 	const handleSave = useCallback(
 		async (updates: Record<string, unknown>) => {
 			if (!selectedPath) return;
@@ -337,7 +312,7 @@ export function App() {
 
 	const openEnvManager = useCallback(() => {
 		setActiveView("environments");
-	}, []);
+	}, [setActiveView]);
 
 	const workspaceError = workspaceQuery.error;
 	const workspaceName = workspaceQuery.data?.manifest.name ?? "Workspace";
@@ -373,31 +348,16 @@ export function App() {
 
 	return (
 		<div className="app-shell">
-			<TitleBar
-				projectName={workspaceName}
-				requestName={requestName}
-				sidebarCollapsed={sidebarCollapsed}
-				onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
-				responseCollapsed={responseCollapsed}
-				onToggleResponse={() => setResponseCollapsed((c) => !c)}
-			/>
+			<TitleBar projectName={workspaceName} requestName={requestName} />
 
 			<div className="workspace">
 				{!sidebarCollapsed && (
 					<Sidebar
 						tree={versionTree}
 						requestIndex={requestIndex}
-						selectedPath={selectedPath}
-						onSelect={handleSelect}
 						environments={environments.length > 0 ? environments : [defaultEnv]}
-						activeEnv={effectiveEnv}
-						onEnvChange={setActiveEnv}
 						onManageEnv={openEnvManager}
-						activeVersion={activeVersion}
 						versions={versions}
-						onVersionChange={setActiveVersion}
-						onNewRequest={() => setIsNewRequestModalOpen(true)}
-						onNewFolder={() => setIsNewFolderPromptOpen(true)}
 						actions={
 							{
 								onFolderRename: (folderPath, newName) =>
@@ -424,11 +384,6 @@ export function App() {
 							environments={
 								environments.length > 0 ? environments : [defaultEnv]
 							}
-							activeEnv={effectiveEnv}
-							onClose={() => setActiveView("request")}
-							onEnvChange={(name) => {
-								setActiveEnv(name);
-							}}
 						/>
 					) : (
 						<RequestPanel
@@ -439,10 +394,8 @@ export function App() {
 									? requestQuery.error.message
 									: null
 							}
-							saveError={saveError}
 							onSave={handleSave}
 							onSend={handleSend}
-							onDirtyChange={setRequestDirty}
 							sending={sendMutation.isPending}
 							saving={saveMutation.isPending}
 							activeEnvVariables={envQuery.data?.environment.variables ?? {}}
@@ -458,7 +411,6 @@ export function App() {
 
 					<StatusBar
 						workspaceName={workspaceName}
-						activeEnv={effectiveEnv}
 						sending={sendMutation.isPending}
 					/>
 				</div>

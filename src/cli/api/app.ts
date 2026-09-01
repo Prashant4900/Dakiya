@@ -184,7 +184,6 @@ export function createApiApp(options: ApiOptions = {}): Hono {
 		}
 	});
 
-
 	app.delete("/requests/*", async (c) => {
 		const fullPath = c.req.path.replace(/^\/requests\//, "");
 		if (

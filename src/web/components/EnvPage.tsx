@@ -7,6 +7,7 @@ import {
 	fetchEnvironment,
 	saveEnvironment,
 } from "../api/client.js";
+import { useStore } from "../store.js";
 import { PromptDialog } from "./PromptDialog.js";
 
 // Keys whose names suggest secret values
@@ -21,7 +22,8 @@ function jsonToVars(source: string): { key: string; value: string }[] {
 	try {
 		if (!source.trim()) return [];
 		const parsed = JSON.parse(source);
-		if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return [];
+		if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+			return [];
 		return Object.entries(parsed).map(([key, val]) => ({
 			key,
 			value: typeof val === "string" ? val : JSON.stringify(val),
@@ -39,7 +41,7 @@ function varsToJson(vars: { key: string; value: string }[]): string {
 			obj[trimmedKey] = value;
 		}
 	}
-	return JSON.stringify(obj, null, 2) + "\n";
+	return `${JSON.stringify(obj, null, 2)}\n`;
 }
 
 type EnvRow = { id: number; key: string; value: string; masked: boolean };
@@ -292,17 +294,11 @@ function EnvEditorPanel({ name, activeEnv, onSaved }: EnvEditorPanelProps) {
 
 type EnvPageProps = {
 	environments: string[];
-	activeEnv: string;
-	onClose: () => void;
-	onEnvChange: (name: string) => void;
 };
 
-export function EnvPage({
-	environments,
-	activeEnv,
-	onClose,
-	onEnvChange,
-}: EnvPageProps) {
+export function EnvPage({ environments }: EnvPageProps) {
+	const { activeEnv, setActiveEnv, setActiveView } = useStore();
+	const onClose = useCallback(() => setActiveView("request"), [setActiveView]);
 	const queryClient = useQueryClient();
 	const [selectedEnv, setSelectedEnv] = useState<string>(
 		() => activeEnv || environments[0] || "",
@@ -376,7 +372,7 @@ export function EnvPage({
 									title={`Switch to ${name}`}
 									onClick={(e) => {
 										e.stopPropagation();
-										onEnvChange(name);
+										setActiveEnv(name);
 									}}
 								>
 									Use

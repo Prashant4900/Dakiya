@@ -15,5 +15,5 @@ export default async function ({ req, env, meta }: PreContext) {
 	// const token = env.get("auth_token");
 	env.set("message", "Hello, Nigam!"); // in-memory for this request run
 	// env.set("auth_token", "new_token", { persist: true }); // saved to .json env file
-	env.commit()
+	env.commit();
 }

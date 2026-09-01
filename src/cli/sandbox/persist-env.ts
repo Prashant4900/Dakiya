@@ -14,7 +14,7 @@ export function persistEnvironmentVariables(
 	if (Object.keys(updates).length === 0) return;
 
 	const file = path.join(dakiyaDir(cwd), "environments", `${envName}.json`);
-	
+
 	let current: Record<string, string> = {};
 	if (fs.existsSync(file)) {
 		try {
@@ -32,5 +32,5 @@ export function persistEnvironmentVariables(
 	}
 
 	fs.mkdirSync(path.dirname(file), { recursive: true });
-	fs.writeFileSync(file, JSON.stringify(current, null, 2) + "\n", "utf8");
+	fs.writeFileSync(file, `${JSON.stringify(current, null, 2)}\n`, "utf8");
 }

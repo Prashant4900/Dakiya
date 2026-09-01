@@ -13,6 +13,7 @@ import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { createScript, deleteScript, saveScript } from "../api/client.js";
 import type { RequestDocument, RequestResponse } from "../api/types.js";
+import { useStore } from "../store.js";
 import { formatExamples } from "../utils/format.js";
 import { methodBadgeClass, methodColorVar } from "../utils/method.js";
 import { BodyEditor } from "./BodyEditor.js";
@@ -82,10 +83,8 @@ type RequestPanelProps = {
 	request: RequestResponse | null;
 	loading: boolean;
 	error: string | null;
-	saveError: string | null;
 	onSave: (updates: Record<string, unknown>) => Promise<void>;
 	onSend: () => void;
-	onDirtyChange: (dirty: boolean) => void;
 	sending: boolean;
 	saving: boolean;
 	activeEnvVariables: Record<string, string>;
@@ -267,15 +266,14 @@ export function RequestPanel({
 	request,
 	loading,
 	error,
-	saveError,
 	onSave,
 	onSend,
-	onDirtyChange,
 	sending,
 	saving,
 	activeEnvVariables,
 	children,
 }: RequestPanelProps) {
+	const { saveError, setRequestDirty } = useStore();
 	const [tab, setTab] = useState<EditorTab>(() => {
 		const saved = localStorage.getItem("dakiya_requestTab");
 		return (saved as EditorTab) || "body";
@@ -316,7 +314,7 @@ export function RequestPanel({
 		},
 	});
 
-	const saveScriptMutation = useMutation({
+	const _saveScriptMutation = useMutation({
 		mutationFn: ({ type, source }: { type: "pre" | "post"; source: string }) =>
 			saveScript(request?.relativePath ?? "", type, source),
 		onSuccess: () => {
@@ -350,13 +348,13 @@ export function RequestPanel({
 	}, [request]);
 
 	useEffect(() => {
-		onDirtyChange(dirty);
-	}, [dirty, onDirtyChange]);
+		setRequestDirty(dirty);
+	}, [dirty, setRequestDirty]);
 
 	const doc: RequestDocument | undefined = request?.document;
 
-	const method = doc?.request.method ?? "GET";
-	const url = doc?.request.url ?? "";
+	const _method = doc?.request.method ?? "GET";
+	const _url = doc?.request.url ?? "";
 	// Actually, it's safer to only sync when tab changes or request ID changes.
 
 	// Let's refactor the useEffect to only run when tab changes or request ID changes.
@@ -587,7 +585,6 @@ export function RequestPanel({
 									setIsUrlFocused(false);
 								}
 							}}
-							autoFocus
 						/>
 					) : (
 						<div className="url-input mono url-preview">
@@ -595,7 +592,9 @@ export function RequestPanel({
 								<EnvHighlight text={localUrl} variables={activeEnvVariables} />
 							) : (
 								<span className="url-placeholder">
-									{request ? "Enter request URL or {{variable}}" : "Select a request"}
+									{request
+										? "Enter request URL or {{variable}}"
+										: "Select a request"}
 								</span>
 							)}
 						</div>

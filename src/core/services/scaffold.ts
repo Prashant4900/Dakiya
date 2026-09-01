@@ -142,4 +142,3 @@ export function scaffoldFiles(workspaceName: string): ScaffoldFile[] {
 		},
 	];
 }
-

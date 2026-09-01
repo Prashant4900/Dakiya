@@ -392,7 +392,8 @@ export function scaffoldScript(
 
 	const tsPath = posixJoin(scriptsDir, `${methodId}.${type}.ts`);
 	if (!fs.exists(tsPath)) {
-		const template = type === "pre" ? PRE_SCRIPT_TEMPLATE : POST_SCRIPT_TEMPLATE;
+		const template =
+			type === "pre" ? PRE_SCRIPT_TEMPLATE : POST_SCRIPT_TEMPLATE;
 		fs.writeFile(tsPath, template);
 	}
 

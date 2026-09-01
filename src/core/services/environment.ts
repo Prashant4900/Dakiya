@@ -1,5 +1,4 @@
 import type { Environment, EnvironmentVariables } from "@core/domain";
-import { parseSimpleYaml } from "./yaml.js";
 
 /** Parse an environments/<name>.json file into an Environment. */
 export function parseEnvironment(name: string, source: string): Environment {

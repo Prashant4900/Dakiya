@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CollectionNode, RequestIndexItem } from "../api/types.js";
+import { useStore } from "../store.js";
 import type { CollectionTreeActions } from "./CollectionTree.js";
 import { CollectionTree } from "./CollectionTree.js";
 import { EnvSwitcher } from "./EnvSwitcher.js";
@@ -14,36 +15,30 @@ const MAX_WIDTH = 450;
 type SidebarProps = {
 	tree: CollectionNode[];
 	requestIndex: RequestIndexItem[];
-	selectedPath: string | null;
-	onSelect: (path: string) => void;
 	environments: string[];
-	activeEnv: string;
-	onEnvChange: (name: string) => void;
 	onManageEnv: () => void;
-	onNewRequest: () => void;
-	onNewFolder: () => void;
 	versions: string[];
-	activeVersion: string | null;
-	onVersionChange: (name: string) => void;
 	actions?: CollectionTreeActions;
 };
 
 export function Sidebar({
 	tree,
 	requestIndex,
-	selectedPath,
-	onSelect,
 	environments,
-	activeEnv,
-	onEnvChange,
 	onManageEnv,
-	onNewRequest,
-	onNewFolder,
 	versions,
-	activeVersion,
-	onVersionChange,
 	actions,
 }: SidebarProps) {
+	const {
+		selectedPath,
+		setSelectedPath,
+		activeEnv,
+		setActiveEnv,
+		activeVersion,
+		setActiveVersion,
+		setIsNewRequestModalOpen,
+		setIsNewFolderPromptOpen,
+	} = useStore();
 	const [search, setSearch] = useState("");
 	const [width, setWidth] = useState(250);
 	const [resizing, setResizing] = useState(false);
@@ -101,13 +96,13 @@ export function Sidebar({
 					<EnvSwitcher
 						environments={environments}
 						activeEnv={activeEnv}
-						onEnvChange={onEnvChange}
+						onEnvChange={setActiveEnv}
 						onManage={onManageEnv}
 					/>
 					<VersionSwitcher
 						versions={versions}
 						activeVersion={activeVersion}
-						onVersionChange={onVersionChange}
+						onVersionChange={setActiveVersion}
 					/>
 				</div>
 			</div>
@@ -121,10 +116,10 @@ export function Sidebar({
 						className="flex-1 h-8"
 					/>
 					<Button
-						onClick={onNewRequest}
-						title="New Request"
-						variant="outline"
+						variant="ghost"
 						size="icon"
+						onClick={() => setIsNewRequestModalOpen(true)}
+						title="New Request"
 						className="h-8 w-8 shrink-0"
 					>
 						<FilePlus className="h-4 w-4" />
@@ -138,10 +133,10 @@ export function Sidebar({
 						Requests
 					</span>
 					<Button
-						onClick={onNewFolder}
-						title="New Folder"
 						variant="ghost"
 						size="icon"
+						onClick={() => setIsNewFolderPromptOpen(true)}
+						title="New Folder"
 						className="h-6 w-6 text-muted-foreground hover:text-foreground"
 					>
 						<FolderPlus className="h-3.5 w-3.5" />
@@ -156,7 +151,7 @@ export function Sidebar({
 						nodes={tree}
 						requestIndex={requestIndex}
 						selectedPath={selectedPath}
-						onSelect={onSelect}
+						onSelect={setSelectedPath}
 						search={search}
 						versionPrefix={activeVersion ?? ""}
 						actions={actions}

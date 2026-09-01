@@ -8,7 +8,7 @@ import type { HttpClient } from "./http.js";
 import { createFetchHttpClient } from "./http.js";
 import { resolveBody } from "./resolve.js";
 import type { ScriptMeta, ScriptRunner } from "./script.js";
-import { toMutableResponse, type MutableRequest } from "./script.js";
+import { type MutableRequest, toMutableResponse } from "./script.js";
 import { resolveRecord, resolveVars } from "./vars.js";
 
 export type SendRequestOptions = {
@@ -51,7 +51,9 @@ export async function sendRequest(
 		method: options.document.request.method,
 		url: options.document.request.url,
 		headers: { ...options.document.request.headers },
-		...(options.document.body !== undefined ? { body: options.document.body } : {}),
+		...(options.document.body !== undefined
+			? { body: options.document.body }
+			: {}),
 	};
 
 	const baseMeta: Omit<ScriptMeta, "durationMs"> = {
@@ -82,7 +84,9 @@ export async function sendRequest(
 		method: mutable.method,
 		url: resolveVars(mutable.url, variables),
 		headers: resolveRecord(mutable.headers, variables),
-		...(mutable.body !== undefined ? { body: resolveBody(mutable.body, variables) } : {}),
+		...(mutable.body !== undefined
+			? { body: resolveBody(mutable.body, variables) }
+			: {}),
 	};
 
 	const http = options.http ?? createFetchHttpClient();
@@ -133,4 +137,3 @@ export async function sendRequest(
 		logs,
 	};
 }
-

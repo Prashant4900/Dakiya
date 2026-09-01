@@ -128,7 +128,6 @@ export async function deleteScript(
 	});
 }
 
-
 export function sendRequestApi(
 	path: string,
 	env: string,
