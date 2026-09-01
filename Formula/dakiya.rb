@@ -10,7 +10,8 @@ class Dakiya < Formula
   depends_on "pnpm" => :build
 
   def install
-    system "pnpm", "install", "--config.ignore-scripts=false"
+    ENV["npm_config_only_built_dependencies"] = "esbuild,@biomejs/biome"
+    system "pnpm", "install", "--config.ignore-scripts=false", "--no-frozen-lockfile"
     system "pnpm", "run", "build"
     libexec.install Dir["*"]
     bin.install_symlink libexec/"dist/cli/cli.js" => "dakiya"
