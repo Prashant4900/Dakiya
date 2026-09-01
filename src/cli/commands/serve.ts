@@ -1,9 +1,11 @@
+import * as fs from "node:fs";
 import * as path from "node:path";
 import * as readline from "node:readline";
-import { createServer } from "vite";
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import { Hono } from "hono";
 import { createApiApp } from "../api/app.js";
-import { createHonoMiddleware } from "../api/middleware.js";
-import { DEFAULT_PORT, resolveWebRoot } from "../constants.js";
+import { DEFAULT_PORT, resolveWebDistDir } from "../constants.js";
 import {
 	dakiyaDir,
 	hasDakiyaManifest,
@@ -77,51 +79,53 @@ export async function runServe(port = DEFAULT_PORT): Promise<void> {
 		return;
 	}
 
-	const webRoot = resolveWebRoot();
+	const webDist = resolveWebDistDir();
 	const api = createApiApp({ cwd: process.cwd() });
+	const app = new Hono();
 
-	let server: Awaited<ReturnType<typeof createServer>>;
-	server = await createServer({
-		root: webRoot,
-		configFile: path.join(webRoot, "vite.config.ts"),
-		server: {
-			port,
-			strictPort: false,
-			host: "localhost",
-		},
-	});
+	// 1. Mount the local API under /api
+	app.route("/api", api);
 
-	// Prepend so /api is handled before Vite's SPA / static fallback.
-	const apiMiddleware = createHonoMiddleware(api, "/api");
-	server.middlewares.use(apiMiddleware);
-	const stack = server.middlewares.stack;
-	const entry = stack.pop();
-	if (entry) stack.unshift(entry);
+	// 2. Serve built static assets if present
+	if (fs.existsSync(webDist)) {
+		const relativeDist = path.relative(process.cwd(), webDist) || ".";
+		app.use(
+			"/*",
+			serveStatic({
+				root: relativeDist,
+			}),
+		);
+
+		// SPA fallback to index.html for all non-API GET requests
+		const indexPath = path.join(webDist, "index.html");
+		if (fs.existsSync(indexPath)) {
+			const indexHtml = fs.readFileSync(indexPath, "utf-8");
+			app.get("*", (c) => {
+				if (c.req.path.startsWith("/api")) {
+					return c.json({ error: "Not Found" }, 404);
+				}
+				return c.html(indexHtml);
+			});
+		}
+	}
 
 	try {
-		await server.listen();
+		serve({
+			fetch: app.fetch,
+			port,
+		});
 	} catch (err) {
 		console.error(`[dakiya] Failed to start server:`, err);
 		process.exitCode = 1;
 		return;
 	}
 
-	const address = server.httpServer?.address();
-	const resolvedPort =
-		typeof address === "object" && address !== null && "port" in address
-			? address.port
-			: port;
-	const url = `http://localhost:${resolvedPort}`;
+	const url = `http://localhost:${port}`;
 	const manifest = loadManifest();
 	console.log(`[dakiya] Workspace: ${dakiyaDir()}`);
 	console.log(
 		`[dakiya] Default version: ${manifest.versions?.[0] || manifest.defaultVersionName}`,
 	);
-	if (resolvedPort !== port) {
-		console.log(
-			`[dakiya] Port ${port} was in use, using ${resolvedPort} instead.`,
-		);
-	}
 	console.log(`[dakiya] Serving dashboard at ${url}`);
 	console.log(`[dakiya] API health: ${url}/api/health`);
 	console.log(`[dakiya] Press Ctrl+C to stop`);

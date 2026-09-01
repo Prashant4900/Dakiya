@@ -20,6 +20,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.43.9
         version: 6.43.9
+      '@hono/node-server':
+        specifier: ^2.1.1
+        version: 2.1.1(hono@4.12.31)
       '@hugeicons/core-free-icons':
         specifier: ^4.3.0
         version: 4.3.0
@@ -945,6 +948,12 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@hono/node-server@2.1.1':
+    resolution: {integrity: sha512-ELuehkj5VCBdgEw9zs+ivkKwyzzUCSQuE96YmiPvn1ECBoZCczbFXJLeEGMTYjphP6gydh4pHMqEYPVMYUVgQg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      hono: ^4
 
   '@hugeicons/core-free-icons@3.3.0':
     resolution: {integrity: sha512-qYyr4JQ2eQIHTSTbITvnJvs6ERNK64D9gpwZnf2IyuG0exzqfyABLO/oTB71FB3RZPfu1GbwycdiGSo46apjMQ==}
@@ -4433,6 +4442,10 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
 
   '@floating-ui/utils@0.2.12': {}
+
+  '@hono/node-server@2.1.1(hono@4.12.31)':
+    dependencies:
+      hono: 4.12.31
 
   '@hugeicons/core-free-icons@3.3.0': {}
 

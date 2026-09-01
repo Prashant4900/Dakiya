@@ -18,8 +18,7 @@
 		"typecheck": "tsc --noEmit",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
-		"format": "biome format --write .",
-		"example": "cd example && pnpm dev"
+		"format": "biome format --write ."
 	},
 	"engines": {
 		"node": ">=22"
@@ -29,6 +28,7 @@
 		"@codemirror/lang-json": "^6.0.2",
 		"@codemirror/lint": "^6.9.7",
 		"@codemirror/view": "^6.43.9",
+		"@hono/node-server": "^2.1.1",
 		"@hugeicons/core-free-icons": "^4.3.0",
 		"@hugeicons/react": "^1.1.10",
 		"@radix-ui/react-alert-dialog": "^1.1.23",
@@ -76,12 +76,26 @@
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.0.5"
 	},
-	"author": "Anonymous",
+	"author": "Prashant",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": ""
+		"url": "https://github.com/Prashant4900/Dakiya.git"
 	},
+	"homepage": "https://github.com/Prashant4900/Dakiya#readme",
+	"bugs": {
+		"url": "https://github.com/Prashant4900/Dakiya/issues"
+	},
+	"keywords": [
+		"api",
+		"http-client",
+		"postman",
+		"rest",
+		"graphql",
+		"developer-tools",
+		"cli",
+		"yaml"
+	],
 	"files": [
 		"dist"
 	]

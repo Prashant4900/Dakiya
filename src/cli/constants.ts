@@ -9,8 +9,13 @@ import { fileURLToPath } from "node:url";
 export const CLI_DIR = path.dirname(fileURLToPath(import.meta.url));
 
 /**
+ * Root directory of the built web distribution.
+ * When bundled in dist/cli/cli.js, this resolves to dist/.
+ */
+export const DIST_DIR = path.resolve(CLI_DIR, "..");
+
+/**
  * Root directory of the Dakiya repository.
- * Resolves to the directory containing package.json and vite.config.ts.
  */
 export const PACKAGE_ROOT = path.resolve(CLI_DIR, "../../");
 
@@ -18,17 +23,15 @@ export const PACKAGE_ROOT = path.resolve(CLI_DIR, "../../");
 export const DEFAULT_PORT = 4242;
 
 /**
- * Resolve and validate the web root for serving the dashboard.
- * @throws Error if package.json is not found in the resolved root.
+ * Resolve and validate the web dist directory for serving the dashboard.
  */
-export function resolveWebRoot(): string {
-	const pkg = path.join(PACKAGE_ROOT, "package.json");
-
-	if (!fs.existsSync(pkg)) {
-		throw new Error(
-			`Could not find Dakiya root at ${PACKAGE_ROOT}. Run from the Dakiya repository (pnpm link --global).`,
-		);
+export function resolveWebDistDir(): string {
+	if (fs.existsSync(path.join(DIST_DIR, "index.html"))) {
+		return DIST_DIR;
 	}
-
-	return PACKAGE_ROOT;
+	const rootDist = path.join(PACKAGE_ROOT, "dist");
+	if (fs.existsSync(path.join(rootDist, "index.html"))) {
+		return rootDist;
+	}
+	return DIST_DIR;
 }
