@@ -22,16 +22,9 @@ Follow these steps to install Dakiya, initialize your project workspace, and sta
 
 ### Via Homebrew (Recommended)
 
-Install directly using Homebrew:
-
-```bash
-brew install https://raw.githubusercontent.com/Prashant4900/Dakiya/main/Formula/dakiya.rb
-```
-
-Or via Homebrew Tap:
-
 ```bash
 brew tap Prashant4900/dakiya https://github.com/Prashant4900/Dakiya
+brew trust prashant4900/dakiya
 brew install dakiya
 ```
 

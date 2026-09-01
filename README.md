@@ -24,16 +24,9 @@ With Dakiya, you get the power of a headless **CLI runner** combined with a beau
 
 ### Via Homebrew (macOS / Linux)
 
-Install directly with a single command:
-
-```bash
-brew install https://raw.githubusercontent.com/Prashant4900/Dakiya/main/Formula/dakiya.rb
-```
-
-Or tap this repository:
-
 ```bash
 brew tap Prashant4900/dakiya https://github.com/Prashant4900/Dakiya
+brew trust prashant4900/dakiya
 brew install dakiya
 ```
 

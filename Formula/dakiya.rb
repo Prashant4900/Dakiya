@@ -10,7 +10,7 @@ class Dakiya < Formula
   depends_on "pnpm" => :build
 
   def install
-    system "pnpm", "install", "--frozen-lockfile"
+    system "pnpm", "install", "--config.ignore-scripts=false"
     system "pnpm", "run", "build"
     libexec.install Dir["*"]
     bin.install_symlink libexec/"dist/cli/cli.js" => "dakiya"
